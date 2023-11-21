@@ -21,7 +21,7 @@
 
 int mainMenu(void);
 int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif);
-void juego(void);
+void juego(int diflvl);
 
 int main(void)
 {
@@ -59,7 +59,7 @@ int main(void)
         {
             case JUGAR:
                 UnloadTexture(fondo);
-                juego();
+                juego(diflvl);
                 break;
             case OPCIONES:
                 Texture2D volumen[7];
@@ -270,4 +270,9 @@ int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
     }
 
     return op;
+}
+
+void juego(int diflvl)
+{
+
 }
