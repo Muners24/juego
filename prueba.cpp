@@ -4,7 +4,7 @@
 
     //Texture2D sub=LoadTexture("texturas\\SUB.png");
     //Texture2D nave=LoadTexture("texturas\\navepix2.png");
-    //Texture2D car=LoadTexture("texturas\\pixel_car.png");
+    //Texture2D car=LoadTexture("texturas\\pixel_car2.png");
     
 
     //DrawTexture(sub, 190, 200,WHITE);
@@ -25,11 +25,20 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "window");
     SetTargetFPS(60);        
     Texture2D menu=LoadTexture("texturas\\menuok.png");
+    Texture2D car=LoadTexture("texturas\\pixel_car2.png");
+    Texture2D car2=LoadTexture("texturas\\pixel_car.png");
+    Texture2D sub=LoadTexture("texturas\\SUB.png");
     while (!WindowShouldClose()) 
     {
        
+        if(!IsWindowFullscreen())
+        {
+            ToggleFullscreen();
+        }
+
         BeginDrawing();
 
+        
         DrawTexture(menu,0,0,WHITE);
 
         if(IsKeyPressed(KEY_UP))
@@ -60,6 +69,9 @@ int main(void)
             }
         }
 
+        DrawTexture(car, 800,300,WHITE);
+        DrawTexture(sub, 190, 200,WHITE);
+        DrawTexture(car2, 800, 100,WHITE);
         switch(optionmenu)
         {
             case JUGAR:
