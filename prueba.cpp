@@ -241,6 +241,11 @@ int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
             DrawText("Dificultad",510,200,40,WHITE);
             DrawText("Sonido",510,350,40,WHITE);
             DrawText("Regresar",510,500,60,WHITE);
+
+            if(IsKeyPressed(KEY_ENTER))
+            {
+                return -1;
+            }
             break;
     }
 
@@ -261,12 +266,6 @@ int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
                 op++;
             }
         }
-    }
-
-            
-    if(IsKeyPressed(KEY_ENTER))
-    {
-        return -1;
     }
 
     return op;
