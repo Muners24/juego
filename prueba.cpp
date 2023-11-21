@@ -126,19 +126,19 @@ int mainMenu(void)
     switch(op)
     {
         case JUGAR:
-            DrawText("Mecánico Aritmético",400,65,70,WHITE);
+            DrawText("Mecánico Aritmético",265,65,70,WHITE);
             DrawText("Jugar",510,200,60,WHITE);
             DrawText("Opciones",510,300,40,WHITE);
             DrawText("Salir",510,400,40,WHITE);
             break;
         case OPCIONES:
-            DrawText("Mecánico Aritmético",400,65,70,WHITE);
+            DrawText("Mecánico Aritmético",265,65,70,WHITE);
             DrawText("Jugar",510,200,40,WHITE);
             DrawText("Opciones",510,300,60,WHITE);
             DrawText("Salir",510,400,40,WHITE);
             break;
         case SALIR:
-            DrawText("Mecánico Aritmético",400,65,70,WHITE);
+            DrawText("Mecánico Aritmético",265,65,70,WHITE);
             DrawText("Jugar",510,200,40,WHITE);
             DrawText("Opciones",510,300,40,WHITE);
             DrawText("Salir",510,400,60,WHITE);
@@ -188,19 +188,19 @@ int opMenu(void)
     switch(op)
     {
         case JUGAR:
-            DrawText("Opciones",500,65,70,WHITE);
+            DrawText("Opciones",450,65,70,WHITE);
             DrawText("Dificultad",510,200,60,WHITE);
             DrawText("Sonido",510,350,40,WHITE);
             DrawText("Regresar",510,500,40,WHITE);
             break;
         case OPCIONES:
-            DrawText("Opciones",500,65,70,WHITE);
+            DrawText("Opciones",450,65,70,WHITE);
             DrawText("Dificultad",510,200,40,WHITE);
             DrawText("Sonido",510,350,60,WHITE);
             DrawText("Regresar",510,500,40,WHITE);
             break;
         case SALIR:
-            DrawText("Opciones",500,65,70,WHITE);
+            DrawText("Opciones",450,65,70,WHITE);
             DrawText("Dificultad",510,200,40,WHITE);
             DrawText("Sonido",510,350,40,WHITE);
             DrawText("Regresar",510,500,60,WHITE);
