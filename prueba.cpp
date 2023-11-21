@@ -15,6 +15,8 @@
 #define OPCIONES 1
 #define SALIR 2
 
+void menu(void);
+
 int main(void)
 {
     int optionmenu=0;
@@ -22,58 +24,69 @@ int main(void)
     const int screenHeight = 720;
     InitWindow(screenWidth, screenHeight, "window");
     SetTargetFPS(60);        
-    
     Texture2D menu=LoadTexture("texturas\\menuok.png");
-
-    if(IsKeyUp)
-    {
-        switch(optionmenu)
-        {
-            case JUGAR:
-                optionmenu=JUGAR;
-                break;
-            case OPCIONES:
-                optionmenu=JUGAR;
-                break;
-            case SALIR:
-                optionmenu=OPCIONES;
-                break;
-
-        }
-    }
-    else
-    {
-        if(IsKeyDown)
-        {
-            switch(optionmenu)
-            {
-                case JUGAR:
-                    optionmenu=OPCIONES;
-                    break;
-
-            }
-        }
-    }
     while (!WindowShouldClose()) 
     {
        
         BeginDrawing();
 
-            DrawTexture(menu,0,0,WHITE);
+        DrawTexture(menu,0,0,WHITE);
 
-            
-            //Original
-            //DrawText("Mecánico Aritmético",400,70,50,WHITE);
-            //DrawText("Jugar",510,200,40,WHITE);
-            //DrawText("Opciones",510,300,40,WHITE);
-            //DrawText("Salir",510,400,40,WHITE);
+        if(IsKeyPressed(KEY_UP))
+        {
+            switch(optionmenu)
+            {
+                case OPCIONES:
+                    optionmenu=JUGAR;
+                    break;
+                case SALIR:
+                    optionmenu=OPCIONES;
+                    break;
+            }
+        }
+        else
+        {
+            if(IsKeyPressed(KEY_DOWN))
+            {
+                switch(optionmenu)
+                {
+                    case JUGAR:
+                        optionmenu=OPCIONES;
+                        break;
+                    case OPCIONES:
+                        optionmenu=SALIR;
+                        break;
+                }
+            }
+        }
+
+        switch(optionmenu)
+        {
+            case JUGAR:
+                DrawText("Mecánico Aritmético",400,70,50,WHITE);
+                DrawText("Jugar",510,200,60,WHITE);
+                DrawText("Opciones",510,300,40,WHITE);
+                DrawText("Salir",510,400,40,WHITE);
+                break;
+            case OPCIONES:
+                DrawText("Mecánico Aritmético",400,70,50,WHITE);
+                DrawText("Jugar",510,200,40,WHITE);
+                DrawText("Opciones",510,300,60,WHITE);
+                DrawText("Salir",510,400,40,WHITE);
+                break;
+            case SALIR:
+                DrawText("Mecánico Aritmético",400,70,50,WHITE);
+                DrawText("Jugar",510,200,40,WHITE);
+                DrawText("Opciones",510,300,40,WHITE);
+                DrawText("Salir",510,400,60,WHITE);
+                break;
+        }
+        //Original
+        //DrawText("Mecánico Aritmético",400,70,50,WHITE);
+        //DrawText("Jugar",510,200,40,WHITE);
+        //DrawText("Opciones",510,300,40,WHITE);
+        //DrawText("Salir",510,400,40,WHITE);
         
-            
-            DrawText("Mecánico Aritmético",400,70,50,WHITE);
-            DrawText("Jugar",510,200,40,WHITE);
-            DrawText("Opciones",510,300,40,WHITE);
-            DrawText("Salir",510,400,40,WHITE);
-            
         EndDrawing();
     }
     CloseWindow();       
