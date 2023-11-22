@@ -1,7 +1,6 @@
 
 
 #include "raylib.h"
-
     //Texture2D sub=LoadTexture("texturas\\SUB.png");
     //Texture2D nave=LoadTexture("texturas\\navepix2.png");
     //Texture2D car=LoadTexture("texturas\\pixel_car2.png");
@@ -19,13 +18,18 @@
 #define SONIDO 1
 #define REGRESAR 2
 
+#define NEWP 0
+#define CONTINUAR 1
+
 int mainMenu(void);
 int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif);
+int juegoMenu(void);
+
 void juego(int diflvl);
 
 int main(void)
 {
-    int op,subOp;
+    int op,subOp,opJug;
     int diflvl=1,vol=3;
 
     const int screenWidth = 1280;
@@ -42,24 +46,45 @@ int main(void)
         //}
         Texture2D fondo=LoadTexture("texturas\\menuok.png");
         
+        //Menu principal
         do
         {
-            inicio:
+            menu:
                 BeginDrawing();
                 DrawTexture(fondo,0,0,WHITE);
-
                 op=mainMenu();
-
                 EndDrawing();
         }while(op==-1);
         
     
         switch(op)
-        {
+        {   
+            //Menu jugar
             case JUGAR:
-                UnloadTexture(fondo);
-                juego(diflvl);
+                do
+                {
+                    BeginDrawing();
+                    DrawTexture(fondo,0,0,WHITE);
+                    opJug=juegoMenu();
+                    EndDrawing();
+                }while(opJug==-1);
+                
+
+                switch(opJug)
+                {
+                    case NEWP:
+                        goto juegoL;
+                        break;
+                    case CONTINUAR:
+                        goto continuar;
+                        break;
+                    case REGRESAR:
+                        goto menu;
+                        break;
+                }
+                
                 break;
+            //Menu opciones
             case OPCIONES:
                 Texture2D volumen[7];
                 Texture2D dif[3];
@@ -92,14 +117,30 @@ int main(void)
                 UnloadTexture(dif[0]);
                 UnloadTexture(dif[1]);
                 UnloadTexture(dif[2]);
-                goto inicio;
+                goto menu;
                 break;
-
+            //Salir
             case SALIR:
                 CloseWindow();
                 return 0;
                 break;
         }
+
+        juegoL:
+        UnloadTexture(fondo);
+        do
+        {
+            juego(diflvl);
+        } while (1);
+
+        continuar:
+        UnloadTexture(fondo);
+        do
+        {
+            juego(diflvl);
+        }while(1);
+        
+        
     }
     CloseWindow();       
 
@@ -264,6 +305,54 @@ int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
     }
 
     return op;
+}
+
+int juegoMenu(void)
+{
+    static int op=0;
+    int sizeTxt[3],j;
+    for(j=0;j<3;j++)
+    {
+        if(j==op)
+        {
+            sizeTxt[j]=60;
+        }
+        else
+        {
+            sizeTxt[j]=40;
+        }
+    }
+
+    DrawText("Mecánico Aritmético",265,65,70,WHITE);
+    DrawText("Nueva Partida",450,200,sizeTxt[0],WHITE);
+    DrawText("Continuar",450,300,sizeTxt[1],WHITE);
+    DrawText("Regresar",450,400,sizeTxt[2],WHITE);
+    
+
+    if(IsKeyPressed(KEY_UP))
+    {
+        if(op!=NEWP)
+        {
+            op--;
+        }
+    }
+    else
+    {
+        if(IsKeyPressed(KEY_DOWN))
+        {
+            if(op!=REGRESAR)
+            {
+                op++;
+            }
+        }
+    }
+
+    if(IsKeyPressed(KEY_ENTER))
+    {
+        return op;
+    }
+
+    return -1;
 }
 
 void juego(int diflvl)
