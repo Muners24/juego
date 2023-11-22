@@ -1,6 +1,6 @@
 
 
-#include "raylib.h"
+#include "C:\raylib\raylib\src\raylib.h"
     //Texture2D sub=LoadTexture("texturas\\SUB.png");
     //Texture2D nave=LoadTexture("texturas\\navepix2.png");
     //Texture2D car=LoadTexture("texturas\\pixel_car2.png");
