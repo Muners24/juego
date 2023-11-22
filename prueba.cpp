@@ -53,8 +53,7 @@ int main(void)
                 EndDrawing();
         }while(op==-1);
         
-        
-
+    
         switch(op)
         {
             case JUGAR:
@@ -80,6 +79,7 @@ int main(void)
                     DrawTexture(fondo,0,0,WHITE);
                     subOp=opMenu(vol,diflvl,volumen[vol],dif[diflvl]);
                     EndDrawing();
+
                 }while(subOp!=-1);
                 
                 UnloadTexture(volumen[0]);
@@ -110,6 +110,23 @@ int mainMenu(void)
 {
     
     static int op=0;
+    int sizeTxt[3],j;
+    for(j=0;j<3;j++)
+    {
+        if(j==op)
+        {
+            sizeTxt[j]=60;
+        }
+        else
+        {
+            sizeTxt[j]=40;
+        }
+    }
+
+    DrawText("Mecánico Aritmético",265,65,70,WHITE);
+    DrawText("Jugar",510,200,sizeTxt[0],WHITE);
+    DrawText("Opciones",510,300,sizeTxt[1],WHITE);
+    DrawText("Salir",510,400,sizeTxt[2],WHITE);
 
     if(IsKeyPressed(KEY_UP))
     {
@@ -129,28 +146,6 @@ int mainMenu(void)
         }
     }
 
-    switch(op)
-    {
-        case JUGAR:
-            DrawText("Mecánico Aritmético",265,65,70,WHITE);
-            DrawText("Jugar",510,200,60,WHITE);
-            DrawText("Opciones",510,300,40,WHITE);
-            DrawText("Salir",510,400,40,WHITE);
-            break;
-        case OPCIONES:
-            DrawText("Mecánico Aritmético",265,65,70,WHITE);
-            DrawText("Jugar",510,200,40,WHITE);
-            DrawText("Opciones",510,300,60,WHITE);
-            DrawText("Salir",510,400,40,WHITE);
-            break;
-        case SALIR:
-            DrawText("Mecánico Aritmético",265,65,70,WHITE);
-            DrawText("Jugar",510,200,40,WHITE);
-            DrawText("Opciones",510,300,40,WHITE);
-            DrawText("Salir",510,400,60,WHITE);
-            break;
-    }
-
     if(IsKeyPressed(KEY_ENTER))
     {
         return op;
@@ -162,16 +157,27 @@ int mainMenu(void)
 int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
 {
     static int op=0;
+    int sizeTxt[3],j;
+    for(j=0;j<3;j++)
+    {
+        if(j==op)
+        {
+            sizeTxt[j]=60;
+        }
+        else
+        {
+            sizeTxt[j]=40;
+        }
+    }
 
+    DrawText("Opciones",450,65,70,WHITE);
+    DrawText("Dificultad",510,200,sizeTxt[0],WHITE);
+    DrawText("Sonido",510,350,sizeTxt[1],WHITE);
+    DrawText("Regresar",510,500,sizeTxt[2],WHITE);
 
     switch(op)
     {
         case DIFICULTAD:
-            DrawText("Opciones",450,65,70,WHITE);
-            DrawText("Dificultad",510,200,60,WHITE);
-            DrawText("Sonido",510,350,40,WHITE);
-            DrawText("Regresar",510,500,40,WHITE);
-
             DrawTexture(dif,520,-125,WHITE);
 
             if(IsKeyPressed(KEY_LEFT))
@@ -208,12 +214,6 @@ int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
             break;
       
         case SONIDO:
-            DrawText("Opciones",450,65,70,WHITE);
-            DrawText("Dificultad",510,200,40,WHITE);
-            DrawText("Sonido",510,350,60,WHITE);
-            DrawText("Regresar",510,500,40,WHITE);
-
-           
             DrawTexture(volumen,485,25,WHITE);
                     
             if(IsKeyPressed(KEY_LEFT))
@@ -236,12 +236,7 @@ int opMenu(int &vol,int &diflvl,Texture2D volumen,Texture2D dif)
             
             break;
 
-        case SALIR:
-            DrawText("Opciones",450,65,70,WHITE);
-            DrawText("Dificultad",510,200,40,WHITE);
-            DrawText("Sonido",510,350,40,WHITE);
-            DrawText("Regresar",510,500,60,WHITE);
-
+        case REGRESAR:
             if(IsKeyPressed(KEY_ENTER))
             {
                 return -1;
