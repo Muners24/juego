@@ -1,4 +1,3 @@
-
 #include "C:\raylib\raylib\src\raylib.h"
 
 #define RANCHO 1280
@@ -8,7 +7,6 @@
 #define SUELO 650
 
 #define G 0.1
-#define GD 0.25
 //blank transparente
 
 int main()
@@ -20,12 +18,10 @@ int main()
     int yposP=0;    //""
     int y0=yposP;   //Posicion inicial para calcular la posicion
     float time=0;     //contador
-    int c=0;
     int bsuelo=0;   //bandera de tocar el suelo
     int bplat1=0;   //bandera de tocar plataforma1
     int bplat2=0;   //bandera de tocar plataforma2
     int v0=0;       //velocidad inicial
-    int bdown=0;
     while(!WindowShouldClose())
     {
 
@@ -36,33 +32,10 @@ int main()
         DrawRectangle(200,200,350,40,GREEN);
 
         
-        //caluclar posicion y
+    
         if(!bsuelo) //si no esta en el suelo, calcula la poscion 
         {
-            if(bdown)   //Si presionarion abajo // **caida mas rapida**
-            {  
-                c++;
-                if(c==1)    
-                {
-                    if(v0+2*G*time-1.4>0) //si esta cayendo 
-                    {
-                        y0=yposP;   
-                        v0=v0+2*G*time; //velocidad inicial igual a velocidad actual
-                        time=0;
-                    }
-                    else  
-                    {
-                        y0=yposP;   //inicializa caida
-                        v0=0;
-                        time=0;
-                    }
-                }
-                yposP=y0+v0*time+GD*time*time; //y=y0+v0*t+G*t^2    //caida acelerada
-            }
-            else
-            {
-                yposP=y0+v0*time+G*time*time; //y=y0+v0*t+G*t^2     
-            }
+            yposP=y0+v0*(time)+G*time*time; //y=y0+v0*t+G*t^2
         }
 
         time++;
@@ -77,7 +50,6 @@ int main()
                 y0=yposP;               //la posicion inicial es el suelo
                 v0=0;                   //velocidad inicial = 0
                 bsuelo=1;               //esta tocando el suelo
-                c=0;
             }
             else
             {
@@ -94,7 +66,6 @@ int main()
                                 y0=yposP;           //posicion inicial sobfe la plataforma n
                                 v0=0;               //velocidad inicial = 0
                                 bplat1=1;           //esta tocando la plataforma 1
-                                c=0;
                             }
                         }
                     }
@@ -113,7 +84,6 @@ int main()
                                 y0=yposP;
                                 v0=0;
                                 bplat2=1;
-                                c=0;
                             }
                         }
                     }
@@ -132,7 +102,6 @@ int main()
                 y0=yposP;
                 time=0;     
                 bsuelo=0;   //cambia su bandera a 0
-                bdown=0;
             }
             else
             {
@@ -142,7 +111,6 @@ int main()
                     y0=yposP;   //inicializa los valores para el salto
                     time=0;
                     bplat1=0;   //cambia la bandera de la plataforma n a 0
-                    bdown=0;         
                 }
                 else
                 {
@@ -152,28 +120,7 @@ int main()
                         y0=yposP;
                         time=0;
                         bplat2=0;
-                        bdown=0;
                     }
-                }
-            }
-        }
-        else
-        {
-            if(!bsuelo)
-            {
-                if(c==0)    //evita que se mueva raro
-                {
-                    if(IsKeyDown(KEY_DOWN))  
-                    {
-                        if(!bplat1)
-                        {
-                            if(!bplat2)
-                            {
-                                bdown=1;
-                            }
-                        }
-                    }
-
                 }
             }
         }

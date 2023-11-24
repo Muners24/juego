@@ -1,4 +1,3 @@
-
 #include "C:\raylib\raylib\src\raylib.h"
 
 #define RANCHO 1280
@@ -7,8 +6,8 @@
 #define ANCHOP 50
 #define SUELO 650
 
-#define G 0.1
-#define GD 0.25
+#define G 0.0981
+#define GD 0.35
 //blank transparente
 
 int main()
@@ -26,6 +25,7 @@ int main()
     int bplat2=0;   //bandera de tocar plataforma2
     int v0=0;       //velocidad inicial
     int bdown=0;
+    int bdownPlat=0;
     while(!WindowShouldClose())
     {
 
@@ -35,16 +35,17 @@ int main()
         DrawRectangle(400,400,350,40,GREEN);
         DrawRectangle(200,200,350,40,GREEN);
 
+        time+=1.4;
         
+
         //caluclar posicion y
         if(!bsuelo) //si no esta en el suelo, calcula la poscion 
         {
             if(bdown)   //Si presionarion abajo // **caida mas rapida**
             {  
-                c++;
-                if(c==1)    
+                if(++c==1)    
                 {
-                    if(v0+2*G*time-1.4>0) //si esta cayendo 
+                    if(v0+2*G*time>0) //si esta cayendo 
                     {
                         y0=yposP;   
                         v0=v0+2*G*time; //velocidad inicial igual a velocidad actual
@@ -65,8 +66,6 @@ int main()
             }
         }
 
-        time++;
-
         //v=v0*2*G*t derivada de la posicion=velocidad
         if(v0+2*G*time>0)   //Si esta cayendo == si la velocidad es menor a 0, en este caso mayor porque esta invertido y
         {
@@ -77,32 +76,37 @@ int main()
                 y0=yposP;               //la posicion inicial es el suelo
                 v0=0;                   //velocidad inicial = 0
                 bsuelo=1;               //esta tocando el suelo
+                bdownPlat=0;
                 c=0;
             }
             else
             {
-                if(yposP>=(400-ALTURAP))    //si esta tocando la altura de la plataforma n
+                if(!bdownPlat)
                 {
-                    if(yposP<=(440-ALTURAP))  //Si esta dentro de la plataforma n
-                    {   
-                        if(xposP<=750)  //Si esta tocando el lado derecho de la plataforma n
+                    if(xposP<=750)  //Si esta tocando el lado derecho de la plataforma n
+                    {
+                        if(400<=xposP+ANCHOP)   //si esta tocando el lado izquierdo de la platforma n
                         {
-                            if(400<=xposP+ANCHOP)   //si esta tocando el lado izquierdo de la platforma n
+                            if(yposP>=(400-ALTURAP))    //si esta tocando la altura de la plataforma n
                             {
-                                time=0;
-                                yposP=400-ALTURAP;  //ajusta la posicion sobre la plataforma n
-                                y0=yposP;           //posicion inicial sobfe la plataforma n
-                                v0=0;               //velocidad inicial = 0
-                                bplat1=1;           //esta tocando la plataforma 1
-                                c=0;
+                                //if(yposP<=(405-ALTURAP))  //Si esta dentro de la plataforma n
+                                {   
+                                    
+                                            time=0;
+                                            yposP=400-ALTURAP;  //ajusta la posicion sobre la plataforma n
+                                            y0=yposP;           //posicion inicial sobfe la plataforma n
+                                            v0=0;               //velocidad inicial = 0
+                                            bplat1=1;           //esta tocando la plataforma 1
+                                            c=0;
+                                }
                             }
                         }
                     }
                 }
-                
+                    
                 if(yposP>=(200-ALTURAP))    //lo mismo de arriba para otra plataforma
                 {
-                    if(yposP<=(240-ALTURAP))   
+                    if(yposP<=(205-ALTURAP))   
                     {
                         if(xposP<=550)
                         {
@@ -119,6 +123,7 @@ int main()
                     }
                 }
                 
+                
             }
         }
 
@@ -133,6 +138,7 @@ int main()
                 time=0;     
                 bsuelo=0;   //cambia su bandera a 0
                 bdown=0;
+                c=0;
             }
             else
             {
@@ -142,7 +148,8 @@ int main()
                     y0=yposP;   //inicializa los valores para el salto
                     time=0;
                     bplat1=0;   //cambia la bandera de la plataforma n a 0
-                    bdown=0;         
+                    bdown=0;    
+                    c=0;        
                 }
                 else
                 {
@@ -153,28 +160,44 @@ int main()
                         time=0;
                         bplat2=0;
                         bdown=0;
+                        c=0;
                     }
                 }
             }
         }
         else
         {
-            if(!bsuelo)
+            if(c==0)    //evita que se mueva raro
             {
-                if(c==0)    //evita que se mueva raro
+                if(IsKeyPressed(KEY_DOWN))  
                 {
-                    if(IsKeyDown(KEY_DOWN))  
+                    
+                    if(!bplat1)
                     {
-                        if(!bplat1)
+                        if(!bplat2)
                         {
-                            if(!bplat2)
-                            {
-                                bdown=1;
-                            }
+                            bdown=1;
+                        }
+                        else
+                        {
+                            time=0;
+                            v0=0;
+                            y0=yposP+1;
+                            bdownPlat=1;
+                            bplat2=0;
                         }
                     }
-
+                    else
+                    {
+                        time=0;
+                        v0=0;
+                        y0=yposP;
+                        bdownPlat=1;
+                        bplat1=0;
+                    }
                 }
+
+            
             }
         }
 
