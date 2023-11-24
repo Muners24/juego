@@ -44,7 +44,7 @@ int main()
                 c++;
                 if(c==1)    
                 {
-                    if(v0+2*G*time-1.4>0) //si esta cayendo 
+                    if(v0+2*G*time>0) //si esta cayendo 
                     {
                         y0=yposP;   
                         v0=v0+2*G*time; //velocidad inicial igual a velocidad actual
