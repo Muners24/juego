@@ -43,26 +43,26 @@ int main()
         //v=v0*2*G*t derivada de la posicion=velocidad
         if(v0+2*G*time>0)   //Si esta cayendo == si la velocidad es menor a 0, en este caso mayor porque esta invertido y
         {
-            if(yposP>=SUELO-ALTURAP)    //si la posicion esta por debajo del suelo
+            if(yposP>=SUELO-ALTOP)    //si la posicion esta por debajo del suelo
             {
                 time=0;                 
-                yposP=SUELO-ALTURAP;    //ajusta la posicion exacta con el suelo
+                yposP=SUELO-ALTOP;    //ajusta la posicion exacta con el suelo
                 y0=yposP;               //la posicion inicial es el suelo
                 v0=0;                   //velocidad inicial = 0
                 bsuelo=1;               //esta tocando el suelo
             }
             else
             {
-                if(yposP>=(400-ALTURAP))    //si esta tocando la altura de la plataforma n
+                if(yposP>=(400-ALTOP))    //si esta tocando la altura de la plataforma n
                 {
-                    if(yposP<=(440-ALTURAP))  //Si esta dentro de la plataforma n
+                    if(yposP<=(440-ALTOP))  //Si esta dentro de la plataforma n
                     {   
                         if(xposP<=750)  //Si esta tocando el lado derecho de la plataforma n
                         {
                             if(400<=xposP+ANCHOP)   //si esta tocando el lado izquierdo de la platforma n
                             {
                                 time=0;
-                                yposP=400-ALTURAP;  //ajusta la posicion sobre la plataforma n
+                                yposP=400-ALTOP;  //ajusta la posicion sobre la plataforma n
                                 y0=yposP;           //posicion inicial sobfe la plataforma n
                                 v0=0;               //velocidad inicial = 0
                                 bplat1=1;           //esta tocando la plataforma 1
@@ -71,16 +71,16 @@ int main()
                     }
                 }
                 
-                if(yposP>=(200-ALTURAP))    //lo mismo de arriba para otra plataforma
+                if(yposP>=(200-ALTOP))    //lo mismo de arriba para otra plataforma
                 {
-                    if(yposP<=(240-ALTURAP))   
+                    if(yposP<=(240-ALTOP))   
                     {
                         if(xposP<=550)
                         {
                             if(200<=xposP+ANCHOP)
                             {
                                 time=0;
-                                yposP=200-ALTURAP;
+                                yposP=200-ALTOP;
                                 y0=yposP;
                                 v0=0;
                                 bplat2=1;
@@ -153,7 +153,7 @@ int main()
             }
         }
 
-        DrawRectangle(xposP,yposP,ANCHOP,ALTURAP,BLUE); //Se muestra el personaje al final para realizar los ajustes primero
+        DrawRectangle(xposP,yposP,ANCHOP,ALTOP,BLUE); //Se muestra el personaje al final para realizar los ajustes primero
     
         EndDrawing();
     }

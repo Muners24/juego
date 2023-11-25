@@ -2,9 +2,12 @@
 
 #define RANCHO 1280
 #define RALTO 720
-#define ALTURAP 60
+#define CAMX 360
+#define CAMY 640
+
+#define ALTOP 60
 #define ANCHOP 50
-#define SUELO 600
+#define SUELO 650
 
 #define G 0.1
 #define GD 0.25
@@ -32,12 +35,17 @@ int ColisionPlat(Tplat player,Tplat plat);
 
 //devuelve 0
 int Reposo(float &time,float &v0,int &y0,int y);
+
 int Salto(float &time,float &v0,int &y0,int y);
+
+//y0+v0*time+GD*time*time;
+int Posicion(int y0,float v0,float time,int g);
 
 int main()
 {
     SetTargetFPS(60);  
     InitWindow(RANCHO,RALTO,"juego");
+    
     //Inicializacion Plataformas
     Tplat plat[2];
     plat[0].y=400;
@@ -53,13 +61,19 @@ int main()
     Tplayer player;
     //Inicializa la posicion
     player.x=400;  //Posicion incial
-    player.y=0;    //""
-    player.height=ALTURAP;
+    player.y=SUELO;    //""
+    player.height=ALTOP;
     player.width=ANCHOP;
+
+    Camera2D camara = { 0 };
+    camara.target = (Vector2){ CAMX, CAMY };
+    camara.offset = (Vector2){ CAMX, CAMY };
+    camara.rotation = 0.0f;
+    camara.zoom = 1.0f;
 
     int y0=player.y;    //velocidad inicial  
     float v0=0;        //Posicion inicial para calcular la posicion
-       
+    int y0Cam;
 
     float time=0;     //contador
     int c=0;
@@ -72,11 +86,7 @@ int main()
     while(!WindowShouldClose())
     {
 
-        BeginDrawing();
-        ClearBackground(WHITE);
-        DrawRectangle(0,SUELO,1280,70,GREEN);
-        DrawRectangleRec(plat[0],GREEN);
-        DrawRectangleRec(plat[1],GREEN);
+        
 
         time+=1.3;
         igncolision++;
@@ -90,29 +100,48 @@ int main()
                 {
                     if(velocidad(v0,time)>0) //si esta cayendo 
                     {
-                        time=0;
-                        y0=player.y;   
                         v0=velocidad(v0,time); //velocidad inicial igual a velocidad actual
+                        y0=player.y; 
+                        time=1.3;
                     }
                     else  
                     {
                         Reposo(time,v0,y0,player.y); //inicializa caida
                     }
                 }
-                player.y=y0+v0*time+GD*time*time; //y=y0+v0*t+G*t^2    //caida acelerada
+
+                if(player.y<30)
+                {
+                    camara.target.y=Posicion(y0-30,v0,time*0.2,bdown)+CAMY; //y=y0+v0*t+G*t^2 
+                }
+                else 
+                {
+                    camara.target.y=CAMY;
+                }
+
+                player.y=Posicion(y0,v0,time,bdown); //y=y0+v0*t+G*t^2    //caida acelerada
             }
-            else
-            {
-                player.y=y0+v0*time+G*time*time; //y=y0+v0*t+G*t^2     
+            else    //caida normal
+            { 
+                if(player.y<30)
+                {
+                    y0Cam=y0;
+                    camara.target.y=Posicion(y0Cam,-11.5,time,bdown)+CAMY; 
+                }
+                else 
+                {
+                    camara.target.y=CAMY;
+                }
+                player.y=Posicion(y0,v0,time,bdown); //y=y0+v0*t+G*t^2   
             }
         }
 
         //v=v0*2*G*t derivada de la posicion=velocidad
         if(velocidad(v0,time)>0)   //Si esta cayendo == si la velocidad es menor a 0, en este caso mayor porque esta invertido y
         {
-            if(player.y>=SUELO-ALTURAP)    //si la posicion esta por debajo del suelo
+            if(player.y>=SUELO-ALTOP)    //si la posicion esta por debajo del suelo
             {
-                player.y=SUELO-ALTURAP;    //ajusta la posicion exacta con el suelo
+                player.y=SUELO-ALTOP;    //ajusta la posicion exacta con el suelo
                 bsuelo=!Reposo(time,v0,y0,player.y);
             }
             else
@@ -122,8 +151,9 @@ int main()
                     if(ColisionPlat(player,plat[0]))  //Si esta tocando el lado derecho de la plataforma n
                     {
                 
-                        player.y=plat[0].y-ALTURAP;  //ajusta la posicion sobre la plataforma n
+                        player.y=plat[0].y-ALTOP;  //ajusta la posicion sobre la plataforma n
                         bplat1=!Reposo(time,v0,y0,player.y);
+                        bdown=0;
                         c=0;                //habilita bajar de plataforma
                     }
                         
@@ -131,8 +161,8 @@ int main()
                     if(ColisionPlat(player,plat[1]))    //lo mismo de arriba para otra plataforma
                     {
                         
-                        player.y=plat[1].y-ALTURAP;  //ajusta la posicion sobre la plataforma n
-                        
+                        player.y=plat[1].y-ALTOP;  //ajusta la posicion sobre la plataforma n
+                        bdown=0;
                         bplat2=!Reposo(time,v0,y0,player.y);           //esta tocando la plataforma 1
                         c=0;                //habilita bajar de plataforma
                     }
@@ -183,13 +213,15 @@ int main()
                         else
                         {
                             bplat2=Reposo(time,v0,y0,player.y); //inicializa caida
-                            igncolision=0;  
+                            igncolision=0;
+                            bdown=0;        //evita que caiga rapido de la plataforma  
                         }
                     }
                     else
                     {
                         bplat1=Reposo(time,v0,y0,player.y);
                         igncolision=0;
+                        bdown=0;
                     }
                 }
             }
@@ -222,11 +254,20 @@ int main()
                 }
             }
         }
-
-        DrawRectangle(player.x,player.y,ANCHOP,ALTURAP,BLUE); //Se muestra el personaje al final para realizar los ajustes primero
-    
+        //EndMode2D();
+        
+        
+        BeginDrawing();
+            BeginMode2D(camara);
+            ClearBackground(BLACK);
+            DrawRectangle(0,SUELO,1280,70,GREEN);
+            DrawRectangleRec(plat[0],GREEN);
+            DrawRectangleRec(plat[1],GREEN);
+            DrawRectangle(player.x,player.y,ANCHOP,ALTOP,BLUE);
+            EndMode2D();
         EndDrawing();
     }
+    
     CloseWindow();
     return 0;
 }
@@ -242,7 +283,7 @@ int ColisionPlat(Tplat player,Tplat plat)
     {
         if(plat.x<=player.x+ANCHOP)   //si esta tocando el lado izquierdo de la platforma n
         {
-            if(player.y+player.height<=(plat.y+plat.height))
+            if(player.y+player.height<=(plat.y+30))
             {
                 if(player.y+player.height>=plat.y)
                 { 
@@ -268,4 +309,16 @@ int Salto(float &time,float &v0,int &y0,int y)
     y0=y;
     v0=VS;     
     return 0;
+}
+
+int Posicion(int y0,float v0,float time,int g)
+{
+    if(g)
+    {
+        return (y0+v0*time+GD*time*time);
+    }
+    else
+    {
+        return (y0+v0*time+G*time*time);
+    }
 }
