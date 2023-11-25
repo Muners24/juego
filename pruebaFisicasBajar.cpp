@@ -313,12 +313,5 @@ int Salto(float &time,float &v0,int &y0,int y)
 
 int Posicion(int y0,float v0,float time,int g)
 {
-    if(g)
-    {
-        return (y0+v0*time+GD*time*time);
-    }
-    else
-    {
-        return (y0+v0*time+G*time*time);
-    }
+    return (y0+v0*time+(g ? GD : G)*time*time);
 }
