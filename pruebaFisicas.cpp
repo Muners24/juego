@@ -65,7 +65,7 @@ int main()
             }
         }
 
-        time++;
+        time+=1.4;
 
         //v=v0*2*G*t derivada de la posicion=velocidad
         if(v0+2*G*time>0)   //Si esta cayendo == si la velocidad es menor a 0, en este caso mayor porque esta invertido y
