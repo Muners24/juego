@@ -10,10 +10,12 @@
 #define SUELO 650
 
 #define G 0.1
-#define GD 0.25
+#define GD 0.15
 
 #define VX 3
 #define VS -11
+#define VSJ -4
+#define VY -4
 //blank transparente
 
 typedef Rectangle Tplat;
@@ -37,6 +39,7 @@ int ColisionPlat(Tplat player,Tplat plat);
 int Reposo(float &time,float &v0,int &y0,int y);
 
 int Salto(float &time,float &v0,int &y0,int y);
+int JetPack(float &time,float &v0,int &y0,int y);
 
 //y0+v0*time+GD*time*time;
 int Posicion(int y0,float v0,float time,int g);
@@ -73,39 +76,42 @@ int main()
 
     int y0=player.y;    //velocidad inicial  
     float v0=0;        //Posicion inicial para calcular la posicion
+    float tmpv0;
     int y0Cam;
 
     float time=0;     //contador
     int c=0;
-    int igncolision=0;
+    float igncolision=0;
     int bsuelo=0;   //bandera de tocar el suelo
     int bplat1=0;   //bandera de tocar plataforma1
     int bplat2=0;   //bandera de tocar plataforma2
     int bdown=0;    //bandera de presionar abajo
+    int jetpack=0;
+    int jetpackc=0;
 
     while(!WindowShouldClose())
     {
 
         
 
-        time+=1.3;
-        igncolision++;
-
-        //caluclar posicion y
+        time+=0.5;
+        igncolision+=0.4;
+//caluclar posicion y *********************************************************************************************************
         if(!bsuelo) //si no esta en el suelo, calcula la poscion 
         {
+            jetpackc++; //contador para habilitar jetpack
             if(bdown)   //Si presionarion abajo // **caida mas rapida**
             {  
                 if(++c==1)    //solo inicializa 1 vez
                 {
                     if(velocidad(v0,time)>0) //si esta cayendo 
                     {
-                        v0=velocidad(v0,time); //velocidad inicial igual a velocidad actual
-                        y0=player.y; 
-                        time=1.3;
+                        v0=velocidad(v0,time); //velocidad inicial igual a velocidad actual (positiva)
+                        y0=player.y;            //posicion inicial para caer desde ese punto
+                        time=0.5;
                     }
                     else  
-                    {
+                    {               
                         Reposo(time,v0,y0,player.y); //inicializa caida
                     }
                 }
@@ -119,7 +125,16 @@ int main()
                     camara.target.y=CAMY;
                 }
 
-                player.y=Posicion(y0,v0,time,bdown); //y=y0+v0*t+G*t^2    //caida acelerada
+                if(!jetpack)    //si no esta usando el jetpack calcula caida
+                {
+                    player.y=Posicion(y0,v0,time,bdown); //y=y0+v0*t+G*t^2  caida acelerada 
+                }
+                else
+                {
+                    player.y+=VY;   //sube con velocidad constante
+                    jetpack=JetPack(time,v0,y0,player.y);   //inicializa un minisalto cuando se suelte abajo
+                                                            //hace mas comodo el uso del jetpack
+                }
             }
             else    //caida normal
             { 
@@ -132,17 +147,29 @@ int main()
                 {
                     camara.target.y=CAMY;
                 }
-                player.y=Posicion(y0,v0,time,bdown); //y=y0+v0*t+G*t^2   
+
+                if(!jetpack)        //si no esta usando el jetpack calcula caida
+                {
+                    player.y=Posicion(y0,v0,time,bdown); //y=y0+v0*t+G*t^2   //calcula caida
+                }
+                else
+                {
+                    player.y+=VY;   //sube con velocidad constante
+                    jetpack=JetPack(time,v0,y0,player.y);   //inicializa un minisalto cuando se suelte abajo
+                                                            //hace mas comodo el uso del jetpack
+                }
             }
         }
 
+//calculo de colisiones ****************************************************************************************************
         //v=v0*2*G*t derivada de la posicion=velocidad
         if(velocidad(v0,time)>0)   //Si esta cayendo == si la velocidad es menor a 0, en este caso mayor porque esta invertido y
         {
             if(player.y>=SUELO-ALTOP)    //si la posicion esta por debajo del suelo
             {
                 player.y=SUELO-ALTOP;    //ajusta la posicion exacta con el suelo
-                bsuelo=!Reposo(time,v0,y0,player.y);
+                bsuelo=!Reposo(time,v0,y0,player.y);    
+                jetpack=0;
             }
             else
             {
@@ -150,9 +177,9 @@ int main()
                 {
                     if(ColisionPlat(player,plat[0]))  //Si esta tocando el lado derecho de la plataforma n
                     {
-                
                         player.y=plat[0].y-ALTOP;  //ajusta la posicion sobre la plataforma n
                         bplat1=!Reposo(time,v0,y0,player.y);
+                        jetpack=0;
                         bdown=0;
                         c=0;                //habilita bajar de plataforma
                     }
@@ -160,48 +187,64 @@ int main()
                         
                     if(ColisionPlat(player,plat[1]))    //lo mismo de arriba para otra plataforma
                     {
-                        
                         player.y=plat[1].y-ALTOP;  //ajusta la posicion sobre la plataforma n
-                        bdown=0;
                         bplat2=!Reposo(time,v0,y0,player.y);           //esta tocando la plataforma 1
+                        jetpack=0;
+                        bdown=0;
                         c=0;                //habilita bajar de plataforma
                     }
                 }
             }
         }
-
-        if(IsKeyPressed(KEY_UP))
+        
+//input *************************************************************************************************************
+        if(IsKeyDown(KEY_UP))
         {
-            if(bsuelo)      //esta tocando el suelo
-            {
-                bsuelo=Salto(time,v0,y0,player.y);    
-                bdown=0;
-                c=0;  
-            }
-            else
-            {
-                if(bplat1)  //bandera de plataforma n
+            //if(IsKeyPressed(KEY_UP))
+            //{
+                if(bsuelo)      //esta tocando el suelo
                 {
-                    bplat1=Salto(time,v0,y0,player.y);   
-                    bdown=0;
-                    c=0;   
+                    bsuelo=Salto(time,v0,y0,player.y);  //inicializa salto
+                    bdown=0;                            //gravedad nomral
+                    jetpackc=0;                         //habilita jetpack
+                    c=0;                                //habilita bajar rapido
                 }
                 else
                 {
-                    if(bplat2)  
+                    if(bplat1)  //bandera de plataforma n
                     {
-                        bplat2=Salto(time,v0,y0,player.y); 
-                        bdown=0;
-                        c=0;  
+                        bplat1=Salto(time,v0,y0,player.y);   //inicializa salto desde plataforma n
+                        bdown=0;                            //gravedad normal
+                        jetpackc=0;                         //habilita jetpack
+                        c=0;                                //habilita bajar rapido
+                    }
+                    else
+                    {
+                        if(bplat2)  
+                        {
+                            bplat2=Salto(time,v0,y0,player.y); 
+                            bdown=0;
+                            jetpackc=0;
+                            c=0;  
+                        }
+                        else
+                        {
+                            if(jetpackc>60)
+                            {
+                                jetpack=1;     //esta usando jetpack
+                                bdown=0;       //gravedad normal
+                                c=0;           //habilita bajar rapido
+                            }
+                        }
                     }
                 }
-            }
+            //}
         }
         else
         {
             if(c<10)    //Solo permite dar abajo 1 vez
             {
-                if(IsKeyPressed(KEY_DOWN))  
+                if(IsKeyDown(KEY_DOWN))  
                 {
                     
                     if(!bplat1) 
@@ -212,8 +255,8 @@ int main()
                         }
                         else
                         {
-                            bplat2=Reposo(time,v0,y0,player.y); //inicializa caida
-                            igncolision=0;
+                            bplat2=Reposo(time,v0,y0,player.y); //inicializa caida de plataforma n
+                            igncolision=0;  //habilita evitar colisiones
                             bdown=0;        //evita que caiga rapido de la plataforma  
                         }
                     }
@@ -281,7 +324,7 @@ int ColisionPlat(Tplat player,Tplat plat)
     {
         if(plat.x<=player.x+ANCHOP)   //si esta tocando el lado izquierdo de la platforma n
         {
-            if(player.y+player.height<=(plat.y+30))
+            if(player.y+player.height<=(plat.y+10))
             {
                 if(player.y+player.height>=plat.y)
                 { 
@@ -312,4 +355,12 @@ int Salto(float &time,float &v0,int &y0,int y)
 int Posicion(int y0,float v0,float time,int g)
 {
     return (y0+v0*time+(g ? GD : G)*time*time);
+}
+
+int JetPack(float &time,float &v0,int &y0,int y)
+{
+    time=0;
+    v0=VSJ;
+    y0=y;
+    return 0;
 }

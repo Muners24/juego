@@ -4,7 +4,7 @@
 #define RANCHO 1280
 #define RALTO 720
 #define ALTURAP 60
-#define ANCHOP 50
+#define ALTOP 50
 #define SUELO 650
 
 #define G 0.1
@@ -87,7 +87,7 @@ int main()
                     {   
                         if(xposP<=750)  //Si esta tocando el lado derecho de la plataforma n
                         {
-                            if(400<=xposP+ANCHOP)   //si esta tocando el lado izquierdo de la platforma n
+                            if(400<=xposP+ALTOP)   //si esta tocando el lado izquierdo de la platforma n
                             {
                                 time=0;
                                 yposP=400-ALTOP;  //ajusta la posicion sobre la plataforma n
@@ -106,7 +106,7 @@ int main()
                     {
                         if(xposP<=550)
                         {
-                            if(200<=xposP+ANCHOP)
+                            if(200<=xposP+ALTOP)
                             {
                                 time=0;
                                 yposP=200-ALTOP;
@@ -181,13 +181,13 @@ int main()
         if(IsKeyDown(KEY_RIGHT))
         {
             
-            if((xposP+ANCHOP)<1280)    //Si no toca el borde derecho 
+            if((xposP+ALTOP)<1280)    //Si no toca el borde derecho 
             {
                 xposP+=3;
             }
             else
             {
-                xposP=1280-ANCHOP;  //Si se paso de la pantalla reajusta su posicion
+                xposP=1280-ALTOP;  //Si se paso de la pantalla reajusta su posicion
             }
         }
         else
@@ -206,7 +206,7 @@ int main()
             }
         }
 
-        DrawRectangle(xposP,yposP,ANCHOP,ALTOP,BLUE); //Se muestra el personaje al final para realizar los ajustes primero
+        DrawRectangle(xposP,yposP,ALTOP,ALTOP,BLUE); //Se muestra el personaje al final para realizar los ajustes primero
     
         EndDrawing();
     }
