@@ -100,6 +100,7 @@ int CheckMobColision(Trec mob,Thit hit);
 int CheckPlayerColision(Trec player,Trec mob);
 //int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
 void DropEgg(Tave mob,Tegg &egg);
+void LimpiaEnemigos(Tave ave[],Tcar car[]);
 
 int main()
 {
@@ -244,7 +245,7 @@ int main()
     camara.offset.x=640;
     camara.offset.y=CAMY;
     camara.rotation = 0;
-    camara.zoom = 0.5;
+    camara.zoom = 1;
 
     while(!WindowShouldClose())
     {
@@ -329,7 +330,6 @@ int main()
                         if(ave[j].pos.x>=player.pos.x-200)
                         {
                             random=rand()%MAXEGG;
-                            //reajusta la posicion para lanzar un huevo si no esta activo el huevo
                             DropEgg(ave[j],egg[random]);
                         }
                     }
@@ -351,6 +351,7 @@ int main()
                         player.y0=player.pos.y;
                         player.v0=0;
                         player.timeDash=70;
+                        LimpiaEnemigos(ave,car);
                     }
                 }
 
@@ -414,6 +415,7 @@ int main()
                     player.y0=player.pos.y;
                     player.v0=0;
                     player.timeDash=70;
+                    LimpiaEnemigos(ave,car);
                 }
             }
         }
@@ -463,6 +465,7 @@ int main()
                         player.y0=player.pos.y;
                         player.v0=0;
                         player.timeDash=70;
+                        LimpiaEnemigos(ave,car);
                     }
                 }
             }
@@ -980,5 +983,18 @@ void DropEgg(Tave mob,Tegg &egg)
         egg.pos.y=mob.pos.y;
         egg.pos.x=mob.pos.x+14;
         egg.status=1;
+    }
+}
+
+void LimpiaEnemigos(Tave ave[],Tcar car[])
+{
+    int j;
+    for(j=0;j<MAXAVE;j++)
+    {
+        ave[j].status=0;
+    }
+    for(j=0;j<MAXCAR;j++)
+    {
+        car[j].status=0;
     }
 }
