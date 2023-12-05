@@ -325,6 +325,7 @@ int main()
                 //ataque enemigo ***********************************************************************************
                 random=(rand()%11)+1;
                 if(random==1)
+                {
                     if(ave[j].pos.x<=player.pos.x+player.pos.width+200)
                     {
                         if(ave[j].pos.x>=player.pos.x-200)
@@ -333,6 +334,7 @@ int main()
                             DropEgg(ave[j],egg[random]);
                         }
                     }
+                }
                 //Colision con golpe
                 if(hit)
                 {
