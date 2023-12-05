@@ -513,7 +513,6 @@ int main()
         if(IsKeyPressed(KEY_X))
         {
             hit=1;
-            dash=0;
         }    
 
         if(player.timeDash>80)
