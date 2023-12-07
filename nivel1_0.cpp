@@ -224,7 +224,7 @@ int main()
 
     while(!WindowShouldClose())
     {
-        printf("x = %f y = %f\n",player.pos.x,player.pos.y);
+        //printf("x = %f y = %f\n",player.pos.x,player.pos.y);
         player.timeDash++;
         player.AtkC++;
         time++;
