@@ -46,7 +46,6 @@ typedef struct _vehiculo
 {
     Trec pos;
     int status;
-
 }Tpart;
 
 typedef struct _jugador
@@ -63,10 +62,9 @@ typedef struct _jugador
 typedef struct _ave
 {
     Trec pos;
-    int status=0;
-    int right=0;
-    int left=0;
-
+    int status;
+    int right;
+    int left;
 }Tave;
 
 typedef struct _huevo
@@ -292,7 +290,6 @@ int main()
                     pieza[j].status=1;
                 }
             }
-            
         }
         
         //** enemigo1 ave ********************************************************************************************************************************
