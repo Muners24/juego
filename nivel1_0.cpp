@@ -278,6 +278,7 @@ int main()
                 }
             }
             
+            //drop
             if(!pieza[j].status)
             {
                 if(CheckPlayerColision(player.pos,pieza[j].pos))
