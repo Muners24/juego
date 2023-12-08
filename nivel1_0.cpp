@@ -146,7 +146,7 @@ int main()
     int lookDown=0;
 
     int random;
-    float randomM[2];
+    
     Thit hit[MAXHIT];
     for(i=0;i<MAXHIT;i++)
     {
@@ -184,7 +184,6 @@ int main()
         pieza[j].pos.x=plat[j].x+plat[j].width/2-pieza[j].pos.width/2;
         pieza[j].pos.y=-300;
     }
-    
     
     //** enemigos **********************************************************************************************************************************
     Tshark shark[MAXSHARK];
@@ -304,7 +303,7 @@ int main()
             }
         }
 
-        //movimiento
+        //movimiento piezas
         if(time>600)
         {
             if(pieza[0].pos.y<plat[0].y-pieza[0].pos.height)
@@ -346,8 +345,8 @@ int main()
                     }
                 }
             }
-            
         }
+
         //** enemigos **
         //** tiburones ******************************************************************************************************************************
         for(i=0;i<MAXSHARK;i++)

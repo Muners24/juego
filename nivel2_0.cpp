@@ -176,7 +176,6 @@ int main()
         pieza[j].status=1;
         pieza[j].pos.height=80;
         pieza[j].pos.width=50;
-        pieza[j].status=1;
         if(j==0)
         {
             pieza[j].pos.y=plat[platc-1].pos.y-pieza[j].pos.height;
