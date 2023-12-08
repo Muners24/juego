@@ -19,7 +19,7 @@
 #define VX 3
 #define VS -11
 #define VSJ -4
-#define VY -15
+#define VY -3
 #define VD 6
 
 //lvl3
@@ -324,13 +324,13 @@ int main()
                     switch (piezac)
                     {
                         case 1:
-                            pieza[j].pos.x=50;
+                            pieza[j].pos.x=150;
                             break;
                         case 2:
-                            pieza[j].pos.x=100;
+                            pieza[j].pos.x=200;
                             break;
                         case 3:
-                            pieza[j].pos.x=150;
+                            pieza[j].pos.x=250;
                             break;
                     }
                 }
