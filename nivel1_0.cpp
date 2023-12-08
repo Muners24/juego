@@ -24,7 +24,6 @@
 
 #define MAXANGUILA 3
 #define ANGUILASPEED 6
-#define MAXANGUILAHIT 5
 #define MAXSHARK 2
 #define SHARKSPEED 9
 #define MAXTORTUGA 2
@@ -237,7 +236,7 @@ int main()
     camara.offset.x=0;
     camara.offset.y=0;
     camara.rotation = 0;
-    camara.zoom = 0.5;
+    camara.zoom = 1;
 
     while(!WindowShouldClose())
     {
