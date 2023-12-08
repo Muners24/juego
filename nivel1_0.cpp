@@ -24,6 +24,7 @@
 
 #define MAXANGUILA 3
 #define ANGUILASPEED 6
+#define MAXANGUILAHIT 5
 #define MAXSHARK 2
 #define SHARKSPEED 9
 #define MAXTORTUGA 2
@@ -64,6 +65,13 @@ typedef struct _tortuga
     int left=0;
 }Ttortu;
 
+typedef struct _anghit
+{
+    Trec pos;
+    int status;
+    int time;
+}Tanghit;
+
 typedef struct _anguila
 {
     Trec pos;
@@ -71,7 +79,9 @@ typedef struct _anguila
     int right=0;
     int left=0;
     Tvel v;
+    Tanghit hit;
 }Tangui;
+
 
 typedef struct _hit
 {
@@ -113,6 +123,7 @@ int CheckMobColision(Trec mob,Thit hit);
 int CheckPlayerColision(Trec player,Trec mob);
 void LimpiaEnemigos(/*Tave ave[],Tcar car[]*/Tshark shark[],Ttortu tort[],Tangui ang[]);
 float CalculaAnguloAnguila(Trec ang,Trec player);
+void AngElectro(Tangui &ang);
 
 int main()
 {
@@ -211,6 +222,12 @@ int main()
         ang[i].pos.y=800;
         ang[i].pos.height=20;
         ang[i].pos.width=85;
+        ang[i].hit.pos.height=ang[0].pos.height*3;
+        ang[i].hit.pos.width=ang[0].pos.width*1.5;
+        ang[i].hit.pos.y=800;
+        ang[i].hit.pos.x=2000;
+        ang[i].hit.status=0;
+        ang[i].hit.time=0;
     }
 
     //Inicializacion camara
@@ -220,7 +237,7 @@ int main()
     camara.offset.x=0;
     camara.offset.y=0;
     camara.rotation = 0;
-    camara.zoom = 1;
+    camara.zoom = 0.5;
 
     while(!WindowShouldClose())
     {
@@ -549,7 +566,60 @@ int main()
                     if(ang[i].pos.x<0-ang[i].pos.width)
                     {
                         ang[i].status=0;
+                        ang[i].hit.status=0;
                     }
+
+                    //** generacion ataque enemigo ************************************************************************************************
+                    random=(rand()%20)+1;
+                    if(random==1)
+                    {
+                        if(!ang[i].hit.status)
+                        {
+                            if(ang[i].pos.x<=player.pos.x+player.pos.width+200)
+                            {
+                                if(ang[i].pos.x>=player.pos.x-200)
+                                {
+                                    if(ang[i].pos.y<=player.pos.y+player.pos.height+200)
+                                    {
+                                        if(ang[i].pos.y>=player.pos.y-200)
+                                        {
+                                            //random=rand()%MAXANGUILAHIT;
+                                            AngElectro(ang[i]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    //** comporamiento descarga electrica ************************************************************************************
+                    if(ang[i].status)
+                    {
+                        if(ang[i].hit.status)
+                        {
+                            if(ang[i].hit.time<120)
+                            {
+                                ang[i].hit.pos.y=ang[i].pos.y-ang[i].pos.height;
+                                ang[i].hit.pos.x=ang[i].pos.x-21;
+                                ang[i].hit.time++;
+
+                                //colision con jugador
+                                if(CheckPlayerColision(player.pos,ang[i].hit.pos))
+                                {
+                                    player.pos.x=400;  //Posicion incial
+                                    player.pos.y=SUELO;    //""
+                                    player.timeDash=70;
+                                    LimpiaEnemigos(shark,tort,ang);
+                                }
+                            }
+                            else
+                            {
+                                ang[i].hit.status=0;
+                            }
+                        }
+                    }
+                    
+
                 }
                 else
                 {
@@ -589,6 +659,7 @@ int main()
                         }
                     }
                 }
+                
                 //Colision con iugador
                 if(ang[i].status)
                 {
@@ -862,6 +933,10 @@ int main()
             {
                 if(ang[i].status)
                 {
+                    if(ang[i].hit.status)
+                    {
+                        DrawRectangleRec(ang[i].hit.pos,YELLOW);
+                    }
                     DrawRectangleRec(ang[i].pos,DARKGRAY);
                 }
             }
@@ -1170,7 +1245,9 @@ void LimpiaEnemigos(/*Tave ave[],Tcar car[]*/Tshark shark[],Ttortu tort[],Tangui
     for(i=0;i<MAXANGUILA;i++)
     {
         ang[i].status=0;
+        ang[i].hit.status=0;
     }
+    
 }
 
 float CalculaAnguloAnguila(Trec ang,Trec player)
@@ -1202,4 +1279,12 @@ float CalculaAnguloAnguila(Trec ang,Trec player)
         }
     }
     return 0;
+}
+
+void AngElectro(Tangui &ang)
+{
+    ang.hit.pos.y=ang.pos.y-ang.pos.height;
+    ang.hit.pos.x=ang.pos.x-21;
+    ang.hit.status=1;
+    ang.hit.time=0;
 }
