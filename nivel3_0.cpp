@@ -27,8 +27,12 @@
 
 #define MAXTORRE 2
 #define TORREASPEED 180
-#define TORREVPROYECTIL 10
+#define TORREVPROYECTIL 6
 #define MAXHITTORRE 3
+#define MAXOVNI 2
+#define OVNISPEED 3
+#define OVNILONG 150
+#define OVNIAMP 15
 
 #define MAXAVE 5
 #define AVESPEED 7
@@ -125,6 +129,14 @@ typedef struct _tower
     Thit hit[MAXHITTORRE];
 }Ttow;
 
+typedef struct _ovni
+{
+    Trec pos;
+    int direccion;
+    int status;
+    int time;
+}Tovni;
+
 float velocidad(float v0,float time);
 int ColisionPlat(Tplayer player,Tplat plat);
 //devuelve 0
@@ -140,7 +152,7 @@ int CheckMobColision(Trec mob,Trec hit);
 int CheckPlayerColision(Trec player,Trec mob);
 //int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
 void DropEgg(Tave mob,Tegg &egg);
-void LimpiaEnemigos(Ttow torre[]);
+void LimpiaEnemigos(Ttow torre[],Tovni ovni[]);
 int JetPack(float &time,float &v0,int &y0,int y,int bdown);
 void InicializaProyectil(int L,int R,int Up,int Down,Tplayer player,Thit &hit);
 void CalculaComponentesVelocidad(float velocidad,float grados,Tvel &v);
@@ -246,6 +258,18 @@ int main()
             torre[j].hit[i].pos.width=20;
         }
     }
+
+    Tovni ovni[MAXOVNI];
+    for(i=0;i<MAXOVNI;i++)
+    {
+        ovni[i].pos.height=35;
+        ovni[i].pos.width=60;
+        ovni[i].pos.x=0;
+        ovni[i].pos.y=1300;
+        ovni[i].status=0;
+    }
+    ovni[0].direccion=1;
+    ovni[1].direccion=0;
     
     Thit hit[MAXHIT];
     for(i=0;i<MAXHIT;i++)
@@ -265,7 +289,7 @@ int main()
     camara.offset.x=0;
     camara.offset.y=0;
     camara.rotation = 0;
-    camara.zoom = 1;
+    camara.zoom = 0.5;
 
     while(!WindowShouldClose())
     {
@@ -446,7 +470,7 @@ int main()
                                 player.y0=player.pos.y;
                                 player.v0=0;
                                 player.timeDash=70;
-                                LimpiaEnemigos(torre);
+                                LimpiaEnemigos(torre,ovni);
                             }
 
                             //si se paso del borde izquierdo
@@ -491,7 +515,7 @@ int main()
                         player.y0=player.pos.y;
                         player.v0=0;
                         player.timeDash=70;
-                        LimpiaEnemigos(torre);
+                        LimpiaEnemigos(torre,ovni);
                     }
                 }
             }
@@ -517,7 +541,85 @@ int main()
             }
         }
         
-        
+         for(i=0;i<MAXOVNI;i++)
+        {
+            //comportameinto
+            if(ovni[i].status)
+            {   
+                ovni[i].time++;        
+                //movimiento enemigo **si sale de la pantalla se elimina**
+                if(ovni[i].direccion)
+                {   //movimiento
+                    ovni[i].pos.x-=OVNISPEED;
+                    ovni[i].pos.y+=OVNIAMP*cos(2*M_PI/OVNILONG*ovni[i].time);
+                    
+                    if(ovni[i].pos.x<=0-ovni[i].pos.height)
+                    {
+                        ovni[i].status=0;
+                    }
+                }
+                else
+                {
+                    //movimiento
+                    ovni[i].pos.x+=OVNISPEED;
+                    ovni[i].pos.y+=OVNIAMP*cos(2*M_PI/OVNILONG*ovni[i].time);
+                    //eliminacion
+                    if(ovni[i].pos.x>RANCHO+ovni[i].pos.width)
+                    {
+                        ovni[i].status=0;
+                    }
+                }
+                
+                //Colision con golpe
+                for(j=0;j<MAXHIT;j++)
+                {
+                    if(hit[j].status)
+                    {
+                        if(CheckMobColision(ovni[i].pos,hit[j].pos))
+                        {
+                            ovni[i].status=0;
+                        }
+                    }
+                }
+
+                //Colision con iugador
+                if(ovni[i].status)
+                {
+                    if(CheckPlayerColision(player.pos,ovni[i].pos))
+                    {
+                        player.pos.x=400;  //Posicion incial
+                        player.pos.y=SUELO;    //""
+                        player.y0=player.pos.y;
+                        player.v0=0;
+                        player.timeDash=70;
+                        LimpiaEnemigos(torre,ovni);
+                    }
+                }
+
+            }
+            else
+            {
+                //generacion
+                random=(rand()%100)+1;
+                if(random==1)
+                {
+                    if(ovni[i].direccion)
+                    {   
+                        ovni[i].status=1;
+                        ovni[i].pos.x=RANCHO;
+                        ovni[i].pos.y=player.pos.y+player.pos.height;
+                        ovni[i].time=0;
+                    }
+                    else
+                    {
+                        ovni[i].status=1;
+                        ovni[i].pos.x=0-ovni[i].pos.width;
+                        ovni[i].pos.y=player.pos.y+player.pos.height;
+                        ovni[i].time=0;
+                    }
+                }
+            }
+        }
         
         //** caluclar posicion y ********************************************************************************************************************************
         if(player.fall)
@@ -911,7 +1013,13 @@ int main()
                     DrawRectangleRec(torre[j].pos,GRAY);
                 }
             }
-            
+            for(i=0;i<MAXOVNI;i++)
+            {
+                if(ovni[i].status)
+                {
+                    DrawRectangleRec(ovni[i].pos,PURPLE);
+                }
+            }
             //piezas
             for(j=0;j<3;j++)
             {
@@ -1063,7 +1171,7 @@ void DropEgg(Tave mob,Tegg &egg)
     }
 }
 
-void LimpiaEnemigos(Ttow torre[])
+void LimpiaEnemigos(Ttow torre[],Tovni ovni[])
 {
     int j,i;
     for(j=0;j<MAXTORRE;j++)
@@ -1074,7 +1182,10 @@ void LimpiaEnemigos(Ttow torre[])
             torre[j].hit[j].status=0;
         }
     }
-    
+    for(i=0;i<MAXOVNI;i++)
+    {
+        ovni[i].status=0;
+    }
 }
 
 int JetPack(float &time,float &v0,int &y0,int y,int bdown)
