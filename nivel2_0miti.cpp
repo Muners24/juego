@@ -11,6 +11,8 @@
 #define ALTOP 85
 #define ANCHOP 50
 #define SUELO 650
+#define MAXVIDA 4
+#define INVULERABILIDAD 120
 
 #define G 0.1
 #define GD 0.2
@@ -46,8 +48,14 @@ typedef struct _vehiculo
 {
     Trec pos;
     int status;
-
 } Tpart;
+
+typedef struct _vida
+{
+    Trec pos;
+    int num;
+    int time;
+}Tvida;
 
 typedef struct _jugador
 {
@@ -58,6 +66,7 @@ typedef struct _jugador
     int jump;
     int jumpjump;
     int fall;
+    Tvida vida;
 } Tplayer;
 
 typedef struct _ave
@@ -100,7 +109,8 @@ int CheckMobColision(Trec mob, Thit hit);
 int CheckPlayerColision(Trec player, Trec mob);
 // int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
 void DropEgg(Tave mob, Tegg &egg);
-void LimpiaEnemigos(Tave ave[], Tcar car[]);
+void LimpiaEnemigosLvl2(Tave ave[], Tcar car[]);
+void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc);
 
 int main()
 {
@@ -140,6 +150,8 @@ int main()
     int lookDown = 0;
     int hit = 0;
     int dash = 0;
+
+    int fin=0;
 
     // auxiliar
     int random;
@@ -333,29 +345,40 @@ int main()
         igncolision++;
         frameC++;
         player.timeDash++;
-        // **************************************************** DIBUJO *******************************************************
-        BeginDrawing();
 
-        BeginMode2D(camara);
-
-        ClearBackground(LIGHTGRAY);
-
-        float ancho = 700;
-        for (int x = 0; x < 8; x++)
+        //** terminar el nivel ***********************************************************************************
+        if(pieza[0].status)
         {
+            if(pieza[0].pos.y==SUELO-pieza[0].pos.height)
+            {
+                if(pieza[1].status)
+                {
+                    if(pieza[1].pos.y==SUELO-pieza[1].pos.height)
+                    {
+                        if(pieza[2].status)
+                        {
+                            if(pieza[2].pos.y==SUELO-pieza[2].pos.height)
+                            {
+                                
+                                if(!fin)
+                                {
+                                    time=0;
+                                }
+                                fin=1;
+                                LimpiaEnemigosLvl2(ave,car);
+                                if(time>300)
+                                {
+                                    cinemaPuzleNivel2();
+                                }
+                                //CloseWindow();
 
-            DrawTextureEx(back, Vector2{ancho, 0}, 0, 1, WHITE);
-            DrawTextureEx(middle, Vector2{ancho, 0}, 0, 1, WHITE);
-            DrawTextureEx(front, Vector2{ancho, 0}, 0, 1, WHITE);
-            ancho -= back.width;
+                            }
+                        }
+                    }
+                }
+            }
         }
-
-        float piso = 2000;
-        for (int x = 0; x < 2000; x++)
-        {
-            DrawTextureEx(ground, Vector2{piso, SUELO}, 0, 1, WHITE);
-            piso -= ground.width;
-        }
+        
         //****************************************************** PIEZAS **********************************************************************
         for (j = 0; j < 3; j++)
         {
@@ -439,16 +462,25 @@ int main()
                 // Colision con jugador
                 if (ave[j].status)
                 {
-                    if (CheckPlayerColision(player.pos, ave[j].pos))
+                    if(player.vida.time>INVULERABILIDAD)
                     {
-                        PlaySound(dolor);
-                        DrawTextureRec(danio, framesDanio, Vector2{player.pos.x - 82, player.pos.y - 60}, WHITE);
-                        player.pos.x = 400;   // Posicion incial
-                        player.pos.y = SUELO; //""
-                        player.y0 = player.pos.y;
-                        player.v0 = 0;
-                        player.timeDash = 70;
-                        LimpiaEnemigos(ave, car);
+                        if(CheckPlayerColision(player.pos,ave[i].pos))
+                        {
+                            PlaySound(dolor);
+                            if(player.vida.num<1)
+                            {
+                                piezac=0;
+                                time=0;
+                                muerteLvl2(player,ave,car,pieza,plat,platc);
+                            }
+                            else
+                            {
+                                DrawTextureRec(danio, framesDanio, Vector2{player.pos.x - 82, player.pos.y - 60}, WHITE);
+                                player.vida.num--;
+                                player.vida.time=0;
+                            }
+                            i=MAXAVE;
+                        }
                     }
                 }
             }
@@ -514,7 +546,7 @@ int main()
                     player.y0 = player.pos.y;
                     player.v0 = 0;
                     player.timeDash = 70;
-                    LimpiaEnemigos(ave, car);
+                    LimpiaEnemigosLvl2(ave, car);
                 }
             }
         }
@@ -566,7 +598,7 @@ int main()
                         player.y0 = player.pos.y;
                         player.v0 = 0;
                         player.timeDash = 70;
-                        LimpiaEnemigos(ave, car);
+                       // LimpiaEnemigos(ave, car);
                     }
                 }
             }
@@ -898,6 +930,30 @@ int main()
             }
         }
 
+        // **************************************************** DIBUJO *******************************************************
+        BeginDrawing();
+
+        BeginMode2D(camara);
+
+        ClearBackground(LIGHTGRAY);
+
+        float ancho = 700;
+        for (int x = 0; x < 8; x++)
+        {
+
+            DrawTextureEx(back, Vector2{ancho, 0}, 0, 1, WHITE);
+            DrawTextureEx(middle, Vector2{ancho, 0}, 0, 1, WHITE);
+            DrawTextureEx(front, Vector2{ancho, 0}, 0, 1, WHITE);
+            ancho -= back.width;
+        }
+
+        float piso = 2000;
+        for (int x = 0; x < 2000; x++)
+        {
+            DrawTextureEx(ground, Vector2{piso, SUELO}, 0, 1, WHITE);
+            piso -= ground.width;
+        }
+
         framesAutom++;
         if (framesAutom >= (60 / framesSpeed))
         {
@@ -1179,7 +1235,7 @@ void DropEgg(Tave mob, Tegg &egg)
     }
 }
 
-void LimpiaEnemigos(Tave ave[], Tcar car[])
+void LimpiaEnemigosLvl2(Tave ave[], Tcar car[])
 {
     int j;
     for (j = 0; j < MAXAVE; j++)
@@ -1189,5 +1245,42 @@ void LimpiaEnemigos(Tave ave[], Tcar car[])
     for (j = 0; j < MAXCAR; j++)
     {
         car[j].status = 0;
+    }
+}
+
+void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc)
+{
+    int j;
+    player.pos.x=400;  //Posicion incial
+    player.pos.y=SUELO;    //""
+    player.y0=player.pos.y;
+    player.v0=0;
+    player.timeDash=70;
+    player.vida.num=MAXVIDA;
+    LimpiaEnemigosLvl2(ave,car);
+    int random = (platc) / 3;
+    for (j = 0; j < 3; j++)
+    {
+        pieza[j].status = 1;
+        pieza[j].pos.height = 80;
+        pieza[j].pos.width = 50;
+        if (j == 0)
+        {
+            pieza[j].pos.y = plat[platc - 1].pos.y - pieza[j].pos.height;
+            pieza[j].pos.x = plat[platc - 1].pos.x + plat[platc].pos.width / 2;
+        }
+        else
+        {
+            pieza[j].pos.y = plat[platc - random * j].pos.y - pieza[j].pos.height;
+            pieza[j].pos.x = plat[platc - random * j].pos.x + plat[platc - random * j].pos.width / 2;
+        }
+    }
+}
+
+void cinemaPuzleNivel2(void)
+{
+    while (1)
+    {
+        printf("\nGanaste\n");
     }
 }

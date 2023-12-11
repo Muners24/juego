@@ -1,8 +1,12 @@
 #include "C:\raylib\raylib\src\raylib.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+
+#define COLUMNAS1 3
+#define RENGLONES1 3
 
 #define RANCHO 1280
 #define RALTO 720
@@ -42,6 +46,15 @@ typedef Rectangle Trec;
 //blank transparente
 
 //typedef Rectangle Tplayer;
+
+typedef struct _tabla
+{
+    Trec pos;
+    int num;
+    char opRight[2];
+    char opDown[2];
+    int status;
+}Ttab;
 
 typedef struct _velocidad
 {
@@ -1392,14 +1405,6 @@ void AngElectro(Tangui &ang)
     ang.hit.time=0;
 }
 
-void cinemaPuzleNivel1(void)
-{
-    while (1)
-    {
-        printf("\nGanaste\n");
-    }
-}
-
 void muerteLvl1(Tplayer &player,Tshark shark[],Ttortu tort[],Tangui ang[],Tpart pieza[],Trec plat[])
 {
     int j;
@@ -1414,5 +1419,77 @@ void muerteLvl1(Tplayer &player,Tshark shark[],Ttortu tort[],Tangui ang[],Tpart 
         pieza[j].listo=0;
         pieza[j].pos.x=plat[j].x+plat[j].width/2-pieza[j].pos.width/2;
         pieza[j].pos.y=-300;
+    }
+}
+
+void cinemaPuzleNivel1(void)
+{
+    int i,j;
+    int random;
+    Ttab tabla[RENGLONES1][COLUMNAS1];
+    //+ - * /
+    char operadores[4][2]={"+","-","*","/"};
+
+    for(i=0;i<RENGLONES1;i++)
+    {
+        tabla[i][COLUMNAS1].opDown[0]='=';
+        tabla[i][COLUMNAS1].opDown[1]='\0';
+    }
+    for(i=0;i<COLUMNAS1;i++)
+    {
+        tabla[RENGLONES1][i].opDown[0]='=';
+        tabla[RENGLONES1][i].opDown[1]='\0';
+    }
+
+    for(i=0;i<RENGLONES1;i++)
+    {
+        for(j=0;j<COLUMNAS1;j++)
+        {
+            if(i==RENGLONES1-1)
+            {
+                
+            }
+            if(j=COLUMNAS1-1)
+            {
+
+            }
+            random=rand()%10;
+            if(random%2==0)
+            {
+                if(j<COLUMNAS1-1)
+                {
+                
+                    tabla[i][j].status=1;
+                    tabla[i][j].num=rand()%20;
+                    if(i<RENGLONES1-1)
+                    {
+                        if(j<COLUMNAS1-1)
+                        {
+                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
+                            strcpy(tabla[i][j].opRight,operadores[rand()%4]);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                tabla[i][j].status=0;
+                tabla[i][j].num=rand()%20;
+                if(i<RENGLONES1-1)
+                {
+                    if(j<COLUMNAS1-1)
+                    {
+                        strcpy(tabla[i][j].opDown,operadores[rand()%4]);
+                        strcpy(tabla[i][j].opRight,operadores[rand()%4]);
+                    }
+                }
+            }
+        }
+    }
+    ClearBackground(WHITE);
+    while (1)
+    {
+        
+        printf("\nGanaste\n");
     }
 }

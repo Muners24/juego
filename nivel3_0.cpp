@@ -30,7 +30,7 @@
 #define MAXTORRE 2
 #define TORREASPEED 180
 #define TORREVPROYECTIL 6
-#define MAXHITTORRE 3
+#define MAXHITTORRE 2
 #define MAXOVNI 2
 #define OVNISPEED 3
 #define OVNILONG 150
@@ -160,12 +160,14 @@ void cinemaPuzleNivel3(void);
 
 int main()
 {
+    
     SetTargetFPS(60);  
     InitWindow(RANCHO,RALTO,"juego");
     srand(time(NULL));
     int j,i;
     int y0Cam;
 
+    
     //contadores
     int frameC=0;
     float time=0;     
@@ -200,7 +202,7 @@ int main()
     for(i=0;i<MAXPLAT;i++)
     {
         plat[i].pos.height=30;
-        plat[i].pos.width=300;
+        plat[i].pos.width=322;
         plat[i].status=1;
         plat[i].flag=0;
     }
@@ -219,8 +221,8 @@ int main()
     for(j=0;j<3;j++)
     {
         pieza[j].status=1;
-        pieza[j].pos.height=80;
-        pieza[j].pos.width=50;
+        pieza[j].pos.height=181;
+        pieza[j].pos.width=63;
         pieza[j].pos.x=plat[j+1].pos.x+plat[j+1].pos.width/2-pieza[j].pos.width/2;
         pieza[j].pos.y=-1500;   
         pieza[j].listo=0;
@@ -230,8 +232,8 @@ int main()
     
     //Inicializa la posicion
     Tplayer player;
-    player.pos.height=ALTOP;
-    player.pos.width=ANCHOP;
+    player.pos.height=ALTOP+10;
+    player.pos.width=25;
     player.pos.x=CAMX-player.pos.width;  //Posicion incial
     player.pos.y=SUELO;    //""
     player.y0=player.pos.y;
@@ -243,8 +245,8 @@ int main()
     player.vida.num=MAXVIDA;
     player.vida.pos.width=25;
     player.vida.pos.height=25;
-    player.vida.pos.x=25;
-    player.vida.pos.y=25;
+    player.vida.pos.x=30;
+    player.vida.pos.y=30;
 
     //Inicializacion enemigos
     Ttow torre[MAXTORRE];
@@ -281,8 +283,8 @@ int main()
     ovni[1].direccion=0;
     
     Tlaser laser;
-    laser.pos.height=40;
-    laser.pos.width=80;
+    laser.pos.height=114;
+    laser.pos.width=168;
     laser.pos.x=player.pos.x;
     laser.pos.y=1500;
     laser.status=0;
@@ -304,13 +306,88 @@ int main()
 
     //Inicializacion camara
     Camera2D camara = { 0 };
-    camara.target.x=1;
+    camara.target.x=0;
     camara.target.y=0;
     camara.offset.x=0;
     camara.offset.y=0;
     camara.rotation = 0;
     camara.zoom = 1;
     Vector2 org;
+
+    Trec temp;
+    
+    //inicializacion para dibujado
+    
+    int framesAutom = 0;
+
+    int framesSpeed = 8;
+    int currentFrame = 0;
+
+    int currentPersonaje = 0;
+    int framesPersonaje = 0;
+
+    int currentSalto = 0;
+    int framesSalto = 0;
+    /******************************************************** CARGAR TEXTURAS **************************************************************/
+    Texture2D morado=LoadTexture("texturas\\ovni.png");
+    Texture2D bala=LoadTexture("texturas\\balalvl3.png");
+    Texture2D suelo=LoadTexture("texturas\\suelo3.png");
+    Texture2D fondo=LoadTexture("texturas\\luna.png");
+    Texture2D plat3=LoadTexture("texturas\\plat3.png");
+    Texture2D corazon=LoadTexture("texturas\\corazon.png");
+    Texture2D laserG=LoadTexture("texturas\\laserGreen.png");
+    Texture2D laserM=LoadTexture("texturas\\laserMorado.png");
+
+    Texture2D nave[3];
+    nave[0]=LoadTexture("texturas\\pieza1_3.png");
+    nave[1]=LoadTexture("texturas\\pieza2_3.png");
+    nave[2]=LoadTexture("texturas\\pieza3_3.png");
+
+    Texture2D towl[9];
+    towl[0]=LoadTexture("texturas\\torrel270.png");
+    towl[1]=LoadTexture("texturas\\torrel292.png");
+    towl[2]=LoadTexture("texturas\\torrel315.png");
+    towl[3]=LoadTexture("texturas\\torrel337.png");
+    towl[4]=LoadTexture("texturas\\torrel0.png");
+    towl[5]=LoadTexture("texturas\\torrel22.png");
+    towl[6]=LoadTexture("texturas\\torrel45.png");
+    towl[7]=LoadTexture("texturas\\torrel67.png");
+    towl[8]=LoadTexture("texturas\\torrel90.png");
+    Texture2D towr[9];
+    towr[0]=LoadTexture("texturas\\torrer270.png");
+    towr[1]=LoadTexture("texturas\\torrer247.png");
+    towr[2]=LoadTexture("texturas\\torrer225.png");
+    towr[3]=LoadTexture("texturas\\torrer192.png");
+    towr[4]=LoadTexture("texturas\\torrer180.png");
+    towr[5]=LoadTexture("texturas\\torrer158.png");
+    towr[6]=LoadTexture("texturas\\torrer135.png");
+    towr[7]=LoadTexture("texturas\\torrer112.png");
+    towr[8]=LoadTexture("texturas\\torrer90.png");
+
+    //jugador
+    Texture2D caminar = LoadTexture("texturas/Cyborg_run.png");
+    Rectangle framesCaminar = {0.0f, 0.0f, (float)caminar.width / 6, (float)caminar.height};
+    Texture2D caminarizq = LoadTexture("texturas/Cyborg_run_left.png");
+    Rectangle framesCaminarizq = {0.0f, 0.0f, (float)caminarizq.width / 6, (float)caminarizq.height};
+    Texture2D reposo = LoadTexture("texturas/Cyborg_idle.png");
+    Rectangle framesReposo = {0.0f, 0.0f, (float)reposo.width / 4, (float)reposo.height};
+    Texture2D reposoizq = LoadTexture("texturas/Cyborg_idle_left.png");
+    Rectangle framesReposoizq = {0.0f, 0.0f, (float)reposoizq.width / 4, (float)reposoizq.height};
+    Texture2D danio = LoadTexture("texturas/Cyborg_hurt.png");
+    Rectangle framesDanio = {0.0f, 0.0f, (float)danio.width, (float)danio.height};
+    Texture2D salto = LoadTexture("texturas/Cyborg_jump.png");
+    Rectangle frameSalto = {0.0f, 0.0f, (float)salto.width / 4, (float)salto.height};
+    Texture2D saltoder = LoadTexture("texturas/Cyborg_jumpr.png");
+    Rectangle frameSaltoder = {0.0f, 0.0f, (float)saltoder.width / 4, (float)saltoder.height};
+
+    //**************************************************** CARGAR AUDIOS *******************************************************************
+
+    InitAudioDevice();
+
+    Sound dolor = LoadSound("sonidos/danio.wav");
+    Sound RecPieza=LoadSound("sonidos/pieza.wav");
+    Sound las=LoadSound("sonidos/laser.wav");
+    
     while(!WindowShouldClose())
     {
         /*
@@ -408,20 +485,20 @@ int main()
                     {
                         if(CheckPlayerColision(player.pos,pieza[j].pos))
                         {
+                            PlaySound(RecPieza);
                             pieza[j].status=0;
                             pieza[j].pos.y=SUELO-pieza[j].pos.height;
                             piezac++;
-                            printf("\npiezac = %d\n",piezac);
                             switch(piezac)
                             {
                                 case 1:
                                     pieza[j].pos.x=150;
                                     break;
                                 case 2:
-                                    pieza[j].pos.x=200;
+                                    pieza[j].pos.x=213;
                                     break;
                                 case 3:
-                                    pieza[j].pos.x=250;
+                                    pieza[j].pos.x=276;
                                     break;
                             }
                             j=3;
@@ -483,8 +560,7 @@ int main()
                     }
                 }
             }
-            
-            
+                 
             //** torreta **************************************************************************************************************************
             for(i=0;i<MAXTORRE;i++)
             {
@@ -500,7 +576,8 @@ int main()
                                 {
                                     torre[i].hit[j].pos.x=torre[i].pos.x;
                                     torre[i].hit[j].pos.y=torre[i].pos.y;
-                                    CalculaComponentesVelocidad(TORREVPROYECTIL,CalculaAngulo(torre[i].hit[j].pos,player.pos),torre[i].hit[j].v);
+                                    grados=CalculaAngulo(torre[i].hit[j].pos,player.pos);
+                                    CalculaComponentesVelocidad(TORREVPROYECTIL,grados,torre[i].hit[j].v);
                                     torre[i].atkC=0;
                                     torre[i].hit[j].status=1;
                                     j=MAXHITTORRE;
@@ -509,7 +586,8 @@ int main()
                                 {
                                     torre[i].hit[j].pos.x=torre[i].pos.x+torre[i].pos.width;
                                     torre[i].hit[j].pos.y=torre[i].pos.y;
-                                    CalculaComponentesVelocidad(TORREVPROYECTIL,CalculaAngulo(torre[i].hit[j].pos,player.pos),torre[i].hit[j].v);
+                                    grados=CalculaAngulo(torre[i].hit[j].pos,player.pos);
+                                    CalculaComponentesVelocidad(TORREVPROYECTIL,grados,torre[i].hit[j].v);
                                     torre[i].atkC=0;
                                     torre[i].hit[j].status=1;                            
                                     j=MAXHITTORRE;
@@ -542,6 +620,7 @@ int main()
                                 {
                                     if(CheckPlayerColision(player.pos,torre[i].hit[j].pos))
                                     {
+                                        PlaySound(dolor);
                                         if(player.vida.num<1)
                                         {
                                             piezac=0;
@@ -578,6 +657,7 @@ int main()
                     {
                         if(CheckPlayerColision(player.pos,torre[i].pos))
                         {
+                            PlaySound(dolor);
                             if(player.vida.num<1)
                             {
                                 piezac=0;
@@ -671,6 +751,7 @@ int main()
                         {
                             if(CheckPlayerColision(player.pos,ovni[i].pos))
                             {
+                                PlaySound(dolor);
                                 if(player.vida.num<1)
                                 {
                                     piezac=0;
@@ -1109,6 +1190,7 @@ int main()
                         {
                             if(!hit[i].status)
                             {
+                                PlaySound(las);
                                 hit[i].pos.y=player.pos.y+player.pos.height/4;
                                 Direccioniugador(lookL,lookR,lookL,lookDown,player);
                                 if(lookR)
@@ -1187,29 +1269,97 @@ int main()
 
         BeginDrawing();
             BeginMode2D(camara);
-            ClearBackground(BLACK);
+            ClearBackground(BLANK);
+            DrawTexture(fondo,0,-1300,WHITE);
             org.x=0;
             org.y=0;
-            //DrawRectanglePro(player.pos,org,player.pos.x*0.2,GREEN);
-            DrawRectangleRec(player.pos,BLUE);      
-            //suelo    
-            DrawRectangle(0,SUELO,1280,70,DARKGREEN);
+            //jugador
+            DrawRectangleRec(player.pos,BLUE);  
+            if (player.fall)
+            {
+                framesSalto++;
+                if (framesSalto >= (60 / framesSpeed))
+                {
+                    framesSalto = 0;
+                    currentSalto++;
+
+                    if (currentSalto > 3)
+                        currentSalto = 0;
+                    frameSalto.x = (float)currentSalto * (float)salto.width / 4;
+                    frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
+                }
+                if (lookL)
+                {
+                    DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 50}, WHITE);
+                }
+                if (lookR)
+                {
+                    DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
+                }
+            }
+            else
+            {
+                if (IsKeyDown(KEY_RIGHT))
+                {
+                    framesPersonaje++;
+                    framesSalto = 0;
+                    if (framesPersonaje >= (60 / framesSpeed))
+                    {
+                        framesPersonaje = 0;
+                        currentPersonaje++;
+
+                        if (currentPersonaje > 5)
+                            currentPersonaje = 0;
+                        framesCaminar.x = (float)currentPersonaje * (float)caminar.width / 6;
+                    }
+                    DrawTextureRec(caminar, framesCaminar, Vector2{player.pos.x-40, player.pos.y - 75}, WHITE);
+                }
+                else if (IsKeyDown(KEY_LEFT))
+                {
+                    framesPersonaje++;
+                    if (framesPersonaje >= (60 / framesSpeed))
+                    {
+                        framesPersonaje = 0;
+                        currentPersonaje++;
+
+                        if (currentPersonaje > 5)
+                            currentPersonaje = 0;
+                        framesCaminarizq.x = (float)currentPersonaje * (float)caminarizq.width / 6;
+                    }
+                    DrawTextureRec(caminarizq, framesCaminarizq, Vector2{player.pos.x - 80, player.pos.y - 75}, WHITE);
+                }
+                else
+                {
+                    framesPersonaje = 0;
+                    if (lookL)
+                    {
+                        DrawTextureRec(reposoizq, framesReposoizq, Vector2{player.pos.x - 85, player.pos.y - 75}, WHITE);
+                    }
+                    if (lookR)
+                    {
+                        DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 30, player.pos.y - 75}, WHITE);
+                    }
+                }
+            }
+                
+            //suelo
+            DrawTexture(suelo,0,SUELO-4,WHITE);
             //printf("\n centro jux = %f centro laser = %f\n",player.pos.x+player.pos.width/2,laser.pos.x+laser.pos.width/2);
             //laser
             if(laser.atkC>240)
             {
                 if(laser.atkC<360)
-                {
-                    DrawRectangleRec(laser.pos,DARKPURPLE);
+                {   
+                    DrawTexture(laserG,laser.pos.x,laser.pos.y,WHITE);
                 }
                 else
                 {
-                    DrawRectangleRec(laser.pos,GREEN);
+                    DrawTexture(laserM,laser.pos.x,laser.pos.y,WHITE);
                 }
             }
             else
             {
-                DrawRectangleRec(laser.pos,GREEN);
+                DrawTexture(laserM,laser.pos.x,laser.pos.y,WHITE);
             }
 
             if(laser.time>1)
@@ -1232,7 +1382,7 @@ int main()
                 {
                     player.vida.pos.y=player.pos.y-375;
                 }
-                DrawRectangleRec(player.vida.pos,RED);
+                DrawTexture(corazon,player.vida.pos.x,player.vida.pos.y,WHITE);
                 player.vida.pos.x+=25+player.vida.pos.width;
             }
             player.vida.pos.x=25;
@@ -1240,7 +1390,7 @@ int main()
             //plataformas
             for(j=0;j<MAXPLAT;j++)
             {
-                DrawRectangleRec(plat[j].pos,DARKGREEN);
+                DrawTexture(plat3,plat[j].pos.x,plat[j].pos.y,WHITE);
             }
             //enemigos
             for(j=0;j<MAXTORRE;j++)
@@ -1251,17 +1401,151 @@ int main()
                     {
                         if(torre[j].hit[i].status)
                         {
-                            DrawRectangleRec(torre[j].hit[i].pos,RED);
+                            DrawTexture(bala,torre[j].hit[i].pos.x-4,torre[j].hit[i].pos.y-4,WHITE);
                         }
                     }
-                    DrawRectangleRec(torre[j].pos,GRAY);
+
+                    if(torre[j].direccion)
+                    {
+                        grados=CalculaAngulo(torre[j].pos,player.pos);
+                        if(grados<=112)
+                        {
+                            DrawTexture(towr[8],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                        }
+                        else
+                        {
+                            if(grados<=135)
+                            {
+                                DrawTexture(towr[7],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                            }
+                            else
+                            {
+                                if(grados<=158)
+                                {
+                                    DrawTexture(towr[6],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                }
+                                else
+                                {
+                                    if(grados<=180)
+                                    {
+                                        DrawTexture(towr[5],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                    }
+                                    else
+                                    {
+                                        if(grados<=192)
+                                        {
+                                            DrawTexture(towr[4],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                        }
+                                        else
+                                        {
+                                            if(grados<=225)
+                                            {
+                                                DrawTexture(towr[3],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                            }
+                                            else
+                                            {
+                                                if(grados<=247)
+                                                {
+                                                    DrawTexture(towr[2],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                                }
+                                                else
+                                                {
+                                                    if(grados<=270)
+                                                    {
+                                                        DrawTexture(towr[1],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                                    }
+                                                    else
+                                                    {
+                                                        if(grados>270)
+                                                        {
+                                                            DrawTexture(towr[0],torre[j].pos.x-5,torre[j].pos.y-5,WHITE);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                       grados = CalculaAngulo(torre[j].pos, player.pos) + 90;
+
+                        if (grados > 360) 
+                        {
+                            grados -= 360;
+                        }
+
+                        if(grados > 90) 
+                        {
+                            if(grados<=270)
+                            {
+                                if (grados <= 112) 
+                                {
+                                    DrawTexture(towl[5], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                } 
+                                else
+                                {
+                                    if (grados <= 135) 
+                                    {
+                                        DrawTexture(towl[6], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                    } 
+                                    else
+                                    {
+                                        if (grados <= 158) 
+                                        {
+                                            DrawTexture(towl[7], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                        } 
+                                        else
+                                        {
+                                            DrawTexture(towl[8], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                        } 
+                                    } 
+                                } 
+                            }
+                        } 
+                        else 
+                        {
+                            if (grados <= 22) 
+                            {
+                                DrawTexture(towl[1], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                            } 
+                            else
+                            {
+                                if (grados <= 45) 
+                                {
+                                    DrawTexture(towl[2], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                } 
+                                else 
+                                {
+                                    if (grados <= 67) 
+                                    {
+                                        DrawTexture(towl[3], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                    } 
+                                    else 
+                                    {
+                                        if (grados <= 90) 
+                                        {
+                                            DrawTexture(towl[4], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                        }
+                                    }
+                                }
+                            } 
+                        }
+                        if(grados>=337)
+                        {
+                            DrawTexture(towl[0], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);   
+                        }
+                    }
                 }
             }
             for(i=0;i<MAXOVNI;i++)
             {
                 if(ovni[i].status)
                 {
-                    DrawRectangleRec(ovni[i].pos,PURPLE);
+                    DrawTexture(morado,ovni[i].pos.x-12.5,ovni[i].pos.y-7.5,WHITE);
                 }
             }
             //piezas
@@ -1269,7 +1553,7 @@ int main()
             {
                 if(pieza[j].status)
                 {
-                    DrawRectangleRec(pieza[j].pos,ORANGE);
+                    DrawTexture(nave[j],pieza[j].pos.x,pieza[j].pos.y,WHITE);
                 }
             }
             //golpe
@@ -1283,7 +1567,18 @@ int main()
             EndMode2D();
         EndDrawing();
     }
-    
+
+    for(i=0;i<9;i++)
+    {
+        UnloadTexture(towl[i]);
+        UnloadTexture(towr[i]);
+    }
+    for(i=0;i<3;i++)
+    {
+        UnloadTexture(nave[i]);
+    }
+    UnloadTexture(morado);
+    UnloadTexture(bala);    
     CloseWindow();
     return 0;
 }
@@ -1367,7 +1662,6 @@ int CheckMobColision(Trec mob,Trec hit)
     }
     return 0;
 }
-
 
 void LimpiaEnemigosLvl3(Ttow torre[],Tovni ovni[])
 {

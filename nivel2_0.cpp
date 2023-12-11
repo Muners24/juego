@@ -1038,6 +1038,7 @@ void LimpiaEnemigos(Tave ave[],Tcar car[])
 
 void cinemaPuzleNivel2(void)
 {
+    
     while (1)
     {
         printf("\nGanaste\n");
