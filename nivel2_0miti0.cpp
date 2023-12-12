@@ -77,9 +77,9 @@ typedef struct _jugador
 typedef struct _ave
 {
     Trec pos;
-    int status = 0;
-    int right = 0;
-    int left = 0;
+    int status;
+    int right;
+    int left;
 
 } Tave;
 
@@ -378,7 +378,7 @@ int main()
     camara.offset.x = 640;
     camara.offset.y = CAMY;
     camara.rotation = 0;
-    camara.zoom = 0.5;
+    camara.zoom = 1;
 
     Tcora dropVida[MAXDROPVIDA];
 
@@ -546,6 +546,21 @@ int main()
                     if (CheckMobColision(ave[j].pos, hithit))
                     {
                         ave[j].status = 0;
+                        random=rand()%10+1;
+                        if(random<=4)
+                        {
+                            for(i=0;i<MAXDROPVIDA;i++)
+                            {
+                                if(!dropVida[i].status)
+                                {
+                                    dropVida[i].status=1;
+                                    dropVida[i].time=0;
+                                    dropVida[i].pos.x=ave[j].pos.x;
+                                    dropVida[i].pos.y=ave[j].pos.y;
+                                    i=MAXDROPVIDA;
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -622,7 +637,25 @@ int main()
             {
                 if (CheckMobColision(egg[j].pos, hithit))
                 {
-                    egg[j].status = 0;
+                    if(egg[j].status)
+                    {
+                        egg[j].status = 0;
+                        random=rand()%10+1;
+                        if(random<=1)
+                        {
+                            for(i=0;i<MAXDROPVIDA;i++)
+                            {
+                                if(!dropVida[i].status)
+                                {
+                                    dropVida[i].status=1;
+                                    dropVida[i].time=0;
+                                    dropVida[i].pos.x=egg[j].pos.x;
+                                    dropVida[i].pos.y=egg[j].pos.y;
+                                    i=MAXDROPVIDA;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -680,23 +713,26 @@ int main()
                 // Colision con golpe
                 if (hit)
                 {
-                    if (CheckMobColision(car[j].pos, hithit))
+                    if(car[j].movimiento)
                     {
-                        car[j].movimiento = 0;
-                        car[j].time = 0;
-                        random=rand()%10+1;
-                        if(random<=4)
+                        if (CheckMobColision(car[j].pos, hithit))
                         {
-                            for(i=0;i<MAXDROPVIDA;i++)
+                            car[j].movimiento = 0;
+                            car[j].time = 0;
+                            random=rand()%10+1;
+                            if(random<=4)
                             {
-                                if(!dropVida[i].status)
+                                for(i=0;i<MAXDROPVIDA;i++)
                                 {
-                                    dropVida[i].status=1;
-                                    dropVida[i].time=0;
-                                    dropVida[i].pos.x=car[j].pos.x;
-                                    dropVida[i].pos.y=car[j].pos.y;
-                                    i=MAXDROPVIDA;
+                                    if(!dropVida[i].status)
+                                    {
+                                        dropVida[i].status=1;
+                                        dropVida[i].time=0;
+                                        dropVida[i].pos.x=car[j].pos.x;
+                                        dropVida[i].pos.y=car[j].pos.y;
+                                        i=MAXDROPVIDA;
                                     }
+                                }
                             }
                         }
                     }

@@ -29,6 +29,7 @@
 #define DESPAWNTIME 600
 #define MAXDROPASPEED 10
 #define DURACIONBUFF 300
+
 //lvl3
 #define RECVEHICULO 900
 
@@ -350,7 +351,7 @@ int main()
     camara.offset.x=0;
     camara.offset.y=0;
     camara.rotation = 0;
-    camara.zoom = 0.8;
+    camara.zoom = 1;
     Vector2 org;
     Vector2 org1;
     Trec temp;
@@ -1540,7 +1541,6 @@ int main()
             org1.y=0;
             //jugador
             //jetpack
-            DrawRectangleRec(player.pos,BLUE);
             Direccioniugador(lookL,lookR,lookUp,lookDown,player);
             if(lookR)
             {

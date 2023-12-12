@@ -35,9 +35,9 @@ float CalculaResultadosX(int a,int b,char op1);
 
 int main()
 {
-    cinemaPuzleNivel1();
-    //cinemaPuzleNivel2();
-    //cinemaPuzleNivel3();
+    //cinemaPuzleNivel1();
+    cinemaPuzleNivel2();
+    cinemaPuzleNivel3();
     return 0;
 }   
 
