@@ -24,6 +24,11 @@
 #define VY -3
 #define VD 6
 
+//DROPS
+#define MAXDROPVIDA 10
+#define DESPAWNTIME 600
+#define MAXDROPASPEED 10
+#define DURACIONBUFF 300
 //lvl3
 #define RECVEHICULO 900
 
@@ -36,17 +41,12 @@
 #define OVNILONG 150
 #define OVNIAMP 15
 
-#define MAXAVE 5
-#define AVESPEED 7
-#define MAXEGG 8
-#define MAXCAR 2
-#define CARSPEED 9
-
 #define MAXPLAT 4
-#define MAXHIT 500
-#define VATAQUE 40
-#define VATAQUEBUFF 15
+#define MAXHIT 5
+#define VATAQUE 60
+#define VATAQUEBUFF 20 
 #define VPROYECTIL 10.0
+
 //blank transparente
 
 //typedef Rectangle Tplayer;
@@ -103,6 +103,7 @@ typedef struct _jugador
     int jetc;
     int x0;
     int AtkC;
+    int buff=0;
     Tvida vida;
 }Tplayer;
 
@@ -135,6 +136,23 @@ typedef struct _Elaser
     int mov;
 }Tlaser;
 
+typedef struct _ASbuff
+{
+    Trec pos;
+    int statusDraw;
+    int statusFun;
+    int time;
+    int duracion;
+}TatkSpeed;
+
+typedef struct _corazon
+{
+    Trec pos;
+    int status;
+    int time;
+}Tcora;
+
+
 float velocidad(float v0,float time);
 int ColisionPlat(Tplayer player,Tplat plat);
 //devuelve 0
@@ -164,7 +182,7 @@ int main()
     SetTargetFPS(60);  
     InitWindow(RANCHO,RALTO,"juego");
     srand(time(NULL));
-    int j,i;
+    int j,i,k;
     int y0Cam;
 
     
@@ -192,8 +210,8 @@ int main()
     //auxiliar
     int random;
     Trec aux;
-    aux.height=10;
-    aux.width=10;
+    aux.height=20;
+    aux.width=20;
     float grados;
 
     //Inicializacion ***************************************************************************************
@@ -229,7 +247,7 @@ int main()
     }
 
     int piezac=0;
-    
+    int hitb=0;
     //Inicializa la posicion
     Tplayer player;
     player.pos.height=ALTOP+10;
@@ -247,6 +265,7 @@ int main()
     player.vida.pos.height=25;
     player.vida.pos.x=30;
     player.vida.pos.y=30;
+    player.vida.time=0;
 
     //Inicializacion enemigos
     Ttow torre[MAXTORRE];
@@ -298,11 +317,31 @@ int main()
     {
         hit[i].status=0;
         hit[i].pos.width=RANCHO;
-        hit[i].pos.height=10;
+        hit[i].pos.height=25;
         hit[i].pos.x=1280;
         hit[i].pos.y=1500;
     }
 
+    Tcora dropVida[MAXDROPVIDA];
+
+    for(i=0;i<MAXDROPVIDA;i++)
+    {
+        dropVida[i].pos.width=30;
+        dropVida[i].pos.height=30;
+        dropVida[i].status=0;
+        dropVida[i].time=0;
+    }
+
+    TatkSpeed dropASpeed[MAXDROPASPEED];
+    for(i=0;i<MAXDROPASPEED;i++)
+    {
+        dropASpeed[i].pos.width=80;
+        dropASpeed[i].pos.height=60;
+        dropASpeed[i].statusDraw=0;
+        dropASpeed[i].statusFun=0;
+        dropASpeed[i].time=0;
+        dropASpeed[i].duracion=DURACIONBUFF;
+    }
 
     //Inicializacion camara
     Camera2D camara = { 0 };
@@ -311,9 +350,9 @@ int main()
     camara.offset.x=0;
     camara.offset.y=0;
     camara.rotation = 0;
-    camara.zoom = 1;
+    camara.zoom = 0.8;
     Vector2 org;
-
+    Vector2 org1;
     Trec temp;
     
     //inicializacion para dibujado
@@ -337,6 +376,7 @@ int main()
     Texture2D corazon=LoadTexture("texturas\\corazon.png");
     Texture2D laserG=LoadTexture("texturas\\laserGreen.png");
     Texture2D laserM=LoadTexture("texturas\\laserMorado.png");
+    Texture2D Aspeed=LoadTexture("texturas\\AtkSpeed.png");
 
     Texture2D nave[3];
     nave[0]=LoadTexture("texturas\\pieza1_3.png");
@@ -365,6 +405,22 @@ int main()
     towr[8]=LoadTexture("texturas\\torrer90.png");
 
     //jugador
+    Texture2D jet[2];
+    jet[0]=LoadTexture("texturas\\jetL.png");
+    jet[1]=LoadTexture("texturas\\jetR.png");
+
+    Texture2D hitR[3];
+    hitR[0]=LoadTexture("texturas\\HitR0.png");
+    hitR[1]=LoadTexture("texturas\\HitR1.png");
+    hitR[2]=LoadTexture("texturas\\HitR2.png");
+    Texture2D hitL[3];
+    hitL[0]=LoadTexture("texturas\\HitL0.png");
+    hitL[1]=LoadTexture("texturas\\HitL1.png");
+    hitL[2]=LoadTexture("texturas\\HitL2.png");
+    Texture2D laserRed[2];
+    laserRed[1]=LoadTexture("texturas\\laserR.png");
+    laserRed[0]=LoadTexture("texturas\\laserL.png");
+    
     Texture2D caminar = LoadTexture("texturas/Cyborg_run.png");
     Rectangle framesCaminar = {0.0f, 0.0f, (float)caminar.width / 6, (float)caminar.height};
     Texture2D caminarizq = LoadTexture("texturas/Cyborg_run_left.png");
@@ -401,6 +457,9 @@ int main()
         */
         //printf("\n xp = %f yp = %f ",player.pos.x,player.pos.y);
         //printf("\n jump = %d  jet = %d\n",player.jump,player.jet);
+        BeginDrawing();
+            BeginMode2D(camara);
+
         time+=0.5;
         igncolision+=1;
         frameC++;
@@ -467,17 +526,17 @@ int main()
             for(j=0;j<3;j++)
             {   
                 //drop
-                if(!pieza[j].listo)
+                if(pieza[j].listo)
                 {
                     if(!pieza[j].status)
                     {
                         if(CheckPlayerColision(player.pos,pieza[j].pos))
                         {
                             pieza[j].status=1;
-                            pieza[j].listo=1;
                         }
                     }
                 }
+
                 //recolleccion
                 if(!pieza[j].listo)
                 {
@@ -487,17 +546,18 @@ int main()
                         {
                             PlaySound(RecPieza);
                             pieza[j].status=0;
+                            pieza[j].listo=1;
                             pieza[j].pos.y=SUELO-pieza[j].pos.height;
                             piezac++;
-                            switch(piezac)
+                            switch(j)
                             {
-                                case 1:
+                                case 0:
                                     pieza[j].pos.x=150;
                                     break;
-                                case 2:
+                                case 1:
                                     pieza[j].pos.x=213;
                                     break;
-                                case 3:
+                                case 2:
                                     pieza[j].pos.x=276;
                                     break;
                             }
@@ -512,15 +572,18 @@ int main()
             {
                 if(!pieza[0].listo)
                 {
-                    if(pieza[0].pos.y<plat[1].pos.y-pieza[0].pos.height)
+                    if(pieza[0].status)
                     {
-                        pieza[0].pos.y+=4;
-                    }
-                    else
-                    {
-                        if(piezac<1)
+                        if(pieza[0].pos.y<plat[1].pos.y-pieza[0].pos.height)
                         {
-                            pieza[0].pos.y=plat[1].pos.y-pieza[0].pos.height;
+                            pieza[0].pos.y+=4;
+                        }
+                        else
+                        {
+                            if(piezac<1)
+                            {
+                                pieza[0].pos.y=plat[1].pos.y-pieza[0].pos.height;
+                            }
                         }
                     }
                 }
@@ -528,15 +591,18 @@ int main()
                 {
                     if(!pieza[1].listo)
                     {
-                        if(pieza[1].pos.y<plat[2].pos.y-pieza[1].pos.height)
+                        if(pieza[1].status)
                         {
-                            pieza[1].pos.y+=4;
-                        }
-                        else
-                        {
-                            if(piezac<2)
+                            if(pieza[1].pos.y<plat[2].pos.y-pieza[1].pos.height)
                             {
-                                pieza[1].pos.y=plat[2].pos.y-pieza[1].pos.height;
+                                pieza[1].pos.y+=4;
+                            }
+                            else
+                            {
+                                if(piezac<2)
+                                {
+                                    pieza[1].pos.y=plat[2].pos.y-pieza[1].pos.height;
+                                }
                             }
                         }
                     }
@@ -545,31 +611,39 @@ int main()
                     {
                         if(!pieza[2].listo)
                         {
-                            if(pieza[2].pos.y<plat[3].pos.y-pieza[2].pos.height)
+                            if(pieza[2].status)
                             {
-                                pieza[2].pos.y+=4;
-                            }
-                            else
-                            {
-                                if(piezac<3)
+                                if(pieza[2].pos.y<plat[3].pos.y-pieza[2].pos.height)
                                 {
-                                    pieza[2].pos.y=plat[3].pos.y-pieza[2].pos.height;
+                                    pieza[2].pos.y+=4;
+                                }
+                                else
+                                {
+                                    if(piezac<3)
+                                    {
+                                        pieza[2].pos.y=plat[3].pos.y-pieza[2].pos.height;
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-                 
+            
+            //enemigos
+            
             //** torreta **************************************************************************************************************************
             for(i=0;i<MAXTORRE;i++)
             {
                 if(torre[i].status)
                 {
+                    //ataque
                     for(j=0;j<MAXHITTORRE;j++)
                     {
                         if(torre[i].atkC>TORREASPEED)
                         {
+
+                            //disparo
                             if(torre[i].hit[j].status==0)
                             {
                                 if(torre[i].direccion)
@@ -615,6 +689,7 @@ int main()
                                     }
                                 }
 
+                                
                                 //colision con jugador
                                 if(player.vida.time>INVULERABILIDAD)
                                 {
@@ -632,27 +707,70 @@ int main()
                                             player.vida.num--;
                                             player.vida.time=0;
                                         }
-                                        i=MAXHITTORRE;
+                                        j=MAXHITTORRE;
                                     }
                                 }
+                                
                             }
                         }    
                     }
 
-                    //Colision con golpe
+                    //Colision con golpe (enemigo)
                     for(j=0;j<MAXHIT;j++)
                     {
                         if(hit[j].status)
                         {
-                            if(CheckMobColision(torre[i].pos,hit[j].pos))
+                            if(hit[j].time>10)
                             {
-                                torre[i].status=0;
+                                if(CheckMobColision(torre[i].pos,hit[j].pos))
+                                {
+                                    torre[i].status=0;
+                                    random=rand()%10+1;
+                                    if(random<=4)
+                                    {
+                                        random=rand()%2;
+                                        if(random)
+                                        {   
+                                            for(k=0;k<MAXDROPVIDA;k++)
+                                            {
+                                                if(!dropVida[k].status)
+                                                {
+                                                    dropVida[k].status=1;
+                                                    dropVida[k].time=0;
+                                                    dropVida[k].pos.x=torre[i].pos.x;
+                                                    dropVida[k].pos.y=torre[i].pos.y;
+                                                    k=MAXDROPVIDA;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                             for(k=0;k<MAXDROPASPEED;k++)
+                                            {
+                                                if(!dropASpeed[k].statusDraw)
+                                                {
+                                                    if(!dropASpeed[k].statusFun)
+                                                    {
+                                                        dropASpeed[k].statusDraw=1;
+                                                        dropASpeed[k].statusFun=0;
+                                                        dropASpeed[k].time=0;
+                                                        dropASpeed[k].pos.x=torre[i].pos.x;
+                                                        dropASpeed[k].pos.y=torre[i].pos.y;
+                                                        k=MAXDROPASPEED;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                   
+                                }
                             }
                         }
                     }
                     
 
-                    //Colision con jugador
+                    //Colision con jugador (enemigo)
                     if(player.vida.time>INVULERABILIDAD)
                     {
                         if(CheckPlayerColision(player.pos,torre[i].pos))
@@ -669,7 +787,7 @@ int main()
                                 player.vida.num--;
                                 player.vida.time=0;
                             }
-                            i=MAXHITTORRE;
+                            i=MAXTORRE;
                         }
                     }
                 }
@@ -703,6 +821,7 @@ int main()
                 }
             }
             
+            //** ovni ************************************************************************************************************
             for(i=0;i<MAXOVNI;i++)
             {
                 //comportameinto
@@ -737,9 +856,50 @@ int main()
                     {
                         if(hit[j].status)
                         {
-                            if(CheckMobColision(ovni[i].pos,hit[j].pos))
+                            if(hit[i].time>10)
                             {
-                                ovni[i].status=0;
+                                if(CheckMobColision(ovni[i].pos,hit[j].pos))
+                                {
+                                    ovni[i].status=0;
+                                    random=rand()%10+1;
+                                    if(random<=4)
+                                    {
+                                        random=rand()%2;
+                                        if(random)
+                                        {   
+                                            for(k=0;k<MAXDROPVIDA;k++)
+                                            {
+                                                if(!dropVida[k].status)
+                                                {
+                                                    dropVida[k].status=1;
+                                                    dropVida[k].time=0;
+                                                    dropVida[k].pos.x=ovni[i].pos.x;
+                                                    dropVida[k].pos.y=ovni[i].pos.y;
+                                                    k=MAXDROPVIDA;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for(k=0;k<MAXDROPASPEED;k++)
+                                            {
+                                                if(!dropASpeed[k].statusDraw)
+                                                {
+                                                    if(!dropASpeed[k].statusFun)
+                                                    {
+                                                        dropASpeed[k].statusDraw=1;
+                                                        dropASpeed[k].statusFun=0;
+                                                        dropASpeed[k].time=0;
+                                                        dropASpeed[k].pos.x=ovni[i].pos.x;
+                                                        dropASpeed[k].pos.y=ovni[i].pos.y;
+                                                        k=MAXDROPASPEED;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
                             }
                         }
                     }
@@ -747,6 +907,7 @@ int main()
                     //Colision con iugador
                     if(ovni[i].status)
                     {
+                        
                         if(player.vida.time>INVULERABILIDAD)
                         {
                             if(CheckPlayerColision(player.pos,ovni[i].pos))
@@ -766,6 +927,7 @@ int main()
                                 i=MAXOVNI;
                             }
                         }
+                        
                     }
 
                 }
@@ -832,7 +994,6 @@ int main()
                             laser.hit.x=laser.pos.x+laser.pos.width/2;
                             laser.hit.y=laser.pos.y+laser.pos.height/2;
                             laser.grados=CalculaAngulo(laser.pos,player.pos);
-                            laser.altura=player.pos.x;
                             laser.mov=0;
                             laser.time=0;
                         }
@@ -842,12 +1003,13 @@ int main()
                         laser.time++;
                         if(laser.time<15)
                         {
-                            for(i=laser.pos.y;i<RALTO;i+=10)
+                            for(i=0;i<1500;i+=10)
                             {
-                                if(laser.pos.x<player.pos.x)
-                                {
-                                    grados=270-laser.grados;
-                                    aux.x=laser.pos.x-tan(Radianes(grados))*i;
+
+                                if(player.pos.x<laser.pos.x)
+                                {   
+                                    grados=275+laser.grados;
+                                    aux.x=laser.pos.x+tan(Radianes(grados))*i;
                                     aux.y=laser.pos.y+i;
                                 }
                                 else
@@ -856,9 +1018,8 @@ int main()
                                     aux.x=laser.pos.x-tan(Radianes(grados))*i;
                                     aux.y=laser.pos.y+i;
                                 }
-
                                 if(player.vida.time>INVULERABILIDAD)
-                                {
+                                {   
                                     if(CheckPlayerColision(player.pos,aux))
                                     {
                                         if(player.vida.num<1)
@@ -872,7 +1033,7 @@ int main()
                                             player.vida.num--;
                                             player.vida.time=0;
                                         }
-                                        i=RALTO;
+                                        i=SUELO;
                                     }
                                 }
                             }
@@ -898,6 +1059,106 @@ int main()
                     laser.pos.y=camara.target.y-537;
                     laser.time=0;
                     laser.atkC=0;
+                }
+            }
+
+            //** DROPS ************************************************************************************************************************
+            for(i=0;i<MAXDROPVIDA;i++)
+            {
+                if(dropVida[i].status)
+                {
+                    //tiempo
+                    dropVida[i].time++;
+                    //eliminacion
+                    if(dropVida[i].time>DESPAWNTIME)
+                    {
+                        dropVida[i].status=0;
+                        dropVida[i].time=0;
+                    }
+
+                    //curacion
+                    if(CheckPlayerColision(player.pos,dropVida[i].pos))
+                    {
+                        player.vida.num++;
+                        dropVida[i].status=0;
+                        dropVida[i].time=0;
+                    }
+                    else
+                    {
+                        //movimiento
+                        if(dropVida[i].pos.y<SUELO-dropVida[i].pos.height)
+                        {
+                            dropVida[i].pos.y+=2;
+                        }
+                        else
+                        {
+                            dropVida[i].pos.y=SUELO-dropVida[i].pos.height;
+                        }
+                    }
+                }
+            }
+
+            for(i=0;i<MAXDROPASPEED;i++)
+            {
+                if(dropASpeed[i].statusDraw)
+                {
+                    //tiempo
+                    dropASpeed[i].time++;
+                    //eliminacion
+                    if(!dropASpeed[i].statusFun)
+                    {
+                        if(dropASpeed[i].time>DESPAWNTIME)
+                        {
+                            dropASpeed[i].statusDraw=0;
+                            dropASpeed[i].statusFun=0;
+                            dropASpeed[i].time=0;
+                            
+                        }
+                        if(CheckPlayerColision(player.pos,dropASpeed[i].pos))
+                        {
+                            player.buff=1;
+                            dropASpeed[i].statusDraw=0;
+                            dropASpeed[i].statusFun=1;
+                            dropASpeed[i].time=0;
+                            dropASpeed[i].duracion=0;
+                        }
+                        else
+                        {
+                            //movimiento
+                            if(dropASpeed[i].pos.y<SUELO-dropASpeed[i].pos.height*3)
+                            {
+                                dropASpeed[i].pos.y+=1;
+                            }
+                            else
+                            {
+                                dropASpeed[i].pos.y=SUELO-dropASpeed[i].pos.height*3;
+                            }
+                        }
+                    }
+
+                    
+                  
+                }
+                else
+                {
+                    if(player.buff)
+                    {
+                        if(dropASpeed[i].statusFun)
+                        {
+                            if(dropASpeed[i].duracion<DURACIONBUFF)
+                            {
+                                dropASpeed[i].duracion++;
+                            }
+                            else
+                            {
+                                player.buff=0;
+                                dropASpeed[i].statusFun=0;
+                                dropASpeed[i].statusDraw=0;
+                                dropASpeed[i].time=0;
+                                dropASpeed[i].duracion=0;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -1024,20 +1285,26 @@ int main()
                 {
                     //** Eliminacion del proyectil *******************************************************************************
                     hit[i].time++;
-                    if(hit[i].time<15)
+                    if(hit[i].time<25)
                     {
-                        hit[i].pos.y=player.pos.y+player.pos.height/4;
-                        if(hit[i].direccion)
+                        hitb=1;
+                        if(hit[i].time>10)
                         {
-                            hit[i].pos.x=player.pos.x+player.pos.width/2;
-                        }
-                        else
-                        {
-                            hit[i].pos.x=player.pos.x+player.pos.width/2-RANCHO;
+                            hit[i].pos.y=player.pos.y-18;
+                            if(hit[i].direccion)
+                            {
+                                hit[i].pos.x=player.pos.x+player.pos.width*3+3;
+                            }
+                            else
+                            {
+                                hit[i].pos.x=player.pos.x-player.pos.width*3-hit[i].pos.width+17;
+                            }
+                            
                         }
                     }
                     else
                     {
+                        hitb=0;
                         hit[i].status=0;
                         hit[i].time=0;
                         hit[i].pos.x=1500;
@@ -1085,6 +1352,93 @@ int main()
             }
             
             //** intput ********************************************************************************************************************************
+            //hit
+            if(IsKeyPressed(KEY_X))
+            {
+                for(i=0;i<MAXHIT;i++)
+                {
+                    Direccioniugador(lookL,lookR,lookUp,lookDown,player);
+                    if(!player.buff) //** Meiora ******************************************************************************************************
+                    {
+                        if(player.AtkC>VATAQUE)
+                        {
+                            if(!hit[i].status)
+                            {
+                                hit[i].pos.y=player.pos.y+player.pos.height/4;
+                                Direccioniugador(lookL,lookR,lookL,lookDown,player);
+                                if(lookR)
+                                {
+                                    hit[i].direccion=1;
+                                    hit[i].pos.x=player.pos.x+player.pos.width/2;
+                                }
+                                else
+                                {
+                                    if(lookL)
+                                    {
+                                        hit[i].direccion=0;
+                                        hit[i].pos.x=player.pos.x+player.pos.width/2-RANCHO;
+                                    }
+                                }
+                                hit[i].status=1;
+                                hit[i].time=0;
+                                player.AtkC=0;
+                                i=MAXHIT;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(player.AtkC>VATAQUEBUFF)
+                        {
+                            if(!hit[i].status)
+                            {
+                                hit[i].pos.y=player.pos.y+player.pos.height/4;
+                                hit[i].pos.x=player.pos.x+player.pos.width/2;
+                                Direccioniugador(lookL,lookR,lookL,lookDown,player);
+                                if(lookR)
+                                {
+                                    hit[i].direccion=1;
+                                }
+                                else
+                                {
+                                    if(lookL)
+                                    {
+                                        hit[i].direccion=0;
+                                    }
+                                }
+                                hit[i].status=1;
+                                hit[i].time=0;
+                                player.AtkC=0;
+                                i=MAXHIT;
+                            }
+                        }
+                    }
+                }
+            }  
+            
+             //dash KEY C
+            if(player.pos.x<1250)
+            {
+                if(player.pos.x>plat[platc-1].pos.x-590)
+                {
+                    if(player.timeDash>80) 
+                    {
+                        if(!dash)
+                        {
+                            if(IsKeyPressed(KEY_C))
+                            {
+                                dash=1;
+                                player.timeDash=0;
+                                Reposo(time,player.v0,player.y0,player.pos.y);
+                                player.fall=0;
+                                player.jump=0;
+                                player.jumpjump=0;
+                            }
+                        }
+                    }
+                }
+            }
+
             if(!dash) //right left
             {
                 if(IsKeyDown(KEY_RIGHT))
@@ -1177,175 +1531,129 @@ int main()
                     }
                 }
             }
-
-            //hit
-            if(IsKeyPressed(KEY_X))
-            {
-                for(i=0;i<MAXHIT;i++)
-                {
-                    Direccioniugador(lookL,lookR,lookUp,lookDown,player);
-                    if(/*Buff*/1) //** Meiora ******************************************************************************************************
-                    {
-                        if(player.AtkC>VATAQUE)
-                        {
-                            if(!hit[i].status)
-                            {
-                                PlaySound(las);
-                                hit[i].pos.y=player.pos.y+player.pos.height/4;
-                                Direccioniugador(lookL,lookR,lookL,lookDown,player);
-                                if(lookR)
-                                {
-                                    hit[i].direccion=1;
-                                    hit[i].pos.x=player.pos.x+player.pos.width/2;
-                                }
-                                else
-                                {
-                                    if(lookL)
-                                    {
-                                        hit[i].direccion=0;
-                                        hit[i].pos.x=player.pos.x+player.pos.width/2-RANCHO;
-                                    }
-                                }
-                                hit[i].status=1;
-                                hit[i].time=0;
-                                player.AtkC=0;
-                                i=MAXHIT;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(player.AtkC>VATAQUEBUFF)
-                        {
-                            if(!hit[i].status)
-                            {
-                                hit[i].pos.y=player.pos.y+player.pos.height/4;
-                                hit[i].pos.x=player.pos.x+player.pos.width/2;
-                                Direccioniugador(lookL,lookR,lookL,lookDown,player);
-                                if(lookR)
-                                {
-                                    hit[i].direccion=1;
-                                }
-                                else
-                                {
-                                    if(lookL)
-                                    {
-                                        hit[i].direccion=0;
-                                    }
-                                }
-                                hit[i].status=1;
-                                hit[i].time=0;
-                                player.AtkC=0;
-                                i=MAXHIT;
-                            }
-                        }
-                    }
-                }
-            }  
-
-            //dash KEY C
-            if(player.pos.x<1250)
-            {
-                if(player.pos.x>plat[platc-1].pos.x-590)
-                {
-                    if(player.timeDash>80) 
-                    {
-                        if(!dash)
-                        {
-                            if(IsKeyPressed(KEY_C))
-                            {
-                                dash=1;
-                                player.timeDash=0;
-                                Reposo(time,player.v0,player.y0,player.pos.y);
-                                player.fall=0;
-                                player.jump=0;
-                                player.jumpjump=0;
-                            }
-                        }
-                    }
-                }
-            }
         }
-
-        BeginDrawing();
-            BeginMode2D(camara);
             ClearBackground(BLANK);
             DrawTexture(fondo,0,-1300,WHITE);
-            org.x=0;
-            org.y=0;
+            org.x=laser.pos.x+laser.pos.width/2;
+            org.y=laser.pos.y+laser.pos.height/2;
+            org1.x=0;
+            org1.y=0;
             //jugador
-            DrawRectangleRec(player.pos,BLUE);  
-            if (player.fall)
+            //jetpack
+            DrawRectangleRec(player.pos,BLUE);
+            Direccioniugador(lookL,lookR,lookUp,lookDown,player);
+            if(lookR)
             {
-                framesSalto++;
-                if (framesSalto >= (60 / framesSpeed))
-                {
-                    framesSalto = 0;
-                    currentSalto++;
-
-                    if (currentSalto > 3)
-                        currentSalto = 0;
-                    frameSalto.x = (float)currentSalto * (float)salto.width / 4;
-                    frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
-                }
-                if (lookL)
-                {
-                    DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 50}, WHITE);
-                }
-                if (lookR)
-                {
-                    DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
-                }
+                DrawTexture(jet[1],player.pos.x-45,player.pos.y-10,WHITE);
             }
             else
             {
-                if (IsKeyDown(KEY_RIGHT))
+                if(lookL)
                 {
-                    framesPersonaje++;
-                    framesSalto = 0;
-                    if (framesPersonaje >= (60 / framesSpeed))
-                    {
-                        framesPersonaje = 0;
-                        currentPersonaje++;
-
-                        if (currentPersonaje > 5)
-                            currentPersonaje = 0;
-                        framesCaminar.x = (float)currentPersonaje * (float)caminar.width / 6;
-                    }
-                    DrawTextureRec(caminar, framesCaminar, Vector2{player.pos.x-40, player.pos.y - 75}, WHITE);
-                }
-                else if (IsKeyDown(KEY_LEFT))
-                {
-                    framesPersonaje++;
-                    if (framesPersonaje >= (60 / framesSpeed))
-                    {
-                        framesPersonaje = 0;
-                        currentPersonaje++;
-
-                        if (currentPersonaje > 5)
-                            currentPersonaje = 0;
-                        framesCaminarizq.x = (float)currentPersonaje * (float)caminarizq.width / 6;
-                    }
-                    DrawTextureRec(caminarizq, framesCaminarizq, Vector2{player.pos.x - 80, player.pos.y - 75}, WHITE);
+                    DrawTexture(jet[0],player.pos.x+player.pos.width-10,player.pos.y-10,WHITE);
                 }
                 else
                 {
-                    framesPersonaje = 0;
+                    DrawTexture(jet[1],player.pos.x-45,player.pos.y-10,WHITE);
+                }
+            }
+            if(!hitb)
+            {
+                if (player.fall)
+                {
+                    framesSalto++;
+                    if (framesSalto >= (60 / framesSpeed))
+                    {
+                        framesSalto = 0;
+                        currentSalto++;
+
+                        if (currentSalto > 3)
+                            currentSalto = 0;
+                        frameSalto.x = (float)currentSalto * (float)salto.width / 4;
+                        frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
+                    }
                     if (lookL)
                     {
-                        DrawTextureRec(reposoizq, framesReposoizq, Vector2{player.pos.x - 85, player.pos.y - 75}, WHITE);
+                        DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 50}, WHITE);
                     }
-                    if (lookR)
+                    else
                     {
-                        DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 30, player.pos.y - 75}, WHITE);
+                        if (lookR)
+                        {
+                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
+                        }
+                        else
+                        {
+                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
+                        }
+                    }
+                }
+                else
+                {
+                    if (IsKeyDown(KEY_RIGHT))
+                    {
+                        framesPersonaje++;
+                        framesSalto = 0;
+                        if (framesPersonaje >= (60 / framesSpeed))
+                        {
+                            framesPersonaje = 0;
+                            currentPersonaje++;
+
+                            if (currentPersonaje > 5)
+                                currentPersonaje = 0;
+                            framesCaminar.x = (float)currentPersonaje * (float)caminar.width / 6;
+                        }
+                        DrawTextureRec(caminar, framesCaminar, Vector2{player.pos.x-40, player.pos.y - 75}, WHITE);
+                    }
+                    else if (IsKeyDown(KEY_LEFT))
+                    {
+                        framesPersonaje++;
+                        if (framesPersonaje >= (60 / framesSpeed))
+                        {
+                            framesPersonaje = 0;
+                            currentPersonaje++;
+
+                            if (currentPersonaje > 5)
+                                currentPersonaje = 0;
+                            framesCaminarizq.x = (float)currentPersonaje * (float)caminarizq.width / 6;
+                        }
+                        DrawTextureRec(caminarizq, framesCaminarizq, Vector2{player.pos.x - 80, player.pos.y - 75}, WHITE);
+                    }
+                    else
+                    {
+                        framesPersonaje = 0;
+                        if (lookL)
+                        {
+                            DrawTextureRec(reposoizq, framesReposoizq, Vector2{player.pos.x - 85, player.pos.y - 75}, WHITE);
+                        }
+                        else
+                        {
+                            if (lookR)
+                            {
+                                DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 30, player.pos.y - 75}, WHITE);
+                            }
+                            else
+                            {
+                                DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 30, player.pos.y - 75}, WHITE);
+                            }
+                        }
                     }
                 }
             }
-                
+            
             //suelo
             DrawTexture(suelo,0,SUELO-4,WHITE);
             //printf("\n centro jux = %f centro laser = %f\n",player.pos.x+player.pos.width/2,laser.pos.x+laser.pos.width/2);
             //laser
+
+            if(laser.time>1)
+            {
+                if(laser.time<15)
+                {
+                    DrawTextureEx(laserRed[1], org,360-laser.grados,1,WHITE);;
+                }
+            }
+
             if(laser.atkC>240)
             {
                 if(laser.atkC<360)
@@ -1360,15 +1668,6 @@ int main()
             else
             {
                 DrawTexture(laserM,laser.pos.x,laser.pos.y,WHITE);
-            }
-
-            if(laser.time>1)
-            {
-                if(laser.time<15)
-                {
-                    
-                    DrawRectanglePro(laser.hit,org,360-laser.grados,RED);
-                }
             }
 
             //vida
@@ -1561,7 +1860,69 @@ int main()
             {
                 if(hit[i].status)
                 {
-                    DrawRectangleRec(hit[i].pos,RED);
+                   
+                    if(lookR)
+                    {
+                        if(hit[i].time<5)
+                        {
+                            DrawTexture(hitR[0],player.pos.x-15,player.pos.y-35,WHITE);
+                        }
+                        else
+                        {
+                            if(hit[i].time<10)
+                            {
+                                DrawTexture(hitR[1],player.pos.x-25,player.pos.y-35,WHITE);
+                            }
+                            else
+                            {
+                                PlaySound(las);
+                                DrawTexture(laserRed[1],hit[i].pos.x,hit[i].pos.y-10,WHITE);
+                                DrawTexture(hitR[2],player.pos.x-35,player.pos.y-35,WHITE);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(lookL)
+                        {
+                            if(hit[i].time<5)
+                            {
+                                DrawTexture(hitL[0],player.pos.x-45,player.pos.y-35,WHITE);
+                            }
+                            else
+                            {
+                                if(hit[i].time<10)
+                                {
+                                    DrawTexture(hitL[1],player.pos.x-55,player.pos.y-35,WHITE);
+                                }
+                                else
+                                {
+                                    PlaySound(las);
+                                    DrawTexture(laserRed[0],hit[i].pos.x+190,hit[i].pos.y-10,YELLOW);
+                                    DrawTexture(hitL[2],player.pos.x-60,player.pos.y-35,WHITE);
+                                }
+                            }
+                        }
+                    }
+                }
+                    
+            }
+            //DROPS
+            for(i=0;i<MAXDROPVIDA;i++)
+            {
+                if(dropVida[i].status)
+                {
+                    DrawTexture(corazon,dropVida[i].pos.x,dropVida[i].pos.y,WHITE);
+                }
+            }
+            for(i=0;i<MAXDROPASPEED;i++)
+            {
+                if(dropASpeed[i].statusDraw)
+                {
+                    if(!dropASpeed[i].statusFun)
+                    {
+                        DrawTexture(Aspeed,dropASpeed[i].pos.x,dropASpeed[i].pos.y,WHITE);
+                    }
                 }
             }
             EndMode2D();
@@ -1577,6 +1938,8 @@ int main()
     {
         UnloadTexture(nave[i]);
     }
+    UnloadTexture(jet[0]);
+    UnloadTexture(jet[1]);
     UnloadTexture(morado);
     UnloadTexture(bala);    
     CloseWindow();
@@ -1819,6 +2182,20 @@ void Direccioniugador(int &L,int &R,int &Up,int &Down,Tplayer player)
                 Up=1;
                 Down=0;
                 L=0;
+                if(player.x0<=player.pos.x)
+                {
+                    R=1;
+                    Up=0;
+                    Down=0;
+                    L=0;
+                }
+                else
+                {
+                    R=0;
+                    Up=0;
+                    Down=0;
+                    L=1;
+                }
             }
             else
             {
@@ -1828,6 +2205,20 @@ void Direccioniugador(int &L,int &R,int &Up,int &Down,Tplayer player)
                     Up=0;
                     Down=1;
                     L=0;
+                    if(player.x0<=player.pos.x)
+                    {
+                        R=1;
+                        Up=0;
+                        Down=0;
+                        L=0;
+                    }
+                    else
+                    {
+                        R=0;
+                        Up=0;
+                        Down=0;
+                        L=1;
+                    }
                 }
                 else
                 {
@@ -1913,7 +2304,7 @@ void InicializaProyectil(int L,int R,int Up,int Down,Tplayer player,Thit &hit)
 float CalculaAngulo(Trec enemigo,Trec player)
 {
     float difx=fabs(player.x+player.width/2-(enemigo.x+enemigo.width/2));
-    float dify=fabs(player.y+player.width/2-(enemigo.y+enemigo.height/2));
+    float dify=fabs(player.y+player.height/2-(enemigo.y+enemigo.height/2));
     float a=atan2(difx,dify);
     a=a*180/M_PI;
     if(player.x>enemigo.x)
@@ -1950,6 +2341,7 @@ void muerteLvl3(Tplayer &player,Ttow torre[],Tovni ovni[],Tpart pieza[],Tplat pl
     player.v0=0;
     player.timeDash=70;
     player.vida.num=MAXVIDA;
+    player.vida.time=0;
     LimpiaEnemigosLvl3(torre,ovni);
     for(j=0;j<3;j++)
     {

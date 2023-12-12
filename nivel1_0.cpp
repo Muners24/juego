@@ -236,7 +236,7 @@ int main()
     }
 
     Ttortu tort[MAXTORTUGA];
-    for(i=0;i<MAXSHARK;i++)
+    for(i=0;i<MAXTORTUGA;i++)
     {
         tort[i].status=0;
         tort[i].right=0;
@@ -569,6 +569,7 @@ int main()
             {
                 //comportameinto
                 if(tort[i].status)
+                
                 {           
                     //movimiento enemigo **si sale de la pantalla se elimina**
                     if(tort[i].right)

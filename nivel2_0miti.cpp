@@ -14,6 +14,12 @@
 #define MAXVIDA 4
 #define INVULERABILIDAD 120
 
+
+//DROPS
+#define MAXDROPVIDA 10
+#define DESPAWNTIME 600
+
+
 #define G 0.1
 #define GD 0.2
 
@@ -335,6 +341,8 @@ int main()
     camara.offset.y = CAMY;
     camara.rotation = 0;
     camara.zoom = 1;
+
+  
 
     float posicion = player.pos.x;
 
