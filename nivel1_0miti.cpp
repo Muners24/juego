@@ -160,12 +160,12 @@ typedef struct _corazon
 
 void Direccioniugador(int &l, int &r, int &up, int &down, Tplayer player);
 void InicializaProyectil(int l, int r, int up, int down, Tplayer player, Thit &hit);
-void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v);
-float Radianes(float grados);
-void PosicionObieto(float vx, float vy, Trec &pos);
+void CalculaComponentesVelocidad3(float velocidad, float grados, Tvel &v);
+float Radianes3(float grados);
+void PosicionObieto3(float vx, float vy, Trec &pos);
 int CheckMobColision(Trec mob, Thit hit);
 int CheckPlayerColision(Trec player, Trec mob);
-void LimpiaEnemigosLvl1(/*Tave ave[],Tcar car[]*/ Tshark shark[], Ttortu tort[], Tangui ang[]);
+void LimpiaEnemigosLvl1(Tshark shark[], Ttortu tort[], Tangui ang[]);
 float CalculaAnguloAnguila(Trec ang, Trec player);
 void AngElectro(Tangui &ang);
 void muerteLvl1(Tplayer &player, Tshark shark[], Ttortu tort[], Tangui ang[], Tpart pieza[], Trec plat[]);
@@ -173,7 +173,7 @@ void cinemaPuzleNivel1(void);
 
 int main()
 {
-    float VDDIAGONAL = VD * sin(45) / sin(90);
+    float VDDIAGONAL = VD1 * sin(45) / sin(90);
     SetTargetFPS(60);
     InitWindow(RANCHO, RALTO, "iuego");
     srand(time(NULL));
@@ -731,7 +731,7 @@ int main()
                             }
                             else
                             {
-                                PosicionObieto(shark[i].v.vx, shark[i].v.vy, shark[i].pos);
+                                PosicionObieto3(shark[i].v.vx, shark[i].v.vy, shark[i].pos);
                             }
                         }
 
@@ -757,7 +757,7 @@ int main()
                                 }
                                 else
                                 {
-                                    PosicionObieto(shark[i].v.vx, shark[i].v.vy, shark[i].pos);
+                                    PosicionObieto3(shark[i].v.vx, shark[i].v.vy, shark[i].pos);
                                 }
                             }
                             // eliminacion
@@ -851,7 +851,7 @@ int main()
                         if (shark[i].right)
                         {
                             shark[i].status = 1;
-                            CalculaComponentesVelocidad(SHARKSPEED, float(random + 165), shark[i].v);
+                            CalculaComponentesVelocidad3(SHARKSPEED, float(random + 165), shark[i].v);
                             shark[i].pos.x = RANCHO;
                             shark[i].pos.y = (rand() % 550) + 50;
                             shark[i].left = 0;
@@ -859,7 +859,7 @@ int main()
                         else
                         {
                             shark[i].status = 1;
-                            CalculaComponentesVelocidad(SHARKSPEED, float(random + 345), shark[i].v);
+                            CalculaComponentesVelocidad3(SHARKSPEED, float(random + 345), shark[i].v);
                             shark[i].pos.x = 0 - shark[i].pos.width;
                             shark[i].pos.y = (rand() % 550) + 50;
                             shark[i].left = 1;
@@ -1011,7 +1011,7 @@ int main()
                             }
                             else
                             {
-                                PosicionObieto(ang[i].v.vx, ang[i].v.vy, ang[i].pos);
+                                PosicionObieto3(ang[i].v.vx, ang[i].v.vy, ang[i].pos);
                             }
                         }
 
@@ -1101,7 +1101,7 @@ int main()
                                 }
                                 else
                                 {
-                                    PosicionObieto(ang[i].v.vx, ang[i].v.vy, ang[i].pos);
+                                    PosicionObieto3(ang[i].v.vx, ang[i].v.vy, ang[i].pos);
                                 }
                             }
                             // eliminacion
@@ -1198,7 +1198,7 @@ int main()
                             ang[i].status = 1;
                             ang[i].pos.x = RANCHO;
                             ang[i].pos.y = (rand() % 550) + 60;
-                            CalculaComponentesVelocidad(ANGUILASPEED, CalculaAnguloAnguila(ang[i].pos, player.pos), ang[i].v);
+                            CalculaComponentesVelocidad3(ANGUILASPEED, CalculaAnguloAnguila(ang[i].pos, player.pos), ang[i].v);
                             ang[i].left = 0;
                         }
                         else
@@ -1206,7 +1206,7 @@ int main()
                             ang[i].status = 1;
                             ang[i].pos.x = 0 - ang[i].pos.width;
                             ang[i].pos.y = (rand() % 550) + 60;
-                            CalculaComponentesVelocidad(ANGUILASPEED, CalculaAnguloAnguila(ang[i].pos, player.pos), ang[i].v);
+                            CalculaComponentesVelocidad3(ANGUILASPEED, CalculaAnguloAnguila(ang[i].pos, player.pos), ang[i].v);
                             ang[i].left = 1;
                         }
                     }
@@ -1234,7 +1234,7 @@ int main()
                             }
                             else
                             {
-                                player.pos.x += VD;
+                                player.pos.x += VD1;
                             }
                         }
                     }
@@ -1256,7 +1256,7 @@ int main()
                                 }
                                 else
                                 {
-                                    player.pos.x -= VD;
+                                    player.pos.x -= VD1;
                                 }
                             }
                         }
@@ -1264,13 +1264,13 @@ int main()
                         {
                             if (lookUp)
                             {
-                                player.pos.y -= VD;
+                                player.pos.y -= VD1;
                             }
                             else
                             {
                                 if (lookDown)
                                 {
-                                    player.pos.y += VD;
+                                    player.pos.y += VD1;
                                 }
                             }
                         }
@@ -1290,7 +1290,7 @@ int main()
                 //** movimiento del disparo ***********************************************************************************
                 if (hit[i].status)
                 {
-                    PosicionObieto(hit[i].v.vx, hit[i].v.vy, hit[i].pos);
+                    PosicionObieto3(hit[i].v.vx, hit[i].v.vy, hit[i].pos);
 
                     //** Eliminacion del proyectil *******************************************************************************
                     // si se paso del borde izquierdo
@@ -1327,7 +1327,7 @@ int main()
                 if (IsKeyDown(KEY_RIGHT))
                 {
                     player.x0 = player.pos.x;
-                    player.pos.x += VX;
+                    player.pos.x += VX1;
                     lookR = 1;
                     lookL = 0;
                 }
@@ -1336,7 +1336,7 @@ int main()
                     if (IsKeyDown(KEY_LEFT))
                     {
                         player.x0 = player.pos.x;
-                        player.pos.x -= VX;
+                        player.pos.x -= VX1;
                         lookR = 1;
                         lookL = 0;
                     }
@@ -1347,13 +1347,13 @@ int main()
             {
                 if (IsKeyDown(KEY_UP))
                 {
-                    player.pos.y -= VY;
+                    player.pos.y -= VY3;
                 }
                 else
                 {
                     if (IsKeyDown(KEY_DOWN))
                     {
-                        player.pos.y += VY;
+                        player.pos.y += VY3;
                     }
                 }
             }
@@ -1389,7 +1389,7 @@ int main()
                                 player.AtkC = 0;
                                 PlaySound(disparo_nv1);
                                 InicializaProyectil(lookL, lookR, lookUp, lookDown, player, hit[i]);
-                                CalculaComponentesVelocidad(VPROYECTIL, 45 * hit[i].direccion, hit[i].v);
+                                CalculaComponentesVelocidad3(VPROYECTIL, 45 * hit[i].direccion, hit[i].v);
                                 disparo=1;
                                 // printf("Direccion = %d l = %d r = %d up = %d down = %d \n",hit[i].direccion,lookL,lookR,lookUp,lookDown);
                                 i = MAXHIT;
@@ -1407,7 +1407,7 @@ int main()
                                 disparo=1;
                                 PlaySound(disparo_nv1);
                                 InicializaProyectil(lookL, lookR, lookUp, lookDown, player, hit[i]);
-                                CalculaComponentesVelocidad(VPROYECTIL, 45 * hit[i].direccion, hit[i].v);
+                                CalculaComponentesVelocidad3(VPROYECTIL, 45 * hit[i].direccion, hit[i].v);
                                 // printf("Direccion = %d l = %d r = %d up = %d down = %d \n",hit[i].direccion,lookL,lookR,lookUp,lookDown);
                                 i = MAXHIT;
                             }
@@ -1870,14 +1870,14 @@ void InicializaProyectil(int L, int R, int Up, int Down, Tplayer player, Thit &h
     }
 }
 
-void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v)
+void CalculaComponentesVelocidad3(float velocidad, float grados, Tvel &v)
 {
     if (grados >= 360)
     {
         grados -= 360;
     }
 
-    v.vy = velocidad * sin(Radianes(grados));
+    v.vy = velocidad * sin(Radianes3(grados));
     v.vx = sqrt((pow(velocidad, 2) - pow(v.vy, 2)));
     if (grados <= 90)
     {
@@ -1905,12 +1905,12 @@ void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v)
     }
 }
 
-float Radianes(float grados)
+float Radianes3(float grados)
 {
     return (grados * M_PI / 180);
 }
 
-void PosicionObieto(float vx, float vy, Trec &pos)
+void PosicionObieto3(float vx, float vy, Trec &pos)
 {
     pos.x += vx;
     pos.y += vy;
@@ -1968,6 +1968,37 @@ void LimpiaEnemigosLvl1(Tshark shark[], Ttortu tort[], Tangui ang[])
         ang[i].status = 0;
         ang[i].hit.status = 0;
     }
+}
+
+float CalculaAnguloAnguila(Trec enemigo, Trec player)
+{
+    float difx = fabs(player.x + player.width / 2 - (enemigo.x + enemigo.width / 2));
+    float dify = fabs(player.y + player.height / 2 - (enemigo.y + enemigo.height / 2));
+    float a = atan2(difx, dify);
+    a = a * 180 / M_PI;
+    if (player.x > enemigo.x)
+    {
+        if (player.y > enemigo.y)
+        {
+            return (270 + a);
+        }
+        else
+        {
+            return (90 - a);
+        }
+    }
+    else
+    {
+        if (player.y > enemigo.y)
+        {
+            return (270 - a);
+        }
+        else
+        {
+            return (90 + a);
+        }
+    }
+    return 0;
 }
 
 float CalculaAnguloAnguila(Trec ang, Trec player)

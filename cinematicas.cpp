@@ -15,6 +15,8 @@ typedef Rectangle Trec;
 //blank transparente
 
 //typedef Rectangle Tplayer;
+//float CalculaResultadosY(int a,int b, int c,char op1,char op2);
+//float CalculaResultadosX(int a,int b,char op1);
 
 typedef struct _tabla
 {
@@ -27,22 +29,22 @@ typedef struct _tabla
     int elec;
 }Ttab;
 
-void cinemaPuzleNivel1(void);
-void cinemaPuzleNivel2(void);
-void cinemaPuzleNivel3(void);
-float CalculaResultadosY(int a,int b, int c,char op1,char op2);
-float CalculaResultadosX(int a,int b,char op1);
+void cinemaPuzleNivel1(int diflvl);
+void cinemaPuzleNivel2(int diflvl);
+void cinemaPuzleNivel3(int diflvl);
+
 
 int main()
 {
-    //cinemaPuzleNivel1();
-    cinemaPuzleNivel2();
-    cinemaPuzleNivel3();
+    int diflvl;
+    cinemaPuzleNivel1(1);
+    cinemaPuzleNivel2(1);
+    cinemaPuzleNivel3(1);
     return 0;
 }   
 
 
-void cinemaPuzleNivel1(void)
+void cinemaPuzleNivel1(int diflvl)
 {
     SetTargetFPS(60);  
     InitWindow(RANCHO,RALTO,"iuego");
@@ -195,28 +197,53 @@ void cinemaPuzleNivel1(void)
         */
         /**/
 
-    random=(rand()%5)+1;
-        
-    switch (random)
+    if(diflvl==1)
     {
-        case 1:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
-            break;
-        case 2:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
-            break;
-        case 3:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
-            break;
-        case 4:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
-            break;
-        case 5:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
-            break;
-    }
-
+        random=(rand()%5)+1;
         
+        switch (random)
+        {
+            case 1:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
+                break;
+            case 2:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
+                break;
+            case 3:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
+                break;
+            case 4:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
+                break;
+            case 5:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
+                break;
+        }
+    }
+    else
+    {
+        random=(rand()%5)+1;
+        
+        switch (random)
+        {
+            case 1:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_1.txt","r");
+                break;
+            case 2:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_2.txt","r");
+                break;
+            case 3:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_3.txt","r");
+                break;
+            case 4:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_4.txt","r");
+                break;
+            case 5:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_5.txt","r");
+                break;
+        }
+    }
+    
     if(fa)
     {    
         for(i=0;i<RENGLONES1;i++)
@@ -540,7 +567,7 @@ void cinemaPuzleNivel1(void)
     CloseWindow();
 }
 
-void cinemaPuzleNivel2(void)
+void cinemaPuzleNivel2(int diflvl)
 {
     SetTargetFPS(60);  
     InitWindow(RANCHO,RALTO,"iuego");
@@ -611,25 +638,51 @@ void cinemaPuzleNivel2(void)
     int ocultoC=0;
     int predictC=0;
 
-    random=(rand()%5)+1;
-        
-    switch (random)
+    if(diflvl==1)
     {
-        case 1:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
-            break;
-        case 2:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
-            break;
-        case 3:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
-            break;
-        case 4:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
-            break;
-        case 5:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
-            break;
+        random=(rand()%5)+1;
+        
+        switch (random)
+        {
+            case 1:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
+                break;
+            case 2:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
+                break;
+            case 3:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
+                break;
+            case 4:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
+                break;
+            case 5:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
+                break;
+        }
+    }
+    else
+    {
+        random=(rand()%5)+1;
+        
+        switch (random)
+        {
+            case 1:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_1.txt","r");
+                break;
+            case 2:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_2.txt","r");
+                break;
+            case 3:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_3.txt","r");
+                break;
+            case 4:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_4.txt","r");
+                break;
+            case 5:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_5.txt","r");
+                break;
+        }
     }
 
         
@@ -956,7 +1009,7 @@ void cinemaPuzleNivel2(void)
     CloseWindow();
 }
 
-void cinemaPuzleNivel3(void)
+void cinemaPuzleNivel3(int diflvl)
 {
     SetTargetFPS(60);  
     InitWindow(RANCHO,RALTO,"iuego");
@@ -1026,25 +1079,51 @@ void cinemaPuzleNivel3(void)
     int ocultoC=0;
     int predictC=0;
 
-    random=(rand()%5)+1;
-        
-    switch (random)
+    if(diflvl==1)
     {
-        case 1:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
-            break;
-        case 2:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
-            break;
-        case 3:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
-            break;
-        case 4:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
-            break;
-        case 5:
-            fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
-            break;
+        random=(rand()%5)+1;
+        
+        switch (random)
+        {
+            case 1:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
+                break;
+            case 2:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
+                break;
+            case 3:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
+                break;
+            case 4:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
+                break;
+            case 5:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
+                break;
+        }
+    }
+    else
+    {
+        random=(rand()%5)+1;
+        
+        switch (random)
+        {
+            case 1:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_1.txt","r");
+                break;
+            case 2:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_2.txt","r");
+                break;
+            case 3:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_3.txt","r");
+                break;
+            case 4:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_4.txt","r");
+                break;
+            case 5:
+                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_5.txt","r");
+                break;
+        }
     }
 
         
