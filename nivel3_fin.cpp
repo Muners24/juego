@@ -15,14 +15,14 @@
 #define MAXVIDA 4
 #define INVULERABILIDAD 120
 
-#define G3 0.1
-#define GD3 0.15
+#define G 0.1
+#define GD 0.15
 
-#define VX3 3
-#define VS3 -11
-#define VSJ3 -4
-#define VY3 -3
-#define VD3 6
+#define VX 3
+#define VS -11
+#define VSJ -4
+#define VY -3
+#define VD 6
 
 // DROPS
 #define MAXDROPVIDA 10
@@ -41,11 +41,11 @@
 #define OVNILONG 150
 #define OVNIAMP 15
 
-#define MAXPLAT3 4
-#define MAXHIT3 5
-#define VATAQUE3 60
-#define VATAQUEBUFF3 30
-#define VPROYECTIL3 10.0
+#define MAXPLAT 4
+#define MAXHIT 5
+#define VATAQUE 60
+#define VATAQUEBUFF 30
+#define VPROYECTIL 10.0
 
 // blank transparente
 
@@ -104,7 +104,7 @@ typedef struct _jugador
     int AtkC;
     int buff = 0;
     Tvida vida;
-} Tplayer3;
+} Tplayer;
 
 typedef struct _tower
 {
@@ -151,24 +151,27 @@ typedef struct _corazon
     int time;
 } Tcora;
 
-float velocidad3(float v0, float time);
-int ColisionPlat3(Tplayer3 player, Tplat plat);
-int Reposo3(float &time, float &v0, int &y0, int y);
+float velocidad(float v0, float time);
+int ColisionPlat(Tplayer player, Tplat plat);
+// devuelve 0
+int Reposo(float &time, float &v0, int &y0, int y);
 
-int Salto1(float &time, float &v0, int &y0, int y);
+int Salto(float &time, float &v0, int &y0, int y);
 
-int Posicion3(int y0, float v0, float time, int g);
+// y0+v0*time+GD*time*time;
+int Posicion(int y0, float v0, float time, int g);
 int CheckMobColision(Trec mob, Trec hit);
 int CheckPlayerColision(Trec player, Trec mob);
+// int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
 void LimpiaEnemigosLvl3(Ttow torre[], Tovni ovni[]);
 int JetPack(float &time, float &v0, int &y0, int y, int bdown);
-void InicializaProyectil3(int L, int R, int Up, int Down, Tplayer3 player, Thit &hit);
-void CalculaComponentesVelocidad3(float velocidad3, float grados, Tvel &v);
-float Radianes3(float grados);
-void PosicionObieto3(float vx, float vy, Trec &pos);
-void Direccioniugador3(int &L, int &R, int &Up, int &Down, Tplayer3 player);
-float CalculaAngulo3(Trec ang, Trec player);
-void muerteLvl3(Tplayer3 &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[]);
+void InicializaProyectil(int L, int R, int Up, int Down, Tplayer player, Thit &hit);
+void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v);
+float Radianes(float grados);
+void PosicionObieto(float vx, float vy, Trec &pos);
+void Direccioniugador(int &L, int &R, int &Up, int &Down, Tplayer player);
+float CalculaAngulo(Trec ang, Trec player);
+void muerteLvl3(Tplayer &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[]);
 void cinemaPuzleNivel3(void);
 
 int main()
@@ -210,8 +213,8 @@ int main()
 
     // Inicializacion ***************************************************************************************
     // Inicializacion Plataformas
-    Tplat plat[MAXPLAT3];
-    for (i = 0; i < MAXPLAT3; i++)
+    Tplat plat[MAXPLAT];
+    for (i = 0; i < MAXPLAT; i++)
     {
         plat[i].pos.height = 30;
         plat[i].pos.width = 322;
@@ -243,10 +246,10 @@ int main()
     int piezac = 0;
     int hitb = 0;
     // Inicializa la posicion
-    Tplayer3 player;
+    Tplayer player;
     player.pos.height = ALTOP + 10;
     player.pos.width = 25;
-    player.pos.x = CAMX - player.pos.width; // Posicion3 incial
+    player.pos.x = CAMX - player.pos.width; // Posicion incial
     player.pos.y = SUELO;                   //""
     player.y0 = player.pos.y;
     player.v0 = 0;
@@ -306,8 +309,8 @@ int main()
     laser.hit.height = 10;
     laser.hit.width = 3000;
 
-    Thit hit[MAXHIT3];
-    for (i = 0; i < MAXHIT3; i++)
+    Thit hit[MAXHIT];
+    for (i = 0; i < MAXHIT; i++)
     {
         hit[i].status = 0;
         hit[i].pos.width = RANCHO;
@@ -644,8 +647,8 @@ int main()
                                 {
                                     torre[i].hit[j].pos.x = torre[i].pos.x;
                                     torre[i].hit[j].pos.y = torre[i].pos.y;
-                                    grados = CalculaAngulo3(torre[i].hit[j].pos, player.pos);
-                                    CalculaComponentesVelocidad3(TORREVPROYECTIL, grados, torre[i].hit[j].v);
+                                    grados = CalculaAngulo(torre[i].hit[j].pos, player.pos);
+                                    CalculaComponentesVelocidad(TORREVPROYECTIL, grados, torre[i].hit[j].v);
                                     torre[i].atkC = 0;
                                     torre[i].hit[j].status = 1;
                                     j = MAXHITTORRE;
@@ -654,8 +657,8 @@ int main()
                                 {
                                     torre[i].hit[j].pos.x = torre[i].pos.x + torre[i].pos.width;
                                     torre[i].hit[j].pos.y = torre[i].pos.y;
-                                    grados = CalculaAngulo3(torre[i].hit[j].pos, player.pos);
-                                    CalculaComponentesVelocidad3(TORREVPROYECTIL, grados, torre[i].hit[j].v);
+                                    grados = CalculaAngulo(torre[i].hit[j].pos, player.pos);
+                                    CalculaComponentesVelocidad(TORREVPROYECTIL, grados, torre[i].hit[j].v);
                                     torre[i].atkC = 0;
                                     torre[i].hit[j].status = 1;
                                     j = MAXHITTORRE;
@@ -667,7 +670,7 @@ int main()
                             //** ataaque ** movimiento
                             if (torre[i].hit[j].status)
                             {
-                                PosicionObieto3(torre[i].hit[j].v.vx, torre[i].hit[j].v.vy, torre[i].hit[j].pos);
+                                PosicionObieto(torre[i].hit[j].v.vx, torre[i].hit[j].v.vy, torre[i].hit[j].pos);
 
                                 // si se paso del borde izquierdo
                                 if (torre[i].hit[j].pos.x < 0 - torre[i].hit[j].pos.width)
@@ -708,7 +711,7 @@ int main()
                     }
 
                     // Colision con golpe (enemigo)
-                    for (j = 0; j < MAXHIT3; j++)
+                    for (j = 0; j < MAXHIT; j++)
                     {
                         if (hit[j].status)
                         {
@@ -841,7 +844,7 @@ int main()
                     }
 
                     // Colision con golpe
-                    for (j = 0; j < MAXHIT3; j++)
+                    for (j = 0; j < MAXHIT; j++)
                     {
                         if (hit[j].status)
                         {
@@ -981,7 +984,7 @@ int main()
                         {
                             laser.hit.x = laser.pos.x + laser.pos.width / 2;
                             laser.hit.y = laser.pos.y + laser.pos.height / 2;
-                            laser.grados = CalculaAngulo3(laser.pos, player.pos);
+                            laser.grados = CalculaAngulo(laser.pos, player.pos);
                             laser.mov = 0;
                             laser.time = 0;
                         }
@@ -997,13 +1000,13 @@ int main()
                                 if (player.pos.x < laser.pos.x)
                                 {
                                     grados = 275 + laser.grados;
-                                    aux.x = laser.pos.x + tan(Radianes3(grados)) * i;
+                                    aux.x = laser.pos.x + tan(Radianes(grados)) * i;
                                     aux.y = laser.pos.y + i;
                                 }
                                 else
                                 {
                                     grados = 270 - laser.grados;
-                                    aux.x = laser.pos.x - tan(Radianes3(grados)) * i;
+                                    aux.x = laser.pos.x - tan(Radianes(grados)) * i;
                                     aux.y = laser.pos.y + i;
                                 }
                                 if (player.vida.time > INVULERABILIDAD)
@@ -1151,30 +1154,30 @@ int main()
                 player.jetc++;
                 if (bdown)
                 {
-                    if (velocidad3(player.v0, time) > 0)
+                    if (velocidad(player.v0, time) > 0)
                     {
                         if (++c == 1)
                         {
-                            player.v0 = velocidad3(player.v0, time); // velocidad inicial igual a velocidad actual
+                            player.v0 = velocidad(player.v0, time); // velocidad inicial igual a velocidad actual
                             player.y0 = player.pos.y;
                             time = 1;
                         }
                     }
                     else
                     {
-                        Reposo3(time, player.v0, player.y0, player.pos.y);
+                        Reposo(time, player.v0, player.y0, player.pos.y);
                     }
 
                     // jetpack *******************
                     if (!player.jet) // si no esta usando el jetpack calcula caida
                     {
-                        player.pos.y = Posicion3(player.y0, player.v0, time, bdown); // y=y0+v0*t+G*t^2  caida acelerada
+                        player.pos.y = Posicion(player.y0, player.v0, time, bdown); // y=y0+v0*t+G*t^2  caida acelerada
                     }
                     else
                     {
                         player.jet = JetPack(time, player.v0, player.y0, player.pos.y, bdown); // inicializa un minisalto cuando se suelte abajo
                                                                                                // hace mas comodo el uso del jetpack
-                        player.pos.y += VY3;                                                    // sube con velocidad constante
+                        player.pos.y += VY;                                                    // sube con velocidad constante
                         bdown = 0;
                     }
                 }
@@ -1184,13 +1187,13 @@ int main()
                     // jetpack***********
                     if (!player.jet) // si no esta usando el jetpack calcula caida
                     {
-                        player.pos.y = Posicion3(player.y0, player.v0, time, bdown); // y=y0+v0*t+G*t^2   //calcula caida
+                        player.pos.y = Posicion(player.y0, player.v0, time, bdown); // y=y0+v0*t+G*t^2   //calcula caida
                     }
                     else
                     {
                         player.jet = JetPack(time, player.v0, player.y0, player.pos.y, bdown); // inicializa un minisalto cuando se suelte abajo
                                                                                                // hace mas comodo el uso del jetpack
-                        player.pos.y += VY3;
+                        player.pos.y += VY;
                     }
                 }
             }
@@ -1201,7 +1204,7 @@ int main()
             if (player.pos.y + player.pos.height > SUELO)
             {
                 player.pos.y = SUELO - player.pos.height;
-                Reposo3(time, player.v0, player.y0, player.pos.y);
+                Reposo(time, player.v0, player.y0, player.pos.y);
                 player.fall = 0;
                 bsuelo = 1;
                 player.jump = 1;
@@ -1213,16 +1216,16 @@ int main()
             if (igncolision > 35)
             {
                 // plataforma cuando cae
-                if (velocidad3(player.v0, time) > 0)
+                if (velocidad(player.v0, time) > 0)
                 {
-                    for (j = 0; j < MAXPLAT3; j++)
+                    for (j = 0; j < MAXPLAT; j++)
                     {
                         if (plat[j].status)
                         {
-                            if (ColisionPlat3(player, plat[j]))
+                            if (ColisionPlat(player, plat[j]))
                             {
                                 player.pos.y = plat[j].pos.y - player.pos.height;
-                                Reposo3(time, player.v0, player.y0, player.pos.y);
+                                Reposo(time, player.v0, player.y0, player.pos.y);
                                 player.fall = 0;
                                 plat[j].flag = 1;
                                 player.jump = 1;
@@ -1236,15 +1239,15 @@ int main()
             }
 
             // si salio de la paltaforma
-            for (j = 0; j < MAXPLAT3; j++)
+            for (j = 0; j < MAXPLAT; j++)
             {
                 if (plat[j].status)
                 {
                     if (plat[j].flag)
                     {
-                        if (!ColisionPlat3(player, plat[j]))
+                        if (!ColisionPlat(player, plat[j]))
                         {
-                            Reposo3(time, player.v0, player.y0, player.pos.y);
+                            Reposo(time, player.v0, player.y0, player.pos.y);
                             player.fall = 1;
                             plat[j].flag = 0;
                             player.jump = 0;
@@ -1257,7 +1260,7 @@ int main()
             }
 
             //** golpe ********************************************************************************************************************************
-            for (i = 0; i < MAXHIT3; i++)
+            for (i = 0; i < MAXHIT; i++)
             {
                 //** movimiento del disparo ***********************************************************************************
                 if (hit[i].status)
@@ -1298,13 +1301,13 @@ int main()
                 {
                     if (lookR)
                     {
-                        player.pos.x += VD3;
+                        player.pos.x += VD;
                     }
                     else
                     {
                         if (lookL)
                         {
-                            player.pos.x -= VD3;
+                            player.pos.x -= VD;
                         }
                     }
                 }
@@ -1312,7 +1315,7 @@ int main()
                 {
                     player.jump == 0;
                     player.fall = 1;
-                    dash = Reposo3(time, player.v0, player.y0, player.pos.y);
+                    dash = Reposo(time, player.v0, player.y0, player.pos.y);
                 }
             }
 
@@ -1332,17 +1335,17 @@ int main()
             // hit
             if (IsKeyPressed(KEY_X))
             {
-                for (i = 0; i < MAXHIT3; i++)
+                for (i = 0; i < MAXHIT; i++)
                 {
-                    Direccioniugador3(lookL, lookR, lookUp, lookDown, player);
+                    Direccioniugador(lookL, lookR, lookUp, lookDown, player);
                     if (!player.buff) //** Meiora ******************************************************************************************************
                     {
-                        if (player.AtkC > VATAQUE3)
+                        if (player.AtkC > VATAQUE)
                         {
                             if (!hit[i].status)
                             {
                                 hit[i].pos.y = player.pos.y + player.pos.height / 4;
-                                Direccioniugador3(lookL, lookR, lookL, lookDown, player);
+                                Direccioniugador(lookL, lookR, lookL, lookDown, player);
                                 if (lookR)
                                 {
                                     hit[i].direccion = 1;
@@ -1359,19 +1362,19 @@ int main()
                                 hit[i].status = 1;
                                 hit[i].time = 0;
                                 player.AtkC = 0;
-                                i = MAXHIT3;
+                                i = MAXHIT;
                             }
                         }
                     }
                     else
                     {
-                        if (player.AtkC > VATAQUEBUFF3)
+                        if (player.AtkC > VATAQUEBUFF)
                         {
                             if (!hit[i].status)
                             {
                                 hit[i].pos.y = player.pos.y + player.pos.height / 4;
                                 hit[i].pos.x = player.pos.x + player.pos.width / 2;
-                                Direccioniugador3(lookL, lookR, lookL, lookDown, player);
+                                Direccioniugador(lookL, lookR, lookL, lookDown, player);
                                 if (lookR)
                                 {
                                     hit[i].direccion = 1;
@@ -1386,7 +1389,7 @@ int main()
                                 hit[i].status = 1;
                                 hit[i].time = 0;
                                 player.AtkC = 0;
-                                i = MAXHIT3;
+                                i = MAXHIT;
                             }
                         }
                     }
@@ -1407,7 +1410,7 @@ int main()
                                 PlaySound(sdash);
                                 dash = 1;
                                 player.timeDash = 0;
-                                Reposo3(time, player.v0, player.y0, player.pos.y);
+                                Reposo(time, player.v0, player.y0, player.pos.y);
                                 player.fall = 0;
                                 player.jump = 0;
                                 player.jumpjump = 0;
@@ -1424,7 +1427,7 @@ int main()
                     if (player.pos.x < 1280)
                     {
                         player.x0 = player.pos.x;
-                        player.pos.x += VX3;
+                        player.pos.x += VX;
                         lookR = 1;
                         lookL = 0;
                     }
@@ -1436,7 +1439,7 @@ int main()
                         if (player.pos.x > plat[platc - 1].pos.x - 610)
                         {
                             player.x0 = player.pos.x;
-                            player.pos.x -= VX3;
+                            player.pos.x -= VX;
                             lookR = 0;
                             lookL = 1;
                         }
@@ -1451,8 +1454,8 @@ int main()
                     if (player.jump)
                     {
                         PlaySound(brinco);
-                        Reposo3(time, player.v0, player.y0, player.pos.y);
-                        Salto1(time, player.v0, player.y0, player.pos.y);
+                        Reposo(time, player.v0, player.y0, player.pos.y);
+                        Salto(time, player.v0, player.y0, player.pos.y);
                         player.fall = 1;
                         if (player.jumpjump) //! doblesalto
                         {
@@ -1464,7 +1467,7 @@ int main()
                         {
                             player.jump = 0;
                         }
-                        for (j = 0; j < MAXPLAT3; j++)
+                        for (j = 0; j < MAXPLAT; j++)
                         {
                             if (plat[j].status)
                             {
@@ -1492,7 +1495,7 @@ int main()
                 {
                     if (IsKeyPressed(KEY_DOWN))
                     {
-                        for (j = 0; j < MAXPLAT3; j++)
+                        for (j = 0; j < MAXPLAT; j++)
                         {
                             if (plat[j].flag)
                             {
@@ -1525,7 +1528,8 @@ int main()
         org1.y = 0;
         // jugador
         // jetpack
-        Direccioniugador3(lookL, lookR, lookUp, lookDown, player);
+
+        Direccioniugador(lookL, lookR, lookUp, lookDown, player);
         if (lookR)
         {
             DrawTexture(jet[1], player.pos.x - 45, player.pos.y - 10, WHITE);
@@ -1672,7 +1676,7 @@ int main()
         player.vida.pos.x = 25;
 
         // plataformas
-        for (j = 0; j < MAXPLAT3; j++)
+        for (j = 0; j < MAXPLAT; j++)
         {
             DrawTexture(plat3, plat[j].pos.x, plat[j].pos.y, WHITE);
         }
@@ -1692,7 +1696,7 @@ int main()
 
                 if (torre[j].direccion)
                 {
-                    grados = CalculaAngulo3(torre[j].pos, player.pos);
+                    grados = CalculaAngulo(torre[j].pos, player.pos);
                     if (grados <= 112)
                     {
                         DrawTexture(towr[8], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
@@ -1756,7 +1760,7 @@ int main()
                 }
                 else
                 {
-                    grados = CalculaAngulo3(torre[j].pos, player.pos) + 90;
+                    grados = CalculaAngulo(torre[j].pos, player.pos) + 90;
 
                     if (grados > 360)
                     {
@@ -1842,7 +1846,7 @@ int main()
             }
         }
         // golpe
-        for (i = 0; i < MAXHIT3; i++)
+        for (i = 0; i < MAXHIT; i++)
         {
             if (hit[i].status)
             {
@@ -1931,12 +1935,12 @@ int main()
     return 0;
 }
 
-float velocidad3(float v0, float time)
+float velocidad(float v0, float time)
 {
-    return (v0 + 2 * G3 * time);
+    return (v0 + 2 * G * time);
 }
 
-int ColisionPlat3(Tplayer3 player, Tplat plat)
+int ColisionPlat(Tplayer player, Tplat plat)
 {
     if (player.pos.x <= plat.pos.x + plat.pos.width) // Si esta tocando el lado derecho de la plataforma n
     {
@@ -1954,7 +1958,7 @@ int ColisionPlat3(Tplayer3 player, Tplat plat)
     return 0;
 }
 
-int Reposo3(float &time, float &v0, int &y0, int y)
+int Reposo(float &time, float &v0, int &y0, int y)
 {
     time = 0;
     v0 = 0;
@@ -1962,17 +1966,17 @@ int Reposo3(float &time, float &v0, int &y0, int y)
     return 0;
 }
 
-int Salto1(float &time, float &v0, int &y0, int y)
+int Salto(float &time, float &v0, int &y0, int y)
 {
     time = 0;
     y0 = y;
-    v0 = VS3;
+    v0 = VS;
     return 0;
 }
 
-int Posicion3(int y0, float v0, float time, int g)
+int Posicion(int y0, float v0, float time, int g)
 {
-    return (y0 + v0 * time + (g ? GD3 : G3) * time * time);
+    return (y0 + v0 * time + (g ? GD : G) * time * time);
 }
 
 int CheckPlayerColision(Trec player, Trec mob)
@@ -2044,29 +2048,29 @@ int JetPack(float &time, float &v0, int &y0, int y, int bdown)
     if (!bdown)
     {
         time = 0;
-        v0 = VSJ3;
+        v0 = VSJ;
         y0 = y;
     }
     else
     {
-        Reposo3(time, v0, y0, y);
+        Reposo(time, v0, y0, y);
     }
     return 0;
 }
 
-float Radianes3(float grados)
+float Radianes(float grados)
 {
     return (grados * M_PI / 180);
 }
 
-void CalculaComponentesVelocidad3(float velocidad, float grados, Tvel &v)
+void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v)
 {
     if (grados >= 360)
     {
         grados -= 360;
     }
 
-    v.vy = velocidad * sin(Radianes3(grados));
+    v.vy = velocidad * sin(Radianes(grados));
     v.vx = sqrt((pow(velocidad, 2) - pow(v.vy, 2)));
     if (grados <= 90)
     {
@@ -2094,13 +2098,13 @@ void CalculaComponentesVelocidad3(float velocidad, float grados, Tvel &v)
     }
 }
 
-void PosicionObieto3(float vx, float vy, Trec &pos)
+void PosicionObieto(float vx, float vy, Trec &pos)
 {
     pos.x += vx;
     pos.y += vy;
 }
 
-void Direccioniugador3(int &L, int &R, int &Up, int &Down, Tplayer3 player)
+void Direccioniugador(int &L, int &R, int &Up, int &Down, Tplayer player)
 {
     if (IsKeyDown(KEY_RIGHT))
     {
@@ -2226,7 +2230,7 @@ void Direccioniugador3(int &L, int &R, int &Up, int &Down, Tplayer3 player)
     }
 }
 
-void InicializaProyectil3(int L, int R, int Up, int Down, Tplayer3 player, Thit &hit)
+void InicializaProyectil(int L, int R, int Up, int Down, Tplayer player, Thit &hit)
 {
     hit.pos.y = player.pos.y + player.pos.height / 4;
     hit.pos.x = player.pos.x + player.pos.width / 2;
@@ -2285,7 +2289,7 @@ void InicializaProyectil3(int L, int R, int Up, int Down, Tplayer3 player, Thit 
     }
 }
 
-float CalculaAngulo3(Trec enemigo, Trec player)
+float CalculaAngulo(Trec enemigo, Trec player)
 {
     float difx = fabs(player.x + player.width / 2 - (enemigo.x + enemigo.width / 2));
     float dify = fabs(player.y + player.height / 2 - (enemigo.y + enemigo.height / 2));
@@ -2316,10 +2320,10 @@ float CalculaAngulo3(Trec enemigo, Trec player)
     return 0;
 }
 
-void muerteLvl3(Tplayer3 &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[])
+void muerteLvl3(Tplayer &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[])
 {
     int j;
-    player.pos.x = 400;   // Posicion3 incial
+    player.pos.x = 400;   // Posicion incial
     player.pos.y = SUELO; //""
     player.y0 = player.pos.y;
     player.v0 = 0;
@@ -2336,3 +2340,10 @@ void muerteLvl3(Tplayer3 &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tpl
     }
 }
 
+void cinemaPuzleNivel3(void)
+{
+    while (1)
+    {
+        printf("\nGanaste\n");
+    }
+}

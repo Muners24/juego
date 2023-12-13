@@ -35,7 +35,7 @@
 
 // blank transparente
 
-// typedef Rectangle Tplayer2;
+// typedef Rectangle Tplayer;
 
 typedef Rectangle Thit;
 
@@ -48,6 +48,20 @@ typedef struct _plataforma
     int flag;
 } Tplat;
 
+typedef struct _vehiculo
+{
+    Trec pos;
+    int status;
+    int listo;
+} Tpart;
+
+typedef struct _vida
+{
+    Trec pos;
+    int num;
+    int time;
+}Tvida;
+
 typedef struct _jugador
 {
     Trec pos;
@@ -58,7 +72,7 @@ typedef struct _jugador
     int jumpjump;
     int fall;
     Tvida vida;
-} Tplayer2;
+} Tplayer;
 
 typedef struct _ave
 {
@@ -85,16 +99,31 @@ typedef struct _car
     int time;
 } Tcar;
 
+typedef struct _corazon
+{
+    Trec pos;
+    int status;
+    int time;
+}Tcora;
 
-float velocidad1(float v0, float time);
-int ColisionPlat2(Tplayer2 player, Tplat plat);
-int Reposo3(float &time, float &v0, int &y0, int y);
-int Salto1(float &time, float &v0, int &y0, int y);
-int Posicion1(int y0, float v0, float time, int g);
+float velocidad(float v0, float time);
+int ColisionPlat(Tplayer player, Tplat plat);
+// devuelve 0
+int Reposo(float &time, float &v0, int &y0, int y);
+
+int Salto(float &time, float &v0, int &y0, int y);
+
+// y0+v0*time+GD*time*time;
+int Posicion(int y0, float v0, float time, int g);
+
 void CalculaPosEnemigo(Tave &mob);
+int CheckMobColision(Trec mob, Thit hit);
+int CheckPlayerColision(Trec player, Trec mob);
+// int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
 void DropEgg(Tave mob, Tegg &egg);
+void LimpiaEnemigos(Tave ave[], Tcar car[]);
 void LimpiaEnemigosLvl2(Tave ave[], Tcar car[]);
-void muerteLvl2(Tplayer2 &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc);
+void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc);
 void cinemaPuzleNivel2(void);
 
 
@@ -288,10 +317,10 @@ int main()
     }
 
     // Inicializa la posicion
-    Tplayer2 player;
+    Tplayer player;
     player.pos.height = ALTOP;
     player.pos.width = ANCHOP-25;
-    player.pos.x = 400;   // Posicion1 incial
+    player.pos.x = 400;   // Posicion incial
     player.pos.y = SUELO; //""
     player.y0 = player.pos.y;
     player.v0 = 0;
@@ -600,7 +629,7 @@ int main()
             if (egg[j].status)
             {
                 egg[j].time += 1;
-                egg[j].pos.y = Posicion1(egg[j].y0, 0, egg[j].time, 0);
+                egg[j].pos.y = Posicion(egg[j].y0, 0, egg[j].time, 0);
             }
 
             // Colision con golpe
@@ -792,24 +821,24 @@ int main()
         {
             if (bdown)
             {
-                if (velocidad1(player.v0, time) > 0)
+                if (velocidad(player.v0, time) > 0)
                 {
                     if (++c == 1)
                     {
-                        player.v0 = velocidad1(player.v0, time); // velocidad1 inicial igual a velocidad1 actual
+                        player.v0 = velocidad(player.v0, time); // velocidad inicial igual a velocidad actual
                         player.y0 = player.pos.y;
                         time = 1;
                     }
                 }
                 else
                 {
-                    Reposo3(time, player.v0, player.y0, player.pos.y);
+                    Reposo(time, player.v0, player.y0, player.pos.y);
                 }
-                player.pos.y = Posicion1(player.y0, player.v0, time, bdown);
+                player.pos.y = Posicion(player.y0, player.v0, time, bdown);
             }
             else
             {
-                player.pos.y = Posicion1(player.y0, player.v0, time, bdown);
+                player.pos.y = Posicion(player.y0, player.v0, time, bdown);
             }
         }
 
@@ -818,7 +847,7 @@ int main()
         if (player.pos.y + player.pos.height > SUELO)
         {
             player.pos.y = SUELO - player.pos.height;
-            Reposo3(time, player.v0, player.y0, player.pos.y);
+            Reposo(time, player.v0, player.y0, player.pos.y);
             player.fall = 0;
             bsuelo = 1;
             player.jump = 1;
@@ -829,16 +858,16 @@ int main()
         if (igncolision > 20)
         {
             // plataforma cuando cae
-            if (velocidad1(player.v0, time) > 0)
+            if (velocidad(player.v0, time) > 0)
             {
                 for (j = 0; j < platc; j++)
                 {
                     if (plat[j].status)
                     {
-                        if (ColisionPlat2(player, plat[j]))
+                        if (ColisionPlat(player, plat[j]))
                         {
                             player.pos.y = plat[j].pos.y - player.pos.height;
-                            Reposo3(time, player.v0, player.y0, player.pos.y);
+                            Reposo(time, player.v0, player.y0, player.pos.y);
                             player.fall = 0;
                             plat[j].flag = 1;
                             player.jump = 1;
@@ -857,9 +886,9 @@ int main()
             {
                 if (plat[j].flag)
                 {
-                    if (!ColisionPlat2(player, plat[j]))
+                    if (!ColisionPlat(player, plat[j]))
                     {
-                        Reposo3(time, player.v0, player.y0, player.pos.y);
+                        Reposo(time, player.v0, player.y0, player.pos.y);
                         player.fall = 1;
                         plat[j].flag = 0;
                         player.jump = 1;
@@ -919,13 +948,13 @@ int main()
             {
                 if (lookR)
                 {
-                    player.pos.x += VD1;
+                    player.pos.x += VD;
                 }
                 else
                 {
                     if (lookL)
                     {
-                        player.pos.x -= VD1;
+                        player.pos.x -= VD;
                     }
                 }
             }
@@ -942,7 +971,7 @@ int main()
                     player.jumpjump = 0;
                 }
                 player.fall = 1;
-                dash = Reposo3(time, player.v0, player.y0, player.pos.y);
+                dash = Reposo(time, player.v0, player.y0, player.pos.y);
             }
         }
 
@@ -967,7 +996,7 @@ int main()
             {
                 if (player.pos.x < 1280)
                 {
-                    player.pos.x += VX1;
+                    player.pos.x += VX;
                     lookR = 1;
                     lookL = 0;
                 }
@@ -978,7 +1007,7 @@ int main()
                 {
                     if (player.pos.x > plat[platc - 1].pos.x - 610)
                     {
-                        player.pos.x -= VX1;
+                        player.pos.x -= VX;
                         lookR = 0;
                         lookL = 1;
                     }
@@ -993,8 +1022,8 @@ int main()
                 if (player.jump)
                 {
                     PlaySound(brinco);
-                    Reposo3(time, player.v0, player.y0, player.pos.y);
-                    Salto1(time, player.v0, player.y0, player.pos.y);
+                    Reposo(time, player.v0, player.y0, player.pos.y);
+                    Salto(time, player.v0, player.y0, player.pos.y);
                     player.fall = 1;
                     if (player.jumpjump) //! doblesalto
                     {
@@ -1094,7 +1123,7 @@ int main()
                         {
                             dash = 1;
                             player.timeDash = 0;
-                            Reposo3(time, player.v0, player.y0, player.pos.y);
+                            Reposo(time, player.v0, player.y0, player.pos.y);
                             player.fall = 0;
                             player.jump = 0;
                             player.jumpjump = 0;
@@ -1328,12 +1357,12 @@ int main()
     return 0;
 }
 
-float velocidad1(float v0, float time)
+float velocidad(float v0, float time)
 {
     return (v0 + 2 * G * time);
 }
 
-int ColisionPlatLvl2(Tplayer2 player, Tplat plat)
+int ColisionPlat(Tplayer player, Tplat plat)
 {
     if (player.pos.x <= plat.pos.x + plat.pos.width) // Si esta tocando el lado derecho de la plataforma n
     {
@@ -1351,7 +1380,7 @@ int ColisionPlatLvl2(Tplayer2 player, Tplat plat)
     return 0;
 }
 
-int ReposoLvl2(float &time, float &v0, int &y0, int y)
+int Reposo(float &time, float &v0, int &y0, int y)
 {
     time = 0;
     v0 = 0;
@@ -1359,7 +1388,7 @@ int ReposoLvl2(float &time, float &v0, int &y0, int y)
     return 0;
 }
 
-int SaltoLvl2(float &time, float &v0, int &y0, int y)
+int Salto(float &time, float &v0, int &y0, int y)
 {
     time = 0;
     y0 = y;
@@ -1367,7 +1396,7 @@ int SaltoLvl2(float &time, float &v0, int &y0, int y)
     return 0;
 }
 
-int PosicionLvl2(int y0, float v0, float time, int g)
+int Posicion(int y0, float v0, float time, int g)
 {
     return (y0 + v0 * time + (g ? GD : G) * time * time);
 }
@@ -1387,7 +1416,7 @@ void CalculaPosEnemigo(Tave &mob)
     }
 }
 
-int CheckPlayerColisionLvl2(Trec player, Trec mob)
+int CheckPlayerColision(Trec player, Trec mob)
 {
     if (player.x < (mob.x + mob.width))
     {
@@ -1396,6 +1425,24 @@ int CheckPlayerColisionLvl2(Trec player, Trec mob)
             if (player.y < (mob.y + mob.height))
             {
                 if ((player.y + player.height) > mob.y)
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+int CheckMobColision(Trec mob, Thit hit)
+{
+    if (mob.x < (hit.x + hit.width))
+    {
+        if ((mob.x + mob.width) > hit.x)
+        {
+            if (mob.y < (hit.y + hit.height))
+            {
+                if ((mob.y + mob.height) > hit.y)
                 {
                     return 1;
                 }
@@ -1417,6 +1464,19 @@ void DropEgg(Tave mob, Tegg &egg)
     }
 }
 
+void LimpiaEnemigos(Tave ave[], Tcar car[])
+{
+    int j;
+    for (j = 0; j < MAXAVE; j++)
+    {
+        ave[j].status = 0;
+    }
+    for (j = 0; j < MAXCAR; j++)
+    {
+        car[j].status = 0;
+    }
+}
+
 void LimpiaEnemigosLvl2(Tave ave[], Tcar car[])
 {
     int j;
@@ -1430,8 +1490,16 @@ void LimpiaEnemigosLvl2(Tave ave[], Tcar car[])
     }
 }
 
+void cinemaPuzleNivel2(void)
+{
+    while (1)
+    {
+        printf("\nGanaste\n");
+    }
+}
 
-void muerteLvl2(Tplayer2 &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc)
+
+void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc)
 {
     int j;
     player.pos.x=400;  //Posicion incial
