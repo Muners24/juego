@@ -30,7 +30,6 @@
 
 #define VX 3
 #define VS -11
-#define VSi -4
 #define VY 3
 #define VD 7.5
 
@@ -53,20 +52,11 @@ typedef Rectangle Trec;
 
 // typedef Rectangle Tplayer;
 
-typedef struct _tabla
-{
-    Trec pos;
-    int num;
-    char opRight[2];
-    char opDown[2];
-    int status;
-} Ttab;
-
 typedef struct _velocidad
 {
     float vx;
     float vy;
-} Tvel;
+}Tvel;
 
 typedef struct _shark
 {
@@ -75,7 +65,7 @@ typedef struct _shark
     int right = 0;
     int left = 0;
     Tvel v;
-} Tshark;
+}Tshark;
 
 typedef struct _tortuga
 {
@@ -104,7 +94,8 @@ typedef struct _anguila
 
 typedef struct _hit
 {
-    Trec pos;      // 7   0    1
+    Trec pos;
+    int time;      // 7   0    1
     int status;    //
     int direccion; //--------------------->  //6   p    2
     Tvel v;        //
@@ -169,7 +160,6 @@ void LimpiaEnemigosLvl1(/*Tave ave[],Tcar car[]*/ Tshark shark[], Ttortu tort[],
 float CalculaAnguloAnguila(Trec ang, Trec player);
 void AngElectro(Tangui &ang);
 void muerteLvl1(Tplayer &player, Tshark shark[], Ttortu tort[], Tangui ang[], Tpart pieza[], Trec plat[]);
-void cinemaPuzleNivel1(int diflvl);
 
 int main()
 {
@@ -277,13 +267,13 @@ int main()
     ataquesizquierdos[1] = LoadTexture("texturas/HitL1.png");
     ataquesizquierdos[2] = LoadTexture("texturas/HitL2.png");
     ataquesizquierdos[3] = LoadTexture("texturas/HitL3.png");
-    ataquesizquierdos[4] = LoadTexture("texturas/HitL4.png");
+    ataquesizquierdos[4] = LoadTexture("texturas/HitL4_1.png");
 
     ataquesderechos[0] = LoadTexture("texturas/HitR0.png");
     ataquesderechos[1] = LoadTexture("texturas/HitR1.png");
     ataquesderechos[2] = LoadTexture("texturas/HitR2.png");
     ataquesderechos[3] = LoadTexture("texturas/HitR3.png");
-    ataquesderechos[4] = LoadTexture("texturas/HitR4.png");
+    ataquesderechos[4] = LoadTexture("texturas/HitR4_1.png");
 
     Texture2D piezas_nv1[3];
     piezas_nv1[0] = LoadTexture("texturas/pieza1_nv1.png");
@@ -473,7 +463,7 @@ int main()
                                 LimpiaEnemigosLvl1(shark, tort, ang);
                                 if (time > 300)
                                 {
-                                    cinemaPuzleNivel1();
+                                    //cinemaPuzleNivel1();
                                 }
                                 // CloseWindow();
                             }
@@ -1715,7 +1705,7 @@ int main()
     return 0;
 }
 
-void Direccioniugador(int &L, int &R, int &Up, int &Down, Tplayer player)
+void Direccioniugador1(int &L, int &R, int &Up, int &Down, Tplayer player)
 {
     if (IsKeyDown(KEY_RIGHT))
     {
@@ -2028,605 +2018,5 @@ void muerteLvl1(Tplayer &player, Tshark shark[], Ttortu tort[], Tangui ang[], Tp
     }
 }
 
-void cinemaPuzleNivel1(void)
-{
-    int i, j;
-    int random;
-    Ttab tabla[RENGLONES1][COLUMNAS1];
-    //+ - * /
-    char operadores[4][2] = {"+", "-", "*", "/"};
 
-    for (i = 0; i < RENGLONES1; i++)
-    {
-        tabla[i][COLUMNAS1].opDown[0] = '=';
-        tabla[i][COLUMNAS1].opDown[1] = '\0';
-    }
-    for (i = 0; i < COLUMNAS1; i++)
-    {
-        tabla[RENGLONES1][i].opDown[0] = '=';
-        tabla[RENGLONES1][i].opDown[1] = '\0';
-    }
 
-    for (i = 0; i < RENGLONES1; i++)
-    {
-        for (j = 0; j < COLUMNAS1; j++)
-        {
-            if (i == RENGLONES1 - 1)
-            {
-            }
-            if (j = COLUMNAS1 - 1)
-            {
-            }
-            random = rand() % 10;
-            if (random % 2 == 0)
-            {
-                if (j < COLUMNAS1 - 1)
-                {
-
-                    tabla[i][j].status = 1;
-                    tabla[i][j].num = rand() % 20;
-                    if (i < RENGLONES1 - 1)
-                    {
-                        if (j < COLUMNAS1 - 1)
-                        {
-                            strcpy(tabla[i][j].opDown, operadores[rand() % 4]);
-                            strcpy(tabla[i][j].opRight, operadores[rand() % 4]);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                tabla[i][j].status = 0;
-                tabla[i][j].num = rand() % 20;
-                if (i < RENGLONES1 - 1)
-                {
-                    if (j < COLUMNAS1 - 1)
-                    {
-                        strcpy(tabla[i][j].opDown, operadores[rand() % 4]);
-                        strcpy(tabla[i][j].opRight, operadores[rand() % 4]);
-                    }
-                }
-            }
-        }
-    }
-    ClearBackground(WHITE);
-    while (1)
-    {
-
-        printf("\nGanaste\n");
-    }
-}
-
-/*
-DrawTexture(ataquesderechos[1], player.pos.x, player.pos.y - 10, WHITE);
-DrawTexture(ataquesderechos[0], player.pos.x, player.pos.y - 10, WHITE);
-DrawTexture(ataquesderechos[3], player.pos.x - 5, player.pos.y - 30, WHITE);
-DrawTexture(ataquesderechos[2], player.pos.x, player.pos.y - 10, WHITE);
-DrawTexture(ataquesizquierdos[1], player.pos.x - 25, player.pos.y - 10, WHITE);
-DrawTexture(ataquesizquierdos[3], player.pos.x, player.pos.y - 30, WHITE);
-
-DrawTexture(ataquesizquierdos[2], player.pos.x - 32, player.pos.y - 10, WHITE);
-*/
-void cinemaPuzleNivel1(int diflvl)
-{
-    SetTargetFPS(60);  
-    InitWindow(RANCHO,RALTO,"iuego");
-    Texture2D fondo = LoadTexture("texturas\\motor1.png");
-    srand(time(NULL));
-
-    Vector2 v=GetMousePosition();
-
-    Color casillas;
-    casillas.r=219;
-    casillas.g=145;
-    casillas.b=49;
-    casillas.a=255;
-
-    Color operacion;
-    operacion.b=122;
-    operacion.g=183;
-    operacion.r=231;
-    operacion.a=255;
-
-    
-    
-    
-    BEIGE;
-    Trec cas;
-    cas.height=110;
-    cas.width=150;
-    cas.x=185;
-    cas.y=100;
-
-    Trec bordecas;
-    bordecas.height=120;
-    bordecas.width=160;
-    bordecas.x=cas.x-5;
-    bordecas.y=cas.y-5;
-    
-    Trec op;
-    op.height=60;
-    op.width=60;
-    op.x=0;
-    op.y=0;
-
-    Trec bordeop;
-    bordeop.height=70;
-    bordeop.width=70;
-
-    Color cian;
-    cian.b=113;
-    cian.g=168;
-    cian.r=0;
-    cian.a=255;
-    cian=BLACK;
-    Color colorop;
-    colorop.b=6;
-    colorop.g=32;
-    colorop.r=56;
-    colorop.a=255;
-
-    int i,j;
-    int random;
-    float respuestasx[3];
-    float respuestasy[2];
-    int fin;
-    int maxDraw=1;
-    char txt[10];
-    Ttab tabla[RENGLONES1][COLUMNAS1];
-    int sel[2]={0,0};
-    //+ - * /
-    char operadores[5][2]={"+","-","*","/","="};
-    FILE *fa;
-    char t[2];
-    int ocultoC=0;
-    int predictC=0;
-    //for(int k=1;k<=15;k++)
-    
-        /*
-        //asignacion ==
-        for(i=0;i<RENGLONES1;i++)
-        {
-            strcpy(tabla[i][COLUMNAS1-1].opRight,operadores[4]);
-        }
-        for(i=0;i<COLUMNAS1;i++)
-        {
-            strcpy(tabla[RENGLONES1-1][i].opDown,operadores[4]);
-        }
-
-        //asignacion de operadores y numeros
-        for(i=0;i<RENGLONES1;i++)
-        {
-            for(j=0;j<COLUMNAS1;j++)
-            {
-                random=rand()%10;
-                if(random%2==0)
-                {
-                    tabla[i][j].status=1;
-                    tabla[i][j].num=(rand()%40)+1;
-                    if(j<COLUMNAS1-1)
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                            strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                        }
-                        else
-                        {
-                            if(j<COLUMNAS1-1)
-                            {
-                                strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                            }   
-                        }
-                    }
-                    else
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                        }
-                    }
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                    tabla[i][j].num=(rand()%40)+1;
-                    if(j<COLUMNAS1-1)
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                            strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                        }
-                        else
-                        {
-                            if(j<COLUMNAS1-1)
-                            {
-                                strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                            }   
-                        }
-                    }
-                    else
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                        }
-                    }
-                }
-            }
-        }
-        */
-        /**/
-
-    if(diflvl==1)
-    {
-        random=(rand()%5)+1;
-        
-        switch (random)
-        {
-            case 1:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
-                break;
-            case 2:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
-                break;
-            case 3:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
-                break;
-            case 4:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
-                break;
-            case 5:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
-                break;
-        }
-    }
-    else
-    {
-        random=(rand()%5)+1;
-        
-        switch (random)
-        {
-            case 1:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_1.txt","r");
-                break;
-            case 2:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_2.txt","r");
-                break;
-            case 3:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_3.txt","r");
-                break;
-            case 4:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_4.txt","r");
-                break;
-            case 5:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_5.txt","r");
-                break;
-        }
-    }
-    
-    if(fa)
-    {    
-        for(i=0;i<RENGLONES1;i++)
-        {
-            for(j=0;j<COLUMNAS1;j++)
-            {
-                random=(rand()%10)+1;
-                if(random<=6)
-                {
-                    tabla[i][j].status=1;
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                }
-                tabla[i][j].elec=0;
-                fscanf(fa,"%d %c %c",&tabla[i][j].num,&tabla[i][j].opRight[0],&tabla[i][j].opDown[0]);
-                tabla[i][j].opRight[1]='\0';
-                tabla[i][j].opDown[1]='\0';
-                if(!tabla[i][j].status)
-                {
-                    ocultoC++;
-                    tabla[i][j].numPredict=0;
-                }
-            }
-        }
-            fscanf(fa," %f %f %f %f %f ",&respuestasy[0],&respuestasy[1],&respuestasx[0],&respuestasx[1],&respuestasx[2]);
-            fclose(fa);
-    }
-    tabla[0][0].elec=1;
-    
-    while (!WindowShouldClose())
-    {
-        v=GetMousePosition();
-
-        //printf("\noculto = %d predictC = %d \n",ocultoC,predictC);
-        //termianr minijuego
-        if(IsKeyPressed(KEY_ENTER))
-        {
-            for(i=0;i<RENGLONES1;i++)
-            {
-                for(j=0;j<COLUMNAS1;j++)
-                {
-                    if(!tabla[i][j].status)
-                    {
-                        if(tabla[i][j].num==tabla[i][j].numPredict)
-                        {
-                            predictC++;
-                        }
-                    }
-                }
-            }
-
-            if(predictC==ocultoC)
-            {
-                printf("Ganaste");
-            }
-            predictC=0;
-        }
-        //printf("\nx = %f  y = %f\n",v.x,v.y);
-        for(i=0;i<RENGLONES1;i++)
-        {
-            for(j=0;j<COLUMNAS1;j++)
-            {  
-                if(i==sel[0])
-                {
-                    
-                    if(j==sel[1])
-                    {
-                        tabla[i][j].elec=1;
-                    }
-                    else
-                    {
-                        tabla[i][j].elec=0;
-                    }
-                }
-                else
-                {
-                    tabla[i][j].elec=0;
-                }
-            }
-        }
-
-        //seleccion right left
-        if(IsKeyPressed(KEY_RIGHT))
-        {
-            if(sel[1]<2)
-            {
-                sel[1]++;
-            }
-        }
-        else
-        {
-            if(IsKeyPressed(KEY_LEFT))
-            {
-                if(sel[1]>0)
-                {
-                    sel[1]--;
-                }
-            }
-        }
-
-        if(IsKeyPressed(KEY_UP))
-        {
-            if(sel[0]>0)
-            {
-                sel[0]--;
-            }
-        }
-        else
-        {
-            if(IsKeyPressed(KEY_DOWN))
-            {
-                if(sel[0]<1)
-                {
-                    sel[0]++;
-                }
-            }
-        }
-
-        
-        if(IsKeyPressed(KEY_W))
-        {
-            if(!tabla[sel[0]][sel[1]].status)
-            {
-                if(tabla[sel[0]][sel[1]].elec)
-                {
-                    tabla[sel[0]][sel[1]].numPredict++;
-                }
-            }
-        }
-        else
-        {
-            if(IsKeyPressed(KEY_S))
-            {
-                if(!tabla[sel[0]][sel[1]].status)
-                {
-                    if(tabla[sel[0]][sel[1]].elec)
-                    {
-                        tabla[sel[0]][sel[1]].numPredict--;
-                    }
-                }
-            }
-        }
-        BeginDrawing();
-            DrawTexture(fondo,0,0,WHITE);
-            
-            for(i=0;i<=RENGLONES1;i++)
-            {
-                for(j=0;j<=COLUMNAS1;j++)
-                {
-                    bordecas.x=cas.x-5;
-                    bordecas.y=cas.y-5;
-
-                    if(i==RENGLONES1 && j==COLUMNAS1)
-                    {
-                        continue;
-                    }
-                    if(i==sel[0])
-                    {
-                        if(j==sel[1])
-                        {
-                            DrawRectangleRec(bordecas,BLACK);
-                        }
-                        else
-                        {
-                            DrawRectangleRec(bordecas,colorop);
-                        }
-                    }
-                    else
-                    {
-                        DrawRectangleRec(bordecas,colorop);
-                    }
-                    DrawRectangleRec(cas,casillas);
-                    if(i==0)
-                    {
-                        if(j==3)
-                        {
-                            sprintf(txt,"%.2f",respuestasy[0]);
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==1)
-                    {
-                        if(j==3)
-                        {
-                            sprintf(txt,"%.2f",respuestasy[1]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==2)
-                    {
-                        if(j==0)
-                        {
-                            sprintf(txt,"%.2f",respuestasx[0]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==2)
-                    {
-                        if(j==1)
-                        {
-                            sprintf(txt,"%.2f",respuestasx[1]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==2)
-                    {
-                        if(j==2)
-                        {
-                            sprintf(txt,"%.2f",respuestasx[2]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    
-                    if(i<RENGLONES1)
-                    {  
-                        if(j<COLUMNAS1)
-                        {
-                            op.x=bordecas.x+bordecas.width+15;
-                            op.y=bordecas.y+20;
-                            bordeop.x=op.x-5;
-                            bordeop.y=op.y-5;
-                            DrawRectangleRec(bordeop,colorop);
-                            DrawRectangleRec(op,operacion);
-                            DrawText(tabla[i][j].opRight,op.x+((op.width-MeasureText(tabla[i][j].opRight,40))/2),op.y+10,40,BLACK);
-                            
-                            op.x=bordecas.x+bordecas.width/2-op.width/2;
-                            op.y=bordecas.y+bordecas.height+15;
-                            bordeop.x=op.x-5;
-                            bordeop.y=op.y-5;
-                            DrawRectangleRec(bordeop,colorop);
-                            DrawRectangleRec(op,operacion);
-                            DrawText(tabla[i][j].opDown,op.x+((op.width-MeasureText(tabla[i][j].opDown,40))/2),op.y+10,40,BLACK);
-
-                            if(tabla[i][j].status)
-                            {
-                                itoa(tabla[i][j].num,txt,10);
-                                if(tabla[i][j].elec)
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,80))/2),cas.y+((cas.height-80)/2),80,WHITE);
-                                }
-                                else
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                                }
-                            }
-                            else
-                            {
-                                itoa(tabla[i][j].numPredict,txt,10);
-                                if(tabla[i][j].elec)
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,80))/2),cas.y+((cas.height-80)/2),80,cian);
-                                }
-                                else
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,cian);
-                                }
-                            }
-                        }
-                    }
-
-                    
-                    if(maxDraw)
-                    {
-                        if(i==RENGLONES1)
-                        {
-                            maxDraw=0;
-                            j--;
-                            
-                        }
-                    }
-                    cas.x+=100+cas.width;
-                }
-                
-                cas.y+=100+cas.height;
-                cas.x=185;
-            }
-            cas.y=100;
-        EndDrawing();
-    }
-    CloseWindow();
-}

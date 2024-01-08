@@ -11,7 +11,7 @@
 #define ALTOP 85
 #define ANCHOP 50
 #define SUELO 650
-#define MAXVIDA 4
+#define MAXVIDA 150
 #define INVULERABILIDAD 120
 
 //DROPS
@@ -121,7 +121,6 @@ int CheckMobColision(Trec mob, Thit hit);
 int CheckPlayerColision(Trec player, Trec mob);
 // int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
 void DropEgg(Tave mob, Tegg &egg);
-void LimpiaEnemigos(Tave ave[], Tcar car[]);
 void LimpiaEnemigosLvl2(Tave ave[], Tcar car[]);
 void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc);
 void cinemaPuzleNivel2(void);
@@ -1464,18 +1463,6 @@ void DropEgg(Tave mob, Tegg &egg)
     }
 }
 
-void LimpiaEnemigos(Tave ave[], Tcar car[])
-{
-    int j;
-    for (j = 0; j < MAXAVE; j++)
-    {
-        ave[j].status = 0;
-    }
-    for (j = 0; j < MAXCAR; j++)
-    {
-        car[j].status = 0;
-    }
-}
 
 void LimpiaEnemigosLvl2(Tave ave[], Tcar car[])
 {
@@ -1497,7 +1484,6 @@ void cinemaPuzleNivel2(void)
         printf("\nGanaste\n");
     }
 }
-
 
 void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc)
 {

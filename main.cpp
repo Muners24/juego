@@ -1,13 +1,5 @@
 
-
-#include "C:\raylib\raylib\src\raylib.h"
-// Texture2D sub=LoadTexture("texturas\\SUB.png");
-// Texture2D nave=LoadTexture("texturas\\navepix2.png");
-// Texture2D car=LoadTexture("texturas\\pixel_car2.png");
-
-// DrawTexture(sub, 190, 200,WHITE);
-// DrawTexture(nave, 500,300,WHITE);
-// DrawTexture(car, 800,300,WHITE);
+#include "cinematicas.h"
 
 #define JUGAR 0
 #define OPCIONES 1
@@ -20,42 +12,28 @@
 #define NEWP 0
 #define SALIRJ 1
 
+//GENERAL
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
+#define MAXDROPVIDA 10
+#define DESPAWNTIME 600
+#define MAXDROPASPEED 10
+#define DURACIONBUFF 600
 
-#define COLUMNAS1 3
-#define RENGLONES1 3
-
-#define RANCHO 1280
-#define RALTO 720
 #define CAMY 360
 #define CAMX 640
 
 #define ALTOP 85
 #define ANCHOP 50
 #define SUELO 650
-#define MAXVIDA 3
+#define MAXVIDA 150
 #define INVULERABILIDAD 120
 
-// DROPS
-#define MAXDROPVIDA 10
-#define DESPAWNTIME 600
-#define MAXDROPASPEED 10
-#define DURACIONBUFF 600
-
-#define G 0.1
-#define GD 0.15
-
-#define VX 3
 #define VS -11
-#define VSi -4
-#define VY 3
-#define VD 7.5
+#define VY 3    //multiplicar por -1 para nivel 3
 
+//NIVEL1
+#define MAXPLAT 3
+//ENEMIGO1
 #define MAXANGUILA 3
 #define ANGUILASPEED 5
 #define MAXSHARK 2
@@ -63,28 +41,36 @@
 #define MAXTORTUGA 2
 #define TORTUGASPEED 3
 
-#define MAXPLAT 3
+//NIVEL2
+//ENEMIGO2
+#define MAXAVE 5
+#define AVESPEED 7
+#define MAXEGG 8
+#define MAXCAR 2
+#define CARSPEED 9
 
+//NIVEL3 
+#define RECVEHICULO 900
+#define VSJ -4
+//ENEMIGO3 
+#define MAXTORRE 2
+#define TORREASPEED 180
+#define TORREVPROYECTIL 6
+#define MAXHITTORRE 2
+#define MAXOVNI 2
+#define OVNISPEED 3
+#define OVNILONG 150
+#define OVNIAMP 15
+//CAMBIAR ATAQUE EN NIVEL3 **
+
+//ATAQUE
 #define MAXHIT 500
 #define VATAQUE 50
 #define VATAQUEBUFF 20
 #define VPROYECTIL 10
 
-typedef Rectangle Trec;
-// blank transparente
-
 // typedef Rectangle Tplayer;
-
-typedef struct _tabla
-{
-    Trec pos;
-    int num;
-    int numPredict;
-    char opRight[2];
-    char opDown[2];
-    int status;
-    int elec;
-}Ttab;
+/**************************************************************  Structs Generales *********************************************************/
 
 typedef struct _velocidad
 {
@@ -92,6 +78,74 @@ typedef struct _velocidad
     float vy;
 } Tvel;
 
+typedef struct _corazon
+{
+    Trec pos;
+    int status;
+    int time;
+}Tcora;
+
+//hit para nivel 1 y 3
+//nivel 1 no usa time
+typedef struct _hit
+{
+    Trec pos;
+    int time;      // 7   0    1
+    int status;    //
+    int direccion; //--------------------->  //6   p    2
+    Tvel v;        //
+} Thit;            // 5   4    3
+
+typedef struct _vida
+{
+    Trec pos;
+    int num;
+    int time;
+} Tvida;
+
+typedef struct _vehiculo
+{
+    Trec pos;
+    int status;
+    int listo;
+} Tpart;
+
+typedef struct _ASbuff
+{
+    Trec pos;
+    int statusDraw;
+    int statusFun;
+    int time;
+    int duracion;
+} TatkSpeed;
+
+//algunos nivles no usan todos los campos
+typedef struct _jugador
+{
+    Trec pos;
+    int dash;
+    int buff;
+    int jet;
+    int jetc;
+    int x0;
+    int AtkC;
+    int y0;
+    float v0;
+    int timeDash;
+    int jump;
+    int jumpjump;
+    int fall;
+    Tvida vida;
+} Tplayer;
+
+typedef struct _plataforma
+{
+    Trec pos;
+    int status;
+    int flag;
+} Tplat;
+
+/****************************************************************** Structs Nivel 1 *********************************************************/
 typedef struct _shark
 {
     Trec pos;
@@ -126,62 +180,62 @@ typedef struct _anguila
     Tanghit hit;
 } Tangui;
 
-typedef struct _hit
-{
-    Trec pos;      // 7   0    1
-    int status;    //
-    int direccion; //--------------------->  //6   p    2
-    Tvel v;        //
-} Thit;            // 5   4    3
-
-typedef struct _plataforma
+/****************************************************************** Structs Nivel 2 *********************************************************/
+typedef struct _ave
 {
     Trec pos;
     int status;
-    int flag;
-} Tplat;
+    int right;
+    int left;
+} Tave;
 
-typedef struct _vehiculo
+typedef struct _huevo
 {
     Trec pos;
     int status;
-    int listo;
-} Tpart;
-
-typedef struct _vida
-{
-    Trec pos;
-    int num;
+    int y0;
     int time;
-} Tvida;
+} Tegg;
 
-typedef struct _jugador
-{
-    Trec pos;
-    int timeDash;
-    int dash;
-    int x0;
-    int AtkC;
-    int buff;
-    Tvida vida;
-} Tplayer;
-
-typedef struct _ASbuff
-{
-    Trec pos;
-    int statusDraw;
-    int statusFun;
-    int time;
-    int duracion;
-} TatkSpeed;
-
-typedef struct _corazon
+typedef struct _car
 {
     Trec pos;
     int status;
+    int movimiento;
     int time;
-} Tcora;
+} Tcar;
+/****************************************************************** Structs Nivel 3 *********************************************************/
+typedef struct _tower
+{
+    Trec pos;
+    int status;
+    int direccion;
+    int atkC;
+    Thit hit[MAXHITTORRE];
+} Ttow;
 
+typedef struct _ovni
+{
+    Trec pos;
+    int direccion;
+    int status;
+    int time;
+} Tovni;
+
+typedef struct _Elaser
+{
+    Trec pos;
+    int status;
+    int atkC;
+    float grados;
+    float altura;
+    Trec hit;
+    int time;
+    int mov;
+} Tlaser;
+
+/****************************************************************** Prototipo de funciones Generales *********************************************************/
+float CalculaAngulo(Trec ang, Trec player);
 void Direccioniugador(int &l, int &r, int &up, int &down, Tplayer player);
 void InicializaProyectil(int l, int r, int up, int down, Tplayer player, Thit &hit);
 void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v);
@@ -189,20 +243,40 @@ float Radianes(float grados);
 void PosicionObieto(float vx, float vy, Trec &pos);
 int CheckMobColision(Trec mob, Thit hit);
 int CheckPlayerColision(Trec player, Trec mob);
-void LimpiaEnemigosLvl1(/*Tave ave[],Tcar car[]*/ Tshark shark[], Ttortu tort[], Tangui ang[]);
-float CalculaAnguloAnguila(Trec ang, Trec player);
+
+int Posicion(int y0, float v0, float time, int g,float _G,float _GD);
+float velocidad(float v0, float time,float _G);
+int Reposo(float &time, float &v0, int &y0, int y);
+int Salto(float &time, float &v0, int &y0, int y);
+int ColisionPlat(Tplayer player, Tplat plat);
+
+/****************************************************************** Prototipo de funciones 1 *********************************************************/
+void LimpiaEnemigosLvl1(Tshark shark[], Ttortu tort[], Tangui ang[]);
 void AngElectro(Tangui &ang);
 void muerteLvl1(Tplayer &player, Tshark shark[], Ttortu tort[], Tangui ang[], Tpart pieza[], Trec plat[]);
 void cinemaPuzleNivel1(int diflvl);
+void Direccioniugador1(int &L, int &R, int &Up, int &Down, Tplayer player);
 
+/****************************************************************** Prototipo de funciones 2 *********************************************************/
+void DropEgg(Tave mob, Tegg &egg);
+void LimpiaEnemigosLvl2(Tave ave[], Tcar car[]);
+void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc);
 
+/****************************************************************** Prototipo de funciones 3 *********************************************************/
+void LimpiaEnemigosLvl3(Ttow torre[], Tovni ovni[]);
+int JetPack(float &time, float &v0, int &y0, int y, int bdown);
+void muerteLvl3(Tplayer &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[]);
 
+/****************************************************************** Prototipo de interfaz  *********************************************************/
 int mainMenu(Sound seleccion);
 int opMenu(int &vol, int &diflvl, Texture2D volumen, Texture2D dif, Sound seleccion, Sound barras);
 int juegoMenu(Sound seleccion);
 void juego(int diflvl);
 void nivel1(int diflvl);
+void nivel2(int diflvl);
+void nivel3(int diflvl);
 
+/****************************************************************** MENUS  **************************************************************************/
 int main(void)
 {
     SetTargetFPS(60);
@@ -211,8 +285,6 @@ int main(void)
     int diflvl = 1, vol = 3;
     const int screenWidth = 1280;
     const int screenHeight = 720;
-    juego(diflvl);
-    cinemaPuzleNivel1(diflvl);
     float scrollingBack = 0.0f;
     float scrollingBigPlanet = 0.0f;
     float scrollingFarPlanet = 0.0f;
@@ -254,254 +326,224 @@ int main(void)
         PlayMusicStream(musica_menu);
         do
         {
-        menu:
-            scrollingBack -= 0.01f;
-            scrollingBigPlanet -= 0.025f;
-            scrollingFarPlanet -= 0.05f;
-            scrollingRingPlanet -= 0.055f;
-            scrollingSpaceStar -= 0.01;
+            menu:
+                scrollingBack -= 0.01f;
+                scrollingBigPlanet -= 0.025f;
+                scrollingFarPlanet -= 0.05f;
+                scrollingRingPlanet -= 0.055f;
+                scrollingSpaceStar -= 0.01;
 
-            if (scrollingBack <= -back.height)
-                scrollingBack = 0;
-            if (scrollingBigPlanet <= -bigplanet.height)
-                scrollingBigPlanet = 0;
-            if (scrollingFarPlanet <= -farplanet.height)
-                scrollingFarPlanet = 0;
-            if (scrollingRingPlanet <= -ringplanet.height)
-                scrollingRingPlanet = 0;
-            if (scrollingSpaceStar <= -stars.height)
-                scrollingSpaceStar = 0;
+                if (scrollingBack <= -back.height)
+                    scrollingBack = 0;
+                if (scrollingBigPlanet <= -bigplanet.height)
+                    scrollingBigPlanet = 0;
+                if (scrollingFarPlanet <= -farplanet.height)
+                    scrollingFarPlanet = 0;
+                if (scrollingRingPlanet <= -ringplanet.height)
+                    scrollingRingPlanet = 0;
+                if (scrollingSpaceStar <= -stars.height)
+                    scrollingSpaceStar = 0;
 
-            BeginDrawing();
-            UpdateMusicStream(musica_menu);
+                BeginDrawing();
+                UpdateMusicStream(musica_menu);
 
-            DrawTextureEx(back, (Vector2){0, scrollingBack}, 0.0f, 1.0f, WHITE);
-            DrawTextureEx(back, (Vector2){0, back.height * 2 + scrollingBack}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(back, (Vector2){0, scrollingBack}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(back, (Vector2){0, back.height * 2 + scrollingBack}, 0.0f, 1.0f, WHITE);
 
-            DrawTextureEx(bigplanet, (Vector2){900, scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
-            DrawTextureEx(bigplanet, (Vector2){900, bigplanet.height * 2 + scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(bigplanet, (Vector2){900, scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(bigplanet, (Vector2){900, bigplanet.height * 2 + scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
 
-            DrawTextureEx(farplanet, (Vector2){0, scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
-            DrawTextureEx(farplanet, (Vector2){0, farplanet.height * 2 + scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(farplanet, (Vector2){0, scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(farplanet, (Vector2){0, farplanet.height * 2 + scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
 
-            DrawTextureEx(ringplanet, (Vector2){0, scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
-            DrawTextureEx(ringplanet, (Vector2){0, ringplanet.height * 2 + scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(ringplanet, (Vector2){0, scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(ringplanet, (Vector2){0, ringplanet.height * 2 + scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
 
-            DrawTextureEx(stars, (Vector2){0, scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
-            DrawTextureEx(stars, (Vector2){0, stars.height * 2 + scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(stars, (Vector2){0, scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
+                DrawTextureEx(stars, (Vector2){0, stars.height * 2 + scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
 
-            op = mainMenu(seleccion);
-            EndDrawing();
+                op = mainMenu(seleccion);
+                EndDrawing();
         } while (op == -1);
 
         //******************************************** JUGAR ******************************************************************
         switch (op)
         {
-        case JUGAR:
-            do
-            {
-                BeginDrawing();
-                UpdateMusicStream(musica_menu);
-                scrollingBack -= 0.01f;
-                scrollingBigPlanet -= 0.025f;
-                scrollingFarPlanet -= 0.05f;
-                scrollingRingPlanet -= 0.055f;
-                scrollingSpaceStar -= 0.01;
+            case JUGAR:
+                do
+                {
+                    BeginDrawing();
+                    UpdateMusicStream(musica_menu);
+                    scrollingBack -= 0.01f;
+                    scrollingBigPlanet -= 0.025f;
+                    scrollingFarPlanet -= 0.05f;
+                    scrollingRingPlanet -= 0.055f;
+                    scrollingSpaceStar -= 0.01;
 
-                if (scrollingBack <= -back.height)
-                    scrollingBack = 0;
-                if (scrollingBigPlanet <= -bigplanet.height)
-                    scrollingBigPlanet = 0;
-                if (scrollingFarPlanet <= -farplanet.height)
-                    scrollingFarPlanet = 0;
-                if (scrollingRingPlanet <= -ringplanet.height)
-                    scrollingRingPlanet = 0;
-                if (scrollingSpaceStar <= -stars.height)
-                    scrollingSpaceStar = 0;
+                    if (scrollingBack <= -back.height)
+                        scrollingBack = 0;
+                    if (scrollingBigPlanet <= -bigplanet.height)
+                        scrollingBigPlanet = 0;
+                    if (scrollingFarPlanet <= -farplanet.height)
+                        scrollingFarPlanet = 0;
+                    if (scrollingRingPlanet <= -ringplanet.height)
+                        scrollingRingPlanet = 0;
+                    if (scrollingSpaceStar <= -stars.height)
+                        scrollingSpaceStar = 0;
 
-                BeginDrawing();
-                UpdateMusicStream(musica_menu);
+                    BeginDrawing();
+                    UpdateMusicStream(musica_menu);
 
-                DrawTextureEx(back, (Vector2){0, scrollingBack}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(back, (Vector2){0, back.height * 2 + scrollingBack}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(back, (Vector2){0, scrollingBack}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(back, (Vector2){0, back.height * 2 + scrollingBack}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(bigplanet, (Vector2){900, scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(bigplanet, (Vector2){900, bigplanet.height * 2 + scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(bigplanet, (Vector2){900, scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(bigplanet, (Vector2){900, bigplanet.height * 2 + scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(farplanet, (Vector2){0, scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(farplanet, (Vector2){0, farplanet.height * 2 + scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(farplanet, (Vector2){0, scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(farplanet, (Vector2){0, farplanet.height * 2 + scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(ringplanet, (Vector2){0, scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(ringplanet, (Vector2){0, ringplanet.height * 2 + scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(ringplanet, (Vector2){0, scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(ringplanet, (Vector2){0, ringplanet.height * 2 + scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(stars, (Vector2){0, scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(stars, (Vector2){0, stars.height * 2 + scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(stars, (Vector2){0, scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(stars, (Vector2){0, stars.height * 2 + scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
 
-                opJug = juegoMenu(seleccion);
-                EndDrawing();
-            } while (opJug == -1);
-
-            switch (opJug)
-            {
-            case NEWP:
-                goto juegoL;
+                    opJug = juegoMenu(seleccion);
+                    EndDrawing();
+                } while (opJug == -1);
+                
+                switch (opJug)
+                {
+                    case NEWP:
+                        goto juegoL;
+                        break;
+                    case 1:
+                        UpdateMusicStream(musica_menu);
+                        goto menu;
+                        break;
+                }
                 break;
-            case REGRESAR:
-                UpdateMusicStream(musica_menu);
-                goto menu;
-                break;
-            }
-            break;
 
             //**************************** OPCIONES ******************************************************************
-        case OPCIONES:
-            UpdateMusicStream(musica_menu);
-            do
-            {
-                BeginDrawing();
+            case OPCIONES:
                 UpdateMusicStream(musica_menu);
-                scrollingBack -= 0.01f;
-                scrollingBigPlanet -= 0.025f;
-                scrollingFarPlanet -= 0.05f;
-                scrollingRingPlanet -= 0.055f;
-                scrollingSpaceStar -= 0.01;
+                do
+                {
+                    BeginDrawing();
+                    UpdateMusicStream(musica_menu);
+                    scrollingBack -= 0.01f;
+                    scrollingBigPlanet -= 0.025f;
+                    scrollingFarPlanet -= 0.05f;
+                    scrollingRingPlanet -= 0.055f;
+                    scrollingSpaceStar -= 0.01;
 
-                if (scrollingBack <= -back.height)
-                    scrollingBack = 0;
-                if (scrollingBigPlanet <= -bigplanet.height)
-                    scrollingBigPlanet = 0;
-                if (scrollingFarPlanet <= -farplanet.height)
-                    scrollingFarPlanet = 0;
-                if (scrollingRingPlanet <= -ringplanet.height)
-                    scrollingRingPlanet = 0;
-                if (scrollingSpaceStar <= -stars.height)
-                    scrollingSpaceStar = 0;
+                    if (scrollingBack <= -back.height)
+                        scrollingBack = 0;
+                    if (scrollingBigPlanet <= -bigplanet.height)
+                        scrollingBigPlanet = 0;
+                    if (scrollingFarPlanet <= -farplanet.height)
+                        scrollingFarPlanet = 0;
+                    if (scrollingRingPlanet <= -ringplanet.height)
+                        scrollingRingPlanet = 0;
+                    if (scrollingSpaceStar <= -stars.height)
+                        scrollingSpaceStar = 0;
 
-                BeginDrawing();
-                UpdateMusicStream(musica_menu);
+                    BeginDrawing();
+                    UpdateMusicStream(musica_menu);
 
-                DrawTextureEx(back, (Vector2){0, scrollingBack}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(back, (Vector2){0, back.height * 2 + scrollingBack}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(back, (Vector2){0, scrollingBack}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(back, (Vector2){0, back.height * 2 + scrollingBack}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(bigplanet, (Vector2){900, scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(bigplanet, (Vector2){900, bigplanet.height * 2 + scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(bigplanet, (Vector2){900, scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(bigplanet, (Vector2){900, bigplanet.height * 2 + scrollingBigPlanet}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(farplanet, (Vector2){0, scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(farplanet, (Vector2){0, farplanet.height * 2 + scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(farplanet, (Vector2){0, scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(farplanet, (Vector2){0, farplanet.height * 2 + scrollingFarPlanet}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(ringplanet, (Vector2){0, scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(ringplanet, (Vector2){0, ringplanet.height * 2 + scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(ringplanet, (Vector2){0, scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(ringplanet, (Vector2){0, ringplanet.height * 2 + scrollingRingPlanet}, 0.0f, 1.0f, WHITE);
 
-                DrawTextureEx(stars, (Vector2){0, scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
-                DrawTextureEx(stars, (Vector2){0, stars.height * 2 + scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
-                subOp = opMenu(vol, diflvl, volumen[vol], dif[diflvl], seleccion, barras);
-                EndDrawing();
+                    DrawTextureEx(stars, (Vector2){0, scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
+                    DrawTextureEx(stars, (Vector2){0, stars.height * 2 + scrollingSpaceStar}, 0.0f, 1.0f, WHITE);
+                    subOp = opMenu(vol, diflvl, volumen[vol], dif[diflvl], seleccion, barras);
+                    EndDrawing();
 
-            } while (subOp != -1);
-            goto menu;
-            break;
+                } while (subOp != -1);
+                goto menu;
+                break;
 
             //**************************** SALIR ******************************************************************
-        case SALIR:
-            CloseWindow();
-            return 0;
-            break;
+            case SALIR:
+                goto finJ;
+                break;
         }
 
     juegoL:
-        do
-        {
-            juego(diflvl);
-        } while (0);
-
-    continuar:
-        do
-        {
-            juego(diflvl);
-        } while (0);
+        StopMusicStream(musica_menu);
+        UnloadTexture(volumen[0]);
+        UnloadTexture(volumen[1]);
+        UnloadTexture(volumen[2]);
+        UnloadTexture(volumen[3]);
+        UnloadTexture(volumen[4]);
+        UnloadTexture(volumen[5]);
+        UnloadTexture(volumen[6]);
+        UnloadTexture(dif[0]);
+        UnloadTexture(dif[1]);
+        UnloadTexture(dif[2]);
+        UnloadMusicStream(musica_menu);
+        UnloadSound(seleccion);
+        CloseAudioDevice();
+        juego(diflvl);
+        CloseWindow();
+        return 0;
     }
 
-    //*********************************************************** UNLOAD ******************************************************************
-    StopMusicStream(musica_menu);
-    UnloadTexture(volumen[0]);
-    UnloadTexture(volumen[1]);
-    UnloadTexture(volumen[2]);
-    UnloadTexture(volumen[3]);
-    UnloadTexture(volumen[4]);
-    UnloadTexture(volumen[5]);
-    UnloadTexture(volumen[6]);
-    UnloadTexture(dif[0]);
-    UnloadTexture(dif[1]);
-    UnloadTexture(dif[2]);
-    UnloadMusicStream(musica_menu);
-    UnloadSound(seleccion);
-    CloseAudioDevice();
-    CloseWindow();
-    //*****************************************************************************************************************************
+    finJ:
+        //*********************************************************** UNLOAD ******************************************************************
+        StopMusicStream(musica_menu);
+        UnloadTexture(volumen[0]);
+        UnloadTexture(volumen[1]);
+        UnloadTexture(volumen[2]);
+        UnloadTexture(volumen[3]);
+        UnloadTexture(volumen[4]);
+        UnloadTexture(volumen[5]);
+        UnloadTexture(volumen[6]);
+        UnloadTexture(dif[0]);
+        UnloadTexture(dif[1]);
+        UnloadTexture(dif[2]);
+        UnloadMusicStream(musica_menu);
+        UnloadSound(seleccion);
+        CloseAudioDevice();
+        CloseWindow();
+        //*****************************************************************************************************************************
 
-    return 0;
+        return 0;
 }
 
 int mainMenu(Sound seleccion)
 {
-    static int op = 0;
-    int sizeTxt[3], j;
-    int fontSize[2] = {70, 40};
-
-    char mensajes[4][30] = {"JUGAR", "OPCIONES", "SALIR", "MECANICO ARITMETICO"};
-    Rectangle fondo[4];
-
-    fondo[3] = {170, 45, 927, 90};
-    DrawRectangleRec(fondo[3], GetColor(0x03D1339));
-    DrawText(mensajes[3], 200, 55, 70, WHITE);
-
-    fondo[0] = {500, 293, 200, 50};
-    DrawRectangleRec(fondo[0], GetColor(0x03D1339));
-    DrawText(mensajes[0], 535, 300, 40, WHITE);
-
-    fondo[1] = {500, 440, 200, 50};
-    DrawRectangleRec(fondo[1], GetColor(0x03D1339));
-    DrawText(mensajes[1], 507, 450, 37, WHITE);
-
-    fondo[2] = {500, 590, 200, 50};
-    DrawRectangleRec(fondo[2], GetColor(0x03D1339));
-    DrawText(mensajes[2], 535, 598, 40, WHITE);
-
-    for (j = 0; j < 3; j++)
+    static int op=0;
+    int sizeTxt[3],j;
+    for(j=0;j<3;j++)
     {
-        if (j == op)
+        if(j==op)
         {
-            DrawRectangleRec(fondo[j], GetColor(0x0CB4C11));
-            if (j == 0)
-            {
-                DrawText(mensajes[0], 535, 300, 40, WHITE);
-            }
-            if (j == 1)
-            {
-                DrawText(mensajes[1], 507, 450, 37, WHITE);
-            }
-            if (j == 2)
-            {
-                DrawText(mensajes[2], 535, 598, 40, WHITE);
-            }
+            sizeTxt[j]=60;
         }
         else
         {
-            DrawRectangleRec(fondo[j], GetColor(0x03D1339));
-            if (j == 0)
-            {
-                DrawText(mensajes[0], 535, 300, 40, WHITE);
-            }
-            if (j == 1)
-            {
-                DrawText(mensajes[1], 507, 450, 37, WHITE);
-            }
-            if (j == 2)
-            {
-                DrawText(mensajes[2], 535, 598, 40, WHITE);
-            }
+            sizeTxt[j]=40;
         }
     }
+
+    char mensajes[4][30] = {"JUGAR", "OPCIONES", "SALIR", "MECANICO ARITMETICO"};
+
+    DrawText(mensajes[3],200,65,70,WHITE);
+    DrawText(mensajes[0],510,200,sizeTxt[0],WHITE);
+    DrawText(mensajes[1],510,300,sizeTxt[1],WHITE);
+    DrawText(mensajes[2],510,400,sizeTxt[2],WHITE);
+
 
     if (IsKeyPressed(KEY_UP))
     {
@@ -532,147 +574,92 @@ int mainMenu(Sound seleccion)
 
 int opMenu(int &vol, int &diflvl, Texture2D volumen, Texture2D dif, Sound seleccion, Sound barras)
 {
-    static int op = 0;
-    int sizeTxt[3], j;
-    for (j = 0; j < 3; j++)
+    static int op=0;
+    int sizeTxt[3],j;
+    for(j=0;j<3;j++)
     {
-        if (j == op)
+        if(j==op)
         {
-            sizeTxt[j] = 60;
+            sizeTxt[j]=60;
         }
         else
         {
-            sizeTxt[j] = 40;
+            sizeTxt[j]=40;
         }
     }
 
-    char mensajes[4][30] = {"DIFICULTAD", "SONIDO", "REGRESAR", "OPCIONES"};
-    Rectangle fondo[4];
+    DrawText("Opciones",450,65,70,WHITE);
+    DrawText("Dificultad",510,200,sizeTxt[0],WHITE);
+    DrawText("Sonido",510,350,sizeTxt[1],WHITE);
+    DrawText("Regresar",510,500,sizeTxt[2],WHITE);
 
-    fondo[3] = {170, 45, 927, 90};
-    DrawRectangleRec(fondo[3], GetColor(0x03D1339));
-    DrawText(mensajes[3], 432, 55, 70, WHITE);
-
-    fondo[0] = {500, 293, 200, 50};
-    DrawRectangleRec(fondo[0], GetColor(0x03D1339));
-    DrawText(mensajes[0], 476, 300, 40, WHITE);
-
-    fondo[1] = {500, 440, 200, 50};
-    DrawRectangleRec(fondo[1], GetColor(0x03D1339));
-    DrawText(mensajes[1], 529, 450, 37, WHITE);
-
-    fondo[2] = {500, 590, 200, 50};
-    DrawRectangleRec(fondo[2], GetColor(0x03D1339));
-    DrawText(mensajes[2], 490, 598, 40, WHITE);
-
-    for (j = 0; j < 3; j++)
+    switch(op)
     {
-        if (j == op)
-        {
-            DrawRectangleRec(fondo[j], GetColor(0x0CB4C11));
-            if (j == 0)
-            {
-                DrawText(mensajes[0], 476, 300, 40, WHITE);
-            }
-            if (j == 1)
-            {
-                DrawText(mensajes[1], 529, 450, 37, WHITE);
-            }
-            if (j == 2)
-            {
-                DrawText(mensajes[2], 490, 598, 40, WHITE);
-            }
-        }
-        else
-        {
-            DrawRectangleRec(fondo[j], GetColor(0x03D1339));
-            if (j == 0)
-            {
-                DrawText(mensajes[0], 476, 300, 40, WHITE);
-            }
-            if (j == 1)
-            {
-                DrawText(mensajes[1], 529, 450, 37, WHITE);
-            }
-            if (j == 2)
-            {
-                DrawText(mensajes[2], 490, 598, 40, WHITE);
-            }
-        }
-    }
+        case DIFICULTAD:
+            DrawTexture(dif,520,-125,WHITE);
 
-    switch (op)
-    {
-    case DIFICULTAD:
-        DrawTexture(dif, 520, -125 + 100, WHITE);
-
-        if (IsKeyPressed(KEY_LEFT))
-        {
-            if (diflvl != 0)
+            if(IsKeyPressed(KEY_LEFT))
             {
-                diflvl--;
-                PlaySound(barras);
-            }
-        }
-        else
-        {
-            if (IsKeyPressed(KEY_RIGHT))
-            {
-                if (diflvl != 2)
+                if(diflvl!=0)
                 {
-                    diflvl++;
-                    PlaySound(barras);
+                    diflvl--;
                 }
             }
-        }
-
-        switch (diflvl)
-        {
-        case 0:
-            DrawText("FACIL", 862, 100 + 150, 40, WHITE);
-            break;
-        case 1:
-            DrawText("NORMAL", 853, 100 + 150, 40, WHITE);
-            break;
-        case 2:
-            DrawText("DIFICL", 856, 100 + 150, 40, WHITE);
-            break;
-        }
-
-        break;
-
-    case SONIDO:
-        DrawTexture(volumen, 485, 25 + 100, WHITE);
-
-        if (IsKeyPressed(KEY_LEFT))
-        {
-            if (vol != 0)
+            else
             {
-                vol--;
-                PlaySound(barras);
-            }
-        }
-        else
-        {
-            if (IsKeyPressed(KEY_RIGHT))
-            {
-                if (vol != 6)
+                if(IsKeyPressed(KEY_RIGHT))
                 {
-                    vol++;
-                    PlaySound(barras);
+                    if(diflvl!=2)
+                    {
+                        diflvl++;
+                    }
                 }
             }
-        }
 
-        break;
+            switch(diflvl)
+            {
+                case 0:
+                    DrawText("Fácil",862,100,60,WHITE);
+                    break;
+                case 1:
+                    DrawText("Normal",853,100,60,WHITE);
+                    break;
+                case 2:
+                    DrawText("Difícil",856,100,60,WHITE);
+                    break;
+            }
 
-    case REGRESAR:
-        if (IsKeyPressed(KEY_ENTER))
-        {
-            PlaySound(seleccion);
-            return -1;
-        }
-        break;
+            break;
+      
+        case SONIDO:
+            DrawTexture(volumen,485,25,WHITE);
+                    
+            if(IsKeyPressed(KEY_LEFT))
+            {
+                if(vol!=0)
+                {
+                    vol--;
+                }
+            }
+            else
+            {
+                if(IsKeyPressed(KEY_RIGHT))
+                {
+                    if(vol!=6)
+                    {
+                        vol++;
+                    }
+                }
+            }
+            
+            break;
+
+        case REGRESAR:
+            if(IsKeyPressed(KEY_ENTER))
+            {
+                return -1;
+            }
+            break;
     }
 
     if (IsKeyPressed(KEY_UP))
@@ -692,57 +679,30 @@ int opMenu(int &vol, int &diflvl, Texture2D volumen, Texture2D dif, Sound selecc
             }
         }
     }
-
     return op;
 }
 
 int juegoMenu(Sound seleccion)
 {
-    static int op = 0;
-    int sizeTxt[3], j;
-
-    char mensajes[3][30] = {"NUEVA PARTIDA", "REGRESAR", "MECANICO ARITMETICO"};
-    Rectangle fondo[3];
-
-    fondo[2] = {170, 45, 927, 90};
-    DrawRectangleRec(fondo[2], GetColor(0x03D1339));
-    DrawText(mensajes[2], 200, 55, 70, WHITE);
-
-    fondo[0] = {500, 293, 200, 50};
-    DrawRectangleRec(fondo[0], GetColor(0x03D1339));
-    DrawText(mensajes[0], 423, 300, 40, WHITE);
-
-    fondo[1] = {500, 440, 200, 50};
-    DrawRectangleRec(fondo[1], GetColor(0x03D1339));
-    DrawText(mensajes[1], 490, 450, 40, WHITE);
-
-    for (j = 0; j < 2; j++)
+     static int op=0;
+    int sizeTxt[3],j;
+    for(j=0;j<3;j++)
     {
-        if (j == op)
+        if(j==op)
         {
-            DrawRectangleRec(fondo[j], GetColor(0x0CB4C11));
-            if (j == 0)
-            {
-                DrawText(mensajes[0], 423, 300, 40, WHITE);
-            }
-            if (j == 1)
-            {
-                DrawText(mensajes[1], 490, 450, 40, WHITE);
-            }
+            sizeTxt[j]=60;
         }
         else
         {
-            DrawRectangleRec(fondo[j], GetColor(0x03D1339));
-            if (j == 0)
-            {
-                DrawText(mensajes[0], 423, 300, 40, WHITE);
-            }
-            if (j == 1)
-            {
-                DrawText(mensajes[1], 490, 450, 40, WHITE);
-            }
+            sizeTxt[j]=40;
         }
     }
+
+    char mensajes[3][30] = {"NUEVA PARTIDA", "REGRESAR", "MECANICO ARITMETICO"};
+
+    DrawText(mensajes[2],200,65,70,WHITE);
+    DrawText(mensajes[0],460,200,sizeTxt[0],WHITE);
+    DrawText(mensajes[1],460,350,sizeTxt[1],WHITE);
 
     if (IsKeyPressed(KEY_UP))
     {
@@ -771,21 +731,27 @@ int juegoMenu(Sound seleccion)
     return -1;
 }
 
+/****************************************************************** JUEGO  ************************************************************************/
 void juego(int diflvl)
 {
     nivel1(diflvl);
+    cinemaPuzleNivel1(diflvl);
+    nivel2(diflvl);
+    cinemaPuzleNivel2(diflvl);
+    nivel3(diflvl);
+    cinemaPuzleNivel3(diflvl);
 }
 
 void nivel1(int diflvl)
 {
-    float VDDIAGONAL = VD * sin(45) / sin(90);
-    SetTargetFPS(60);
-    InitWindow(RANCHO, RALTO, "iuego");
+    float VDDIAGONAL = 7.5 * sin(45) / sin(90);
+    float G = 0.1;
+    float GD = 0.15;
     srand(time(NULL));
     int i, j, k;
     Tplayer player;
-    player.pos.height = ALTOP;
-    player.pos.width = ANCHOP;
+    player.pos.height = ALTOP-10;
+    player.pos.width = ANCHOP/1.5;
     player.pos.x = RANCHO / 2;
     player.pos.y = SUELO - player.pos.height;
     player.dash = 0;
@@ -882,13 +848,13 @@ void nivel1(int diflvl)
     ataquesizquierdos[1] = LoadTexture("texturas/HitL1.png");
     ataquesizquierdos[2] = LoadTexture("texturas/HitL2.png");
     ataquesizquierdos[3] = LoadTexture("texturas/HitL3.png");
-    ataquesizquierdos[4] = LoadTexture("texturas/HitL4.png");
+    ataquesizquierdos[4] = LoadTexture("texturas/HitL4_1.png");
 
     ataquesderechos[0] = LoadTexture("texturas/HitR0.png");
     ataquesderechos[1] = LoadTexture("texturas/HitR1.png");
     ataquesderechos[2] = LoadTexture("texturas/HitR2.png");
     ataquesderechos[3] = LoadTexture("texturas/HitR3.png");
-    ataquesderechos[4] = LoadTexture("texturas/HitR4.png");
+    ataquesderechos[4] = LoadTexture("texturas/HitR4_1.png");
 
     Texture2D piezas_nv1[3];
     piezas_nv1[0] = LoadTexture("texturas/pieza1_nv1.png");
@@ -1047,7 +1013,6 @@ void nivel1(int diflvl)
         BeginDrawing();
 
         BeginMode2D(camara);
-        DrawRectangleRec(player.pos, DARKBLUE);
         DrawTexture(back_nv1, 0, 0, WHITE);
         DrawTexture(backmiddle_nv1, 0, 0, WHITE);
         DrawTexture(middle_nv1, 0, 0, WHITE);
@@ -1076,6 +1041,64 @@ void nivel1(int diflvl)
                                 }
                                 fin = 1;
                                 LimpiaEnemigosLvl1(shark, tort, ang);
+                                if (time > 300)
+                                {
+                                    UnloadTexture(tortuga);
+                                    UnloadTexture(tortugaizq);
+                                    UnloadTexture(anguila);
+                                    UnloadTexture(anguilaizq);
+                                    UnloadTexture(ataque_ani);
+                                    UnloadTexture(ataque_anizq);
+                                    UnloadTexture(pulpo);
+                                    UnloadTexture(pulpoizq);
+                                    UnloadTexture(caminar);
+                                    UnloadTexture(caminarizq);
+                                    UnloadTexture(reposo);
+                                    UnloadTexture(reposoizq);
+                                    UnloadTexture(danio);
+                                    UnloadTexture(salto);
+                                    UnloadTexture(saltoder);
+                                    UnloadTexture(back_nv1);
+                                    UnloadTexture(backmiddle_nv1);
+                                    UnloadTexture(middle_nv1);
+                                    UnloadTexture(front_nv1);
+                                    UnloadTexture(plataforma_nv1);
+                                    UnloadTexture(bullet_nv1);
+                                    UnloadTexture(corazon);
+                                    UnloadTexture(Aspeed);
+
+                                    UnloadTexture(ataquesizquierdos[0]);
+                                    UnloadTexture(ataquesizquierdos[1]);
+                                    UnloadTexture(ataquesizquierdos[2]);
+                                    UnloadTexture(ataquesizquierdos[3]);
+                                    UnloadTexture(ataquesizquierdos[4]);
+                                    
+                                    UnloadTexture(ataquesderechos[0]);
+                                    UnloadTexture(ataquesderechos[1]);
+                                    UnloadTexture(ataquesderechos[2]);
+                                    UnloadTexture(ataquesderechos[3]);
+                                    UnloadTexture(ataquesderechos[4]);
+
+                    
+
+                                    UnloadTexture(piezas_nv1[0]);
+                                    UnloadTexture(piezas_nv1[1]);
+                                    UnloadTexture(piezas_nv1[2]);
+
+                                    UnloadSound(dolor);
+                                    UnloadSound(brinco);
+                                    UnloadSound(paso);
+                                    UnloadSound(agarrar);
+                                    UnloadSound(disparo_nv1);
+                                    UnloadSound(sdash);
+                                    UnloadSound(disparo_nv1);
+                                    UnloadSound(ludico);
+                                    UnloadSound(anguilasound);
+
+                                    UnloadMusicStream(musica_nv1);
+                                    CloseAudioDevice();
+                                    goto next;
+                                }
                             }
                         }
                     }
@@ -1798,7 +1821,7 @@ void nivel1(int diflvl)
                             ang[i].status = 1;
                             ang[i].pos.x = RANCHO;
                             ang[i].pos.y = (rand() % 550) + 60;
-                            CalculaComponentesVelocidad(ANGUILASPEED, CalculaAnguloAnguila(ang[i].pos, player.pos), ang[i].v);
+                            CalculaComponentesVelocidad(ANGUILASPEED, CalculaAngulo(ang[i].pos, player.pos), ang[i].v);
                             ang[i].left = 0;
                         }
                         else
@@ -1806,7 +1829,7 @@ void nivel1(int diflvl)
                             ang[i].status = 1;
                             ang[i].pos.x = 0 - ang[i].pos.width;
                             ang[i].pos.y = (rand() % 550) + 60;
-                            CalculaComponentesVelocidad(ANGUILASPEED, CalculaAnguloAnguila(ang[i].pos, player.pos), ang[i].v);
+                            CalculaComponentesVelocidad(ANGUILASPEED, CalculaAngulo(ang[i].pos, player.pos), ang[i].v);
                             ang[i].left = 1;
                         }
                     }
@@ -1834,7 +1857,7 @@ void nivel1(int diflvl)
                             }
                             else
                             {
-                                player.pos.x += VD;
+                                player.pos.x += 7.5;
                             }
                         }
                     }
@@ -1856,7 +1879,7 @@ void nivel1(int diflvl)
                                 }
                                 else
                                 {
-                                    player.pos.x -= VD;
+                                    player.pos.x -= 7.5;
                                 }
                             }
                         }
@@ -1864,13 +1887,13 @@ void nivel1(int diflvl)
                         {
                             if (lookUp)
                             {
-                                player.pos.y -= VD;
+                                player.pos.y -= 7.5;
                             }
                             else
                             {
                                 if (lookDown)
                                 {
-                                    player.pos.y += VD;
+                                    player.pos.y += 7.5;
                                 }
                             }
                         }
@@ -1927,7 +1950,7 @@ void nivel1(int diflvl)
                 if (IsKeyDown(KEY_RIGHT))
                 {
                     player.x0 = player.pos.x;
-                    player.pos.x += VX;
+                    player.pos.x += 3;
                     lookR = 1;
                     lookL = 0;
                 }
@@ -1936,7 +1959,7 @@ void nivel1(int diflvl)
                     if (IsKeyDown(KEY_LEFT))
                     {
                         player.x0 = player.pos.x;
-                        player.pos.x -= VX;
+                        player.pos.x -= 3;
                         lookR = 1;
                         lookL = 0;
                     }
@@ -1966,7 +1989,7 @@ void nivel1(int diflvl)
                     if (IsKeyPressed(KEY_C))
                     {
                         PlaySound(sdash);
-                        Direccioniugador(lookL, lookR, lookUp, lookDown, player);
+                        Direccioniugador1(lookL, lookR, lookUp, lookDown, player);
                         player.dash = 1;
                         player.timeDash = 0;
                     }
@@ -1978,7 +2001,7 @@ void nivel1(int diflvl)
             {
                 for (i = 0; i < MAXHIT; i++)
                 {
-                    Direccioniugador(lookL, lookR, lookUp, lookDown, player);
+                    Direccioniugador1(lookL, lookR, lookUp, lookDown, player);
                     if (!player.buff) //** Meiora ******************************************************************************************************
                     {
                         if (player.AtkC > VATAQUE)
@@ -2044,136 +2067,7 @@ void nivel1(int diflvl)
             framesReposoizq.x = (float)currentFrame * (float)reposoizq.width / 4;
         }
 
-         Direccioniugador(lookL,lookR,lookUp,lookDown,player);
-
-        // jugador
-        if (!IsKeyDown(KEY_X))
-        {
-             framesSalto++;
-                    if (framesSalto >= (60 / framesSpeed))
-                    {
-                        framesSalto = 0;
-                        currentSalto++;
-
-                        if (currentSalto > 3)
-                            currentSalto = 0;
-                        frameSalto.x = (float)currentSalto * (float)salto.width / 4;
-                        frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
-                    }
-                    if (lookL)
-                    {
-                        DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 50}, WHITE);
-                    }
-                    else
-                    {
-                        if (lookR)
-                        {
-                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
-                        }
-                        else
-                        {
-                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
-                        }
-                    }
-        }
-        else
-        {
-            /*
-            DrawTexture(ataquesderechos[1], player.pos.x, player.pos.y - 10, WHITE);
-            DrawTexture(ataquesderechos[0], player.pos.x, player.pos.y - 10, WHITE);
-            DrawTexture(ataquesderechos[3], player.pos.x - 5, player.pos.y - 30, WHITE);
-            DrawTexture(ataquesderechos[2], player.pos.x, player.pos.y - 10, WHITE);
-            DrawTexture(ataquesizquierdos[1], player.pos.x - 25, player.pos.y - 10, WHITE);
-            DrawTexture(ataquesizquierdos[3], player.pos.x, player.pos.y - 30, WHITE);
-            DrawTexture(ataquesizquierdos[2], player.pos.x - 32, player.pos.y - 10, WHITE);
-            */
-            if (disparo)
-            {
-                if (lookR)
-                {
-                    if (lookUp)
-                    {
-                        DrawTexture(ataquesderechos[3], player.pos.x - 5, player.pos.y - 30, WHITE);
-                    }
-                    else
-                    {
-                        if (lookDown)
-                        {
-                            DrawTexture(ataquesderechos[1], player.pos.x, player.pos.y - 10, WHITE);
-                        }
-                        else
-                        {
-                            DrawTexture(ataquesderechos[2], player.pos.x, player.pos.y - 10, WHITE);
-                        }
-                    }
-                }
-                else
-                {
-                    if (lookL)
-                    {
-                        if (lookUp)
-                        {
-                            DrawTexture(ataquesizquierdos[3], player.pos.x, player.pos.y - 30, WHITE);
-                        }
-                        else
-                        {
-                            if (lookDown)
-                            {
-                                DrawTexture(ataquesizquierdos[1], player.pos.x - 25, player.pos.y - 10, WHITE);
-                            }
-                            else
-                            {
-                                DrawTexture(ataquesizquierdos[2], player.pos.x - 32, player.pos.y - 10, WHITE);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (lookUp)
-                        {
-                            DrawTexture(ataquesderechos[4], player.pos.x, player.pos.y - 10, WHITE);
-                        }
-                        else
-                        {
-                            if (lookDown)
-                            {
-                                DrawTexture(ataquesderechos[0], player.pos.x, player.pos.y - 10, WHITE);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                framesSalto++;
-                    if (framesSalto >= (60 / framesSpeed))
-                    {
-                        framesSalto = 0;
-                        currentSalto++;
-
-                        if (currentSalto > 3)
-                            currentSalto = 0;
-                        frameSalto.x = (float)currentSalto * (float)salto.width / 4;
-                        frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
-                    }
-                    if (lookL)
-                    {
-                        DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 50}, WHITE);
-                    }
-                    else
-                    {
-                        if (lookR)
-                        {
-                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
-                        }
-                        else
-                        {
-                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
-                        }
-                    }
-                    
-            }
-        }
+       
 
         for (i = 0; i < MAXHIT; i++)
         {
@@ -2307,14 +2201,3610 @@ void nivel1(int diflvl)
                 DrawTexture(piezas_nv1[i], pieza[i].pos.x, pieza[i].pos.y, WHITE);
             }
         }
+        // jugador
+        Direccioniugador1(lookL,lookR,lookUp,lookDown,player);
+
+        if (!IsKeyDown(KEY_X))
+        {
+             framesSalto++;
+                    if (framesSalto >= (60 / framesSpeed))
+                    {
+                        framesSalto = 0;
+                        currentSalto++;
+
+                        if (currentSalto > 3)
+                            currentSalto = 0;
+                        frameSalto.x = (float)currentSalto * (float)salto.width / 4;
+                        frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
+                    }
+                    if (lookL)
+                    {
+                        DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 75, player.pos.y - 50}, WHITE);
+                    }
+                    else
+                    {
+                        if (lookR)
+                        {
+                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 35, player.pos.y - 50}, WHITE);
+                        }
+                        else
+                        {
+                            DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 35, player.pos.y - 50}, WHITE);
+                        }
+                    }
+        }
+        else
+        {
+            if (disparo)
+            {
+                if (lookR)
+                {
+                    if (lookUp)
+                    {
+                        DrawTexture(ataquesderechos[3], player.pos.x - 20, player.pos.y - 30, WHITE);
+                    }
+                    else
+                    {
+                        if (lookDown)
+                        {
+                            DrawTexture(ataquesderechos[1], player.pos.x-20, player.pos.y - 10, WHITE);
+                        }
+                        else
+                        {
+                            DrawTexture(ataquesderechos[2], player.pos.x-20, player.pos.y - 10, WHITE);
+                        }
+                    }
+                }
+                else
+                {
+                    if (lookL)
+                    {
+                        if (lookUp)
+                        {
+                            DrawTexture(ataquesizquierdos[3], player.pos.x-35, player.pos.y-40, WHITE);
+                        }
+                        else
+                        {
+                            if (lookDown)
+                            {
+                                DrawTexture(ataquesizquierdos[1], player.pos.x - 50, player.pos.y - 10, WHITE);
+                            }
+                            else
+                            {
+                                DrawTexture(ataquesizquierdos[2], player.pos.x - 65, player.pos.y - 10, WHITE);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (lookUp)
+                        {
+                            DrawTexture(ataquesderechos[4], player.pos.x-15, player.pos.y - 40, WHITE);
+                        }
+                        else
+                        {
+                            if (lookDown)
+                            {
+                                DrawTexture(ataquesderechos[0], player.pos.x-15, player.pos.y - 10, WHITE);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                framesSalto++;
+                if (framesSalto >= (60 / framesSpeed))
+                {
+                    framesSalto = 0;
+                    currentSalto++;
+                    if (currentSalto > 3)
+                    currentSalto = 0;
+                    frameSalto.x = (float)currentSalto * (float)salto.width / 4;
+                    frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
+                }
+                if (lookL)
+                {
+                    DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 75, player.pos.y - 50}, WHITE);
+                }
+                else
+                {
+                    if (lookR)
+                    {
+                        DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 35, player.pos.y - 50}, WHITE);
+                    }
+                    else
+                    {
+                        DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 35, player.pos.y - 50}, WHITE);
+                    }
+                }
+            }
+        }
 
         EndMode2D();
         EndDrawing();
     }
-    CloseWindow();
+    next:
+        int z=0;
 }
 
+void nivel2(int diflvl)
+{
+    int maxplat = 30;
+    float _G=0.1;
+    float _GD=0.2;
+    srand(time(NULL));
+    int j, i;
+    int y0Cam;
+
+    int framesAutom = 0;
+
+    int framesSpeed = 8;
+    int currentFrame = 0;
+
+    int currentPersonaje = 0;
+    int framesPersonaje = 0;
+
+    int currentSalto = 0;
+    int framesSalto = 0;
+
+    // contadores
+    int frameC = 0;
+    float time = 0;
+    int c = 0;
+    int igncolision = 0;
+    int hitc = 0;
+    int platc = 0;
+    // int caminarc=0;
+
+    // banderas
+    int bsuelo = 0;
+    int bdown = 0;
+    // int caminar=0;
+    int lookR = 1;
+    int lookL = 0;
+    int lookUp = 0;
+    int lookDown = 0;
+    int hit = 0;
+    int dash = 0;
+
+    int fin = 0;
+    // auxiliar
+    int random;
+
+    // ************************************************ TEXTURAS ********************************************************************
+    Texture2D pajaro = LoadTexture("texturas/pajaro.png");
+    Rectangle framesPajaro = {0.0f, 0.0f, (float)pajaro.width / 6, (float)pajaro.height};
+
+    Texture2D pajaroizq = LoadTexture("texturas/pajaroizq.png");
+    Rectangle framesPajaroizq = {0.0f, 0.0f, (float)pajaroizq.width / 6, (float)pajaroizq.height};
+
+    Texture2D huevo = LoadTexture("texturas/egg.png");
+    Rectangle framesHuevo = {0.0f, 0.0f, (float)huevo.width, (float)huevo.height};
+
+    Texture2D carro = LoadTexture("texturas/Ranger.png");
+    Rectangle framesCarro = {0.0f, 0.0f, (float)carro.width, (float)carro.height};
+
+    Texture2D carro2 = LoadTexture("texturas/Ranger.png");
+    Rectangle framesCarro2 = {0.0f, 0.0f, (float)carro2.width, (float)carro2.height};
+
+    Texture2D caminar = LoadTexture("texturas/Cyborg_run.png");
+    Rectangle framesCaminar = {0.0f, 0.0f, (float)caminar.width / 6, (float)caminar.height};
+
+    Texture2D caminarizq = LoadTexture("texturas/Cyborg_run_left.png");
+    Rectangle framesCaminarizq = {0.0f, 0.0f, (float)caminarizq.width / 6, (float)caminarizq.height};
+
+    Texture2D reposo = LoadTexture("texturas/Cyborg_idle.png");
+    Rectangle framesReposo = {0.0f, 0.0f, (float)reposo.width / 4, (float)reposo.height};
+
+    Texture2D reposoizq = LoadTexture("texturas/Cyborg_idle_left.png");
+    Rectangle framesReposoizq = {0.0f, 0.0f, (float)reposoizq.width / 4, (float)reposoizq.height};
+
+    Texture2D danio = LoadTexture("texturas/Cyborg_hurt.png");
+    Rectangle framesDanio = {0.0f, 0.0f, (float)danio.width, (float)danio.height};
+
+    Texture2D salto = LoadTexture("texturas/Cyborg_jump.png");
+    Rectangle frameSalto = {0.0f, 0.0f, (float)salto.width / 4, (float)salto.height};
+
+    Texture2D saltoder = LoadTexture("texturas/Cyborg_jumpr.png");
+    Rectangle frameSaltoder = {0.0f, 0.0f, (float)saltoder.width / 4, (float)saltoder.height};
+
+    Texture2D background = LoadTexture("texturas/fondo1.png");
+    Rectangle frameBackground = {0.0f, 0.0f, (float)RANCHO, (float)RALTO};
+
+    Texture2D ground = LoadTexture("texturas/ground.png");
+    Rectangle frameGround = {0.0f, 0.0f, (float)ground.width, (float)ground.height};
+
+    Texture2D back = LoadTexture("texturas/back1.png");
+    Texture2D middle = LoadTexture("texturas/middle.png");
+    Texture2D front = LoadTexture("texturas/front.png");
+
+    Texture2D plataforma = LoadTexture("texturas/plataforma1.png");
+
+    Texture2D escudo = LoadTexture("texturas/escudo.png");
+    Rectangle frameEscudo = {0.0f, 0.0f, (float)escudo.width, (float)escudo.height};
+
+    Texture2D escudoh = LoadTexture("texturas/escudoh.png");
+    Rectangle frameEscudoh = {0.0f, 0.0f, (float)escudoh.width, (float)escudoh.height};
+
+    Texture2D piezas[3];
+
+    Rectangle framePiezas[3] = {0.0f, 0.0f, (float)ground.width, (float)ground.height};
+
+    Texture2D corazon=LoadTexture("texturas/corazon.png");
+    piezas[0] = LoadTexture("texturas/pieza1_2.png");
+    piezas[1] = LoadTexture("texturas/pieza2_2.png");
+    piezas[2] = LoadTexture("texturas/pieza3_2.png");
+    
+    framePiezas[0] = {0.0f, 0.0f, (float)piezas[0].width, (float)piezas[0].height};
+    framePiezas[1] = {0.0f, 0.0f, (float)piezas[1].width, (float)piezas[1].height};
+    framePiezas[2] = {0.0f, 0.0f, (float)piezas[2].width, (float)piezas[2].height};
+
+    // ************************************************ SONIDOS ********************************************************************
+
+    InitAudioDevice();
+
+    Sound dolor = LoadSound("sonidos/danio.wav");
+    Sound brinco = LoadSound("sonidos/salto.mp3");
+    Sound paso = LoadSound("sonidos/paso1.wav");
+    Sound pajarin = LoadSound("sonidos/pajaro.wav");
+    Sound agarrar = LoadSound("sonidos/pieza.wav");
+    Sound carrillo = LoadSound("sonidos/carrillo2.wav");
+    Music nivel2 = LoadMusicStream("sonidos/nivel2_musica.mp3");
+    Sound sdash = LoadSound("sonidos/dash.mp3");
+    SetSoundVolume(brinco, -0.15f);
+    SetSoundVolume(pajarin, -0.5f);
+    SetMusicVolume(nivel2, -0.5f);
+    SetSoundVolume(carrillo, -0.2f);
+    SetSoundVolume(sdash, +15);
+
+    // Inicializacion ***************************************************************************************
+    // Inicializacion Plataformas
+    Tplat plat[maxplat];
+    plat[0].pos.x = 400;
+    plat[0].status = 1;
+    plat[0].flag = 0;
+    plat[0].pos.width = 350;
+    plat[0].pos.height = 40;
+    plat[0].pos.y = (rand() % 300) + 200;
+    for (j = 1; j < maxplat; j++)
+    {
+        if (plat[j - 1].pos.x < -7200)
+        {
+            for (i = j + 1; i < maxplat; i++)
+            {
+                plat[i].status = 0;
+                plat[i].flag = 0;
+                plat[i].pos.width = 0;
+                plat[i].pos.height = 0;
+                plat[i].pos.y = 0;
+                plat[i].pos.x = 0;
+            }
+            j = maxplat;
+        }
+        else
+        {
+            plat[j].status = 1;
+            plat[j].flag = 0;
+            plat[j].pos.width = 350;
+            plat[j].pos.height = 40;
+            plat[j].pos.y = (rand() % 250) + 200;
+            plat[j].pos.x = plat[j - 1].pos.x - plat[j].pos.width - ((rand() % 200) + 50);
+            platc++;
+        }
+    }
+
+    // Inicializacion piezas
+    Tpart pieza[3];
+    int piezac = 0;
+    random = (platc) / 3;
+    for (j = 0; j < 3; j++)
+    {
+
+        pieza[j].status = 1;
+        pieza[j].listo=0;
+        pieza[j].pos.height = 163;
+        pieza[j].pos.width = 114;
+
+        if (j == 0)
+        {
+            pieza[j].pos.y = plat[platc - 1].pos.y - pieza[j].pos.height;
+            pieza[j].pos.x = plat[platc - 1].pos.x + plat[platc].pos.width / 2;
+        }
+        else
+        {
+            pieza[j].pos.y = plat[platc - random * j].pos.y - pieza[j].pos.height;
+            pieza[j].pos.x = plat[platc - random * j].pos.x + plat[platc - random * j].pos.width / 2;
+        }
+    }
+
+    // Inicializa la posicion
+    Tplayer player;
+    player.pos.height = ALTOP;
+    player.pos.width = ANCHOP-25;
+    player.pos.x = 400;   // Posicion incial
+    player.pos.y = SUELO; //""
+    player.y0 = player.pos.y;
+    player.v0 = 0;
+    player.timeDash = 70;
+
+    // vida
+    player.vida.num=MAXVIDA;
+    player.vida.pos.width=30;
+    player.vida.pos.height=30;
+    player.vida.pos.x=player.pos.x-600;;
+    player.vida.pos.y=30;
+    player.vida.time=0;
+
+    // Inicializacion enemigos
+    Tave ave[MAXAVE];
+    for (j = 0; j < MAXAVE; j++)
+    {
+        ave[j].status = 0;
+        ave[j].right = 0;
+        ave[j].left = 0;
+        ave[j].pos.x = 2000;
+        ave[j].pos.y = 800;
+        ave[j].pos.height = 20;
+        ave[j].pos.width = 40;
+    }
+
+    Tegg egg[MAXEGG];
+    for (j = 0; j < MAXEGG; j++)
+    {
+        egg[j].status = 0;
+        egg[j].pos.height = 30;
+        egg[j].pos.width = 20;
+        egg[j].pos.x = 0;
+        egg[j].pos.y = 800;
+    }
+
+    Tcar car[MAXCAR];
+    for (j = 0; j < MAXCAR; j++)
+    {
+        car[j].status = 0;
+        car[j].pos.height = 140;
+        car[j].pos.width = 315;
+        car[j].pos.x = 0;
+        car[j].pos.y = 800;
+        car[j].movimiento = 0;
+        car[j].time = 120;
+    }
+
+    Thit hithit;
+
+    // Inicializacion camara
+    Camera2D camara = {0};
+    camara.target.x = player.pos.x + 30;
+    camara.target.y = player.pos.y;
+    camara.offset.x = 640;
+    camara.offset.y = CAMY;
+    camara.rotation = 0;
+    camara.zoom = 1;
+
+    Tcora dropVida[MAXDROPVIDA];
+
+    for(i=0;i<MAXDROPVIDA;i++)
+    {
+        dropVida[i].pos.width=30;
+        dropVida[i].pos.height=30;
+        dropVida[i].status=0;
+        dropVida[i].time=0;
+    }
+    float posicion = player.pos.x;
+
+    while (!WindowShouldClose())
+    {
+
+        time += 1;
+        igncolision++;
+        frameC++;
+        player.timeDash++;
+        player.vida.time++;
+
+        //** terminar el nivel ***********************************************************************************
+        if(pieza[0].status)
+        {
+            if(pieza[0].pos.y==SUELO-pieza[0].pos.height)
+            {
+                if(pieza[1].status)
+                {
+                    if(pieza[1].pos.y==SUELO-pieza[1].pos.height)
+                    {
+                        if(pieza[2].status)
+                        {
+                            if(pieza[2].pos.y==SUELO-pieza[2].pos.height)
+                            {
+                                
+                                if(!fin)
+                                {
+                                    time=0;
+                                }
+                                fin=1;
+                                LimpiaEnemigosLvl2(ave,car);
+                                if(time>300)
+                                {
+                                    UnloadTexture(piezas[0]);
+                                    UnloadTexture(piezas[1]);
+                                    UnloadTexture(piezas[2]);
+                                    UnloadTexture(corazon);
+                                    UnloadTexture(escudo);
+                                    UnloadTexture(escudoh);
+                                    UnloadTexture(plataforma);
+                                    UnloadTexture(back);
+                                    UnloadTexture(middle);
+                                    UnloadTexture(front);
+                                    UnloadTexture(ground);
+                                    UnloadTexture(background);
+                                    UnloadTexture(salto);
+                                    UnloadTexture(saltoder);
+                                    UnloadTexture(danio);
+                                    UnloadTexture(reposo);
+                                    UnloadTexture(reposoizq);
+                                    UnloadTexture(caminar);
+                                    UnloadTexture(caminarizq);
+                                    UnloadTexture(pajaro);
+                                    UnloadTexture(pajaroizq);
+                                    UnloadTexture(carro);
+                                    UnloadTexture(carro2);
+                                    UnloadTexture(huevo);
+
+                                    UnloadSound(dolor);
+                                    UnloadSound(brinco);
+                                    UnloadSound(paso);
+                                    UnloadSound(pajarin);
+                                    UnloadSound(agarrar);
+                                    UnloadSound(carrillo);
+                                    UnloadSound(sdash);
+                                    UnloadMusicStream(nivel2);
+                                    CloseAudioDevice();
+                                    goto next;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // **************************************************** DIBUJO *******************************************************
+        BeginDrawing();
+
+        BeginMode2D(camara);
+
+        ClearBackground(LIGHTGRAY);
+        float ancho = 700;
+        for (int x = 0; x < 8; x++)
+        {
+            DrawTextureEx(back, Vector2{ancho, 0}, 0, 1, WHITE);
+            DrawTextureEx(middle, Vector2{ancho, 0}, 0, 1, WHITE);
+            DrawTextureEx(front, Vector2{ancho, 0}, 0, 1, WHITE);
+            ancho -= back.width;
+        }
+    
+        float piso = 2000;
+        for (int x = 0; x < 2000; x++)
+        {
+            DrawTextureEx(ground, Vector2{piso, SUELO}, 0, 1, WHITE);
+            piso -= ground.width;
+        }
+
+        if(!fin)
+        {
+            //****************************************************** PIEZAS **********************************************************************
+            
+            for(j=0;j<3;j++)
+            {   
+                //drop
+                if(!pieza[j].listo)
+                {
+                    if(!pieza[j].status)
+                    {
+                        if(CheckPlayerColision(player.pos,pieza[j].pos))
+                        {
+                            pieza[j].status=1;
+                            pieza[j].listo=1;
+                        }
+                    }
+                }
+
+                //recolleccion
+                if(!pieza[j].listo)
+                {
+                    if(pieza[j].status)
+                    {
+                        if(CheckPlayerColision(player.pos,pieza[j].pos))
+                        {
+                            PlaySound(agarrar);
+                            pieza[j].status=0;
+                            pieza[j].pos.y=SUELO-pieza[j].pos.height;
+                            piezac++;
+                            switch(j)
+                            {
+                                case 0:
+                                    pieza[j].pos.x=850;
+                                    break;
+                                case 1:
+                                    pieza[j].pos.x=964;
+                                    break;
+                                case 2:
+                                    pieza[j].pos.x=1058;
+                                    break;
+                            }
+                            j=3;
+                        }
+                    }
+                }    
+            }
+        
+            //******************************************************** AVES **************************************************************************
+            for (j = 0; j < MAXAVE; j++)
+            {
+                // comportameinto
+                if (ave[j].status)
+                {
+                    // movimiento enemigo **si sale de la pantalla se elimina**
+                    if (ave[j].right)
+                    {
+                        ave[j].pos.x -= AVESPEED;
+                        if (ave[j].pos.x <= player.pos.x - 750 - ave[j].pos.width)
+                        {
+                            ave[j].status = 0;
+                        }
+                    }
+                    else
+                    {
+                        if (ave[j].left)
+                        {
+                            ave[j].pos.x += AVESPEED;
+                            if (ave[j].pos.x >= player.pos.x + 750)
+                            {
+                                ave[j].status = 0;
+                            }
+                        }
+                    }
+
+                    // ataque enemigo ***********************************************************************************
+                    random = (rand() % 11) + 1;
+                    if (random == 1)
+                    {
+                        if (ave[j].pos.x <= player.pos.x + player.pos.width + 200)
+                        {
+                            if (ave[j].pos.x >= player.pos.x - 200)
+                            {
+                                random = rand() % MAXEGG;
+                                DropEgg(ave[j], egg[random]);
+                            }
+                        }
+                    }
+                    // Colision con golpe
+                    if (hit)
+                    {
+                        if (CheckMobColision(ave[j].pos, hithit))
+                        {
+                            ave[j].status = 0;
+                            random=rand()%10+1;
+                            if(random<=4)
+                            {
+                                for(i=0;i<MAXDROPVIDA;i++)
+                                {
+                                    if(!dropVida[i].status)
+                                    {
+                                        dropVida[i].status=1;
+                                        dropVida[i].time=0;
+                                        dropVida[i].pos.x=ave[j].pos.x;
+                                        dropVida[i].pos.y=ave[j].pos.y;
+                                        i=MAXDROPVIDA;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Colision con jugador
+                    if (ave[j].status)
+                    {
+                        if(player.vida.time>INVULERABILIDAD)
+                        {
+                            if(CheckPlayerColision(player.pos,ave[j].pos))
+                            {
+                                PlaySound(dolor);
+                                DrawTextureRec(danio, framesDanio, Vector2{player.pos.x - 82, player.pos.y - 60}, WHITE);
+                                if(player.vida.num<1)
+                                {
+                                    piezac=0;
+                                    time=0;
+                                    muerteLvl2(player,ave,car,pieza,plat,platc);
+                                }
+                                else
+                                {
+                                    player.vida.num--;
+                                    player.vida.time=0;
+                                }
+                                i=MAXAVE;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // generacion
+                    random = (rand() % 100) + 1;
+                    if (random == 1)
+                    {
+                        ave[j].right = rand() % 2;
+                        if (ave[j].right)
+                        {
+                            ave[j].status = 1;
+                            ave[j].pos.x = player.pos.x + 610 + player.pos.width;
+                            ave[j].pos.y = (rand() % 90) + 1;
+                            ave[j].left = 0;
+                            PlaySound(pajarin);
+                        }
+                        else
+                        {
+                            ave[j].status = 1;
+                            ave[j].pos.x = player.pos.x - 610;
+                            ave[j].pos.y = (rand() % 101) + 1;
+                            ave[j].left = 1;
+                            PlaySound(pajarin);
+                        }
+                    }
+                }
+            }
+
+            //** comportamiento huevo ********************************************************************************************************************************
+            for (j = 0; j < MAXEGG; j++)
+            {
+                // elinacion de huevo
+                if (egg[j].pos.y - egg[j].pos.height >= SUELO)
+                {
+                    egg[j].status = 0;
+                    egg[j].pos.y = 800;
+                }
+                // caida de huevo
+                if (egg[j].status)
+                {
+                    egg[j].time += 1;
+                    egg[j].pos.y = Posicion(egg[j].y0, 0, egg[j].time, 0,_G,_GD);
+                }
+
+                // Colision con golpe
+                if (hit)
+                {
+                    if (CheckMobColision(egg[j].pos, hithit))
+                    {
+                        if(egg[j].status)
+                        {
+                            egg[j].status = 0;
+                            random=rand()%10+1;
+                            if(random<=1)
+                            {
+                                for(i=0;i<MAXDROPVIDA;i++)
+                                {
+                                    if(!dropVida[i].status)
+                                    {
+                                        dropVida[i].status=1;
+                                        dropVida[i].time=0;
+                                        dropVida[i].pos.x=egg[j].pos.x;
+                                        dropVida[i].pos.y=egg[j].pos.y;
+                                        i=MAXDROPVIDA;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Colision con jugador
+                if (egg[j].status)
+                {
+                    if(player.vida.time>INVULERABILIDAD)
+                    {
+                        if(CheckPlayerColision(player.pos,egg[j].pos))
+                        {
+                            PlaySound(dolor);
+                            DrawTextureRec(danio, framesDanio, Vector2{player.pos.x - 82, player.pos.y - 60}, WHITE);
+                            if(player.vida.num<1)
+                            {
+                                piezac=0;
+                                time=0;
+                                muerteLvl2(player,ave,car,pieza,plat,platc);
+                            }
+                            else
+                            {
+                                player.vida.num--;
+                                player.vida.time=0;
+                            }
+                            i=MAXEGG;
+                        }
+                    }
+                }
+            }
+
+            //** enemigo2 carro ********************************************************************************************************************************
+            for (j = 0; j < MAXCAR; j++)
+            {
+                // comportameinto
+                if (car[j].status)
+                {
+                    // movimiento enemigo
+                    if (car[j].movimiento)
+                    {
+                        car[j].pos.x += CARSPEED;
+                    }
+                    else
+                    {
+                        car[j].time++;
+                        if (car[j].time > 60)
+                        {
+                            car[j].movimiento = 1;
+                        }
+                    }
+                    // eliminacion del enemigo
+                    if (car[j].pos.x >= player.pos.x + 720)
+                    {
+                        car[j].status = 0;
+                    }
+
+                    // Colision con golpe
+                    if (hit)
+                    {
+                        if(car[j].movimiento)
+                        {
+                            if (CheckMobColision(car[j].pos, hithit))
+                            {
+                                car[j].movimiento = 0;
+                                car[j].time = 0;
+                                random=rand()%10+1;
+                                if(random<=4)
+                                {
+                                    for(i=0;i<MAXDROPVIDA;i++)
+                                    {
+                                        if(!dropVida[i].status)
+                                        {
+                                            dropVida[i].status=1;
+                                            dropVida[i].time=0;
+                                            dropVida[i].pos.x=car[j].pos.x;
+                                            dropVida[i].pos.y=car[j].pos.y;
+                                            i=MAXDROPVIDA;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Colision con jugador
+                    if (car[j].status)
+                    {
+                        if(player.vida.time>INVULERABILIDAD)
+                        {
+                            if(CheckPlayerColision(player.pos,car[j].pos))
+                            {
+                                PlaySound(dolor);
+                                DrawTextureRec(danio, framesDanio, Vector2{player.pos.x - 82, player.pos.y - 60}, WHITE);
+
+                                if(player.vida.num<1)
+                                {
+                                    piezac=0;
+                                    time=0;
+                                    muerteLvl2(player,ave,car,pieza,plat,platc);
+                                }
+                                else
+                                {
+                                    player.vida.num--;
+                                    player.vida.time=0;
+                                }
+                                i=MAXCAR;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // generacion
+                    // random=GetRandomValue(1,1);
+                    if (player.pos.x < -60)
+                    {
+                        car[j].status = 1;
+                        car[j].movimiento = 1;
+                        car[j].pos.x = player.pos.x - 610 - car[j].pos.width;
+                        car[j].pos.y = SUELO - car[j].pos.height;
+                        PlaySound(carrillo);
+                    }
+                }
+            }
+
+            //DROPS
+            for(i=0;i<MAXDROPVIDA;i++)
+                {
+                    if(dropVida[i].status)
+                    {
+                        //tiempo
+                        dropVida[i].time++;
+                        //eliminacion
+                        if(dropVida[i].time>DESPAWNTIME)
+                        {
+                            dropVida[i].status=0;
+                            dropVida[i].time=0;
+                        }
+
+                        //curacion
+                        if(CheckPlayerColision(player.pos,dropVida[i].pos))
+                        {
+                            player.vida.num++;
+                            dropVida[i].status=0;
+                            dropVida[i].time=0;
+                        }
+                        else
+                        {
+                            //movimiento
+                            if(dropVida[i].pos.y<SUELO-dropVida[i].pos.height)
+                            {
+                                dropVida[i].pos.y+=2;
+                            }
+                            else
+                            {
+                                dropVida[i].pos.y=SUELO-dropVida[i].pos.height;
+                            }
+                        }
+                    }
+                }
+
+
+            //** caluclar posicion y ********************************************************************************************************************************
+            if (player.fall)
+            {
+                if (bdown)
+                {
+                    if (velocidad(player.v0, time,_G) > 0)
+                    {
+                        if (++c == 1)
+                        {
+                            player.v0 = velocidad(player.v0, time,_G); // velocidad inicial igual a velocidad actual
+                            player.y0 = player.pos.y;
+                            time = 1;
+                        }
+                    }
+                    else
+                    {
+                        Reposo(time, player.v0, player.y0, player.pos.y);
+                    }
+                    player.pos.y = Posicion(player.y0, player.v0, time, bdown,_G,_GD);
+                }
+                else
+                {
+                    player.pos.y = Posicion(player.y0, player.v0, time, bdown,_G,_GD);
+                }
+            }
+
+            //** colisiones ********************************************************************************************************************************
+            // suelo
+            if (player.pos.y + player.pos.height > SUELO)
+            {
+                player.pos.y = SUELO - player.pos.height;
+                Reposo(time, player.v0, player.y0, player.pos.y);
+                player.fall = 0;
+                bsuelo = 1;
+                player.jump = 1;
+                player.jumpjump = 1;
+            }
+
+            // plataformas
+            if (igncolision > 20)
+            {
+                // plataforma cuando cae
+                if (velocidad(player.v0, time,_G) > 0)
+                {
+                    for (j = 0; j < platc; j++)
+                    {
+                        if (plat[j].status)
+                        {
+                            if (ColisionPlat(player, plat[j]))
+                            {
+                                player.pos.y = plat[j].pos.y - player.pos.height;
+                                Reposo(time, player.v0, player.y0, player.pos.y);
+                                player.fall = 0;
+                                plat[j].flag = 1;
+                                player.jump = 1;
+                                player.jumpjump = 1;
+                                bdown = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // si salio de la paltaforma
+            for (j = 0; j < platc; j++)
+            {
+                if (plat[j].status)
+                {
+                    if (plat[j].flag)
+                    {
+                        if (!ColisionPlat(player, plat[j]))
+                        {
+                            Reposo(time, player.v0, player.y0, player.pos.y);
+                            player.fall = 1;
+                            plat[j].flag = 0;
+                            player.jump = 1;
+                            player.jumpjump = 0;
+                            bdown = 0;
+                        }
+                    }
+                }
+            }
+
+            //** golpe ********************************************************************************************************************************
+            if (hit)
+            {
+                if (lookR)
+                {
+                    hithit.pos.x = player.pos.x + ANCHOP - 20;
+                    hithit.pos.y = player.pos.y - 20;
+                }
+                else
+                {
+                    if (lookL)
+                    {
+                        hithit.pos.x = player.pos.x - 60;
+                        hithit.pos.y = player.pos.y - 20;
+                    }
+                }
+
+                if (lookUp)
+                {
+                    hithit.pos.x = player.pos.x - player.pos.width / 2;
+                    hithit.pos.y = player.pos.y - player.pos.height;
+                }
+                else
+                {
+                    if (lookDown)
+                    {
+                        hithit.pos.x = player.pos.x - player.pos.width / 2;
+                        hithit.pos.y = player.pos.y + player.pos.height - player.pos.height / 3;
+                    }
+                }
+                if (hitc < 50)
+                {
+                    hitc++;
+                }
+                else
+                {
+                    hitc = 0;
+                    hit = 0;
+                }
+            }
+
+            //** dash ********************************************************************************************************************************
+            if (dash)
+            {
+                PlaySound(sdash);
+                if (player.timeDash < 20)
+                {
+                    if (lookR)
+                    {
+                        player.pos.x += 10;
+                    }
+                    else
+                    {
+                        if (lookL)
+                        {
+                            player.pos.x -= 10;
+                        }
+                    }
+                }
+                else
+                {
+                    if (player.pos.x > -10)
+                    {
+                        player.jump = 1;
+                        player.jumpjump = 0;
+                    }
+                    else
+                    {
+                        player.jump == 0;
+                        player.jumpjump = 0;
+                    }
+                    player.fall = 1;
+                    dash = Reposo(time, player.v0, player.y0, player.pos.y);
+                }
+            }
+
+            //** camara ********************************************************************************************************************************
+            camara.target.y = player.pos.y;
+            if (player.pos.y > 100)
+            {
+                camara.target.y = CAMY;
+                camara.offset.y = CAMY;
+                camara.target.x = player.pos.x + 25;
+            }
+            else
+            {
+                camara.offset.y = RANCHO / 12.5;
+                camara.target.x = player.pos.x + 25;
+            }
+
+            //** intput ********************************************************************************************************************************
+            if (!dash) // right left
+            {
+                if (IsKeyDown(KEY_RIGHT))
+                {
+                    if (player.pos.x < 1280)
+                    {
+                        player.pos.x += 4;
+                        lookR = 1;
+                        lookL = 0;
+                    }
+                }
+                else
+                {
+                    if (IsKeyDown(KEY_LEFT))
+                    {
+                        if (player.pos.x > plat[platc - 1].pos.x - 610)
+                        {
+                            player.pos.x -= 4;
+                            lookR = 0;
+                            lookL = 1;
+                        }
+                    }
+                }
+            }
+
+            if (!dash) // up down
+            {
+                if (IsKeyPressed(KEY_UP))
+                {
+                    if (player.jump)
+                    {
+                        PlaySound(brinco);
+                        Reposo(time, player.v0, player.y0, player.pos.y);
+                        Salto(time, player.v0, player.y0, player.pos.y);
+                        player.fall = 1;
+                        if (player.jumpjump) //! doblesalto
+                        {
+                            PlaySound(brinco);
+                            player.jump = 1;
+                            player.jumpjump = 0;
+                        }
+                        else
+                        {
+                            player.jump = 0;
+                        }
+                        for (j = 0; j < maxplat; j++)
+                        {
+                            if (plat[j].status)
+                            {
+                                plat[j].flag = 0;
+                            }
+                        }
+                        bsuelo = 0;
+                        bdown = 0;
+                    }
+                }
+                else
+                {
+                    if (IsKeyPressed(KEY_DOWN))
+                    {
+                        for (j = 0; j < maxplat; j++)
+                        {
+                            if (plat[j].flag)
+                            {
+                                // if(IsKeyPressedRepeat(KEY_DOWN))
+                                {
+                                    player.fall = 1;
+                                    igncolision = 0;
+                                    bdown = 0;
+                                }
+                            }
+                            else
+                            {
+                                bdown = 1;
+                                player.fall = 1;
+                                c = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // hit
+            if (IsKeyPressed(KEY_X))
+            {
+                if (IsKeyDown(KEY_UP))
+                {
+                    hithit.pos.width = ALTOP + 30;
+                    hithit.pos.height = 90;
+                    hit = 1;
+                    dash = 0;
+                    player.fall = 1;
+                    lookUp = 1;
+                    lookDown = 0;
+                }
+                else
+                {
+                    if (IsKeyDown(KEY_DOWN))
+                    {
+                        hithit.pos.width = ALTOP + 30;
+                        hithit.pos.height = 90;
+                        hit = 1;
+                        dash = 0;
+                        player.fall = 1;
+                        lookDown = 1;
+                        lookUp = 0;
+                    }
+                    else
+                    {
+                        hithit.pos.width = 90;
+                        hithit.pos.height = ALTOP + 30;
+                        hit = 1;
+                        dash = 0;
+                        player.fall = 1;
+                        lookDown = 0;
+                        lookUp = 0;
+                    }
+                }
+            }
+
+            // dash KEY C
+            if (player.pos.x < 1250)
+            {
+                if (player.pos.x > plat[platc - 1].pos.x - 590)
+                {
+                    if (player.timeDash > 80)
+                    {
+                        if (!dash)
+                        {
+                            if (IsKeyPressed(KEY_C))
+                            {
+                                dash = 1;
+                                player.timeDash = 0;
+                                Reposo(time, player.v0, player.y0, player.pos.y);
+                                player.fall = 0;
+                                player.jump = 0;
+                                player.jumpjump = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // dibujado
+        
+
+        player.vida.pos.x=player.pos.x-600;
+        //vida
+        for(i=1;i<=player.vida.num;i++)
+        {
+            
+            if(player.pos.y>100)
+            {
+                player.vida.pos.y=25;
+            }
+            else
+            {
+                player.vida.pos.y=player.pos.y-75;
+            }
+            DrawTexture(corazon,player.vida.pos.x,player.vida.pos.y,WHITE);
+            player.vida.pos.x+=25+player.vida.pos.width;
+        }
+
+        // plataformas
+        for (j = 0; j < platc; j++)
+        {
+            DrawTexture(plataforma, plat[j].pos.x, plat[j].pos.y, WHITE);
+        }
+
+        // enemigos
+
+        for (j = 0; j < MAXAVE; j++)
+        {
+
+            if (ave[j].status)
+            {
+                if (ave[j].left)
+                {
+                    DrawTextureRec(pajaro, framesPajaro, Vector2{ave[j].pos.x, ave[j].pos.y - 50}, WHITE);
+                }
+
+                if (ave[j].right)
+                {
+                    DrawTextureRec(pajaroizq, framesPajaro, Vector2{ave[j].pos.x, ave[j].pos.y - 50}, WHITE);
+                }
+            }
+        }
+        if(!fin)
+        {
+            for (j = 0; j < MAXEGG; j++)
+            {
+                if (egg[j].status)
+                {
+                    DrawTextureRec(huevo, framesHuevo, Vector2{egg[j].pos.x, egg[j].pos.y}, WHITE);
+                }
+            }
+        }
+        for (j = 0; j < MAXCAR; j++)
+        {
+            if (car[j].status)
+            {
+                DrawTextureRec(carro, framesCarro, Vector2{car[j].pos.x, car[j].pos.y}, WHITE);
+            }
+        }
+        // piezas
+        for (j = 0; j < 3; j++)
+        {
+            if (pieza[j].status)
+            {
+                if(j!=2)
+                {
+                    DrawTextureRec(piezas[j], framePiezas[j], Vector2{pieza[j].pos.x, pieza[j].pos.y}, WHITE);
+                }
+                else
+                {
+                    DrawTextureRec(piezas[j], framePiezas[j], Vector2{pieza[j].pos.x, pieza[j].pos.y+45}, WHITE);
+                }
+            }
+        }
+        // hit
+        if (hit)
+        {
+            if (lookR)
+            {
+                if (lookDown || lookUp)
+                {
+                    DrawTextureRec(escudoh, frameEscudoh, {hithit.pos.x - 15, hithit.pos.y + 7}, WHITE);
+                }
+                else
+                {
+                    DrawTextureRec(escudo, frameEscudo, {hithit.pos.x + 25, hithit.pos.y + 7}, WHITE);
+                }
+            }
+            if (lookL)
+            {
+                if (lookUp)
+                {
+                    DrawTextureRec(escudoh, frameEscudoh, {hithit.pos.x - 15, hithit.pos.y - 7}, WHITE);
+                }
+                else if (lookDown)
+                {
+                    DrawTextureRec(escudoh, frameEscudoh, {hithit.pos.x - 15, hithit.pos.y  + 7}, WHITE);
+                }
+                else
+                {
+                    DrawTextureRec(escudo, frameEscudo, {hithit.pos.x - 15, hithit.pos.y + 7}, WHITE);
+                }
+            }
+        }
+        //DROPS
+        for(i=0;i<MAXDROPVIDA;i++)
+        {
+            if(dropVida[i].status)
+            {
+                DrawTexture(corazon,dropVida[i].pos.x,dropVida[i].pos.y,WHITE);
+            }
+        }
+
+        //JUGADOR
+        framesAutom++;
+        if (framesAutom >= (60 / framesSpeed))
+        {
+            framesAutom = 0;
+            currentFrame++;
+
+            if (currentFrame > 5)
+                currentFrame = 0;
+            framesPajaro.x = (float)currentFrame * (float)pajaro.width / 6;
+            framesPajaroizq.x = (float)currentFrame * (float)pajaroizq.width / 6;
+            framesReposo.x = (float)currentFrame * (float)reposo.width / 4;
+            framesReposoizq.x = (float)currentFrame * (float)reposoizq.width / 4;
+        }
+
+        if (player.fall)
+        {
+            framesSalto++;
+            if (framesSalto >= (60 / framesSpeed))
+            {
+                framesSalto = 0;
+                currentSalto++;
+
+                if (currentSalto > 3)
+                    currentSalto = 0;
+                frameSalto.x = (float)currentSalto * (float)salto.width / 4;
+                frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
+            }
+            if (lookL)
+            {
+                DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 60}, WHITE);
+            }
+            if (lookR)
+            {
+                DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 20, player.pos.y - 60}, WHITE);
+            }
+        }
+        else
+        {
+            if (IsKeyDown(KEY_RIGHT))
+            {
+                framesPersonaje++;
+                framesSalto = 0;
+                if (framesPersonaje >= (60 / framesSpeed))
+                {
+                    framesPersonaje = 0;
+                    currentPersonaje++;
+
+                    if (currentPersonaje > 5)
+                    {
+                        currentPersonaje = 0;
+                        PlaySound(paso);
+                    }
+                    framesCaminar.x = (float)currentPersonaje * (float)caminar.width / 6;
+                }
+                DrawTextureRec(caminar, framesCaminar, Vector2{player.pos.x - 20, player.pos.y - 60}, WHITE);
+            }
+            else if (IsKeyDown(KEY_LEFT))
+            {
+                framesPersonaje++;
+                if (framesPersonaje >= (60 / framesSpeed))
+                {
+                    framesPersonaje = 0;
+                    currentPersonaje++;
+
+                    if (currentPersonaje > 5)
+                    {
+                        currentPersonaje = 0;
+                        PlaySound(paso);
+                    }
+                    framesCaminarizq.x = (float)currentPersonaje * (float)caminarizq.width / 6;
+                }
+                DrawTextureRec(caminarizq, framesCaminarizq, Vector2{player.pos.x - 80, player.pos.y - 60}, WHITE);
+            }
+            else
+            {
+                framesPersonaje = 0;
+                if (lookL)
+                {
+                    DrawTextureRec(reposoizq, framesReposoizq, Vector2{player.pos.x - 82, player.pos.y - 60}, WHITE);
+                }
+                if (lookR)
+                {
+                    DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 20, player.pos.y - 60}, WHITE);
+                }
+            }
+        }
+
+        PlayMusicStream(nivel2);
+        UpdateMusicStream(nivel2);
+
+        EndMode2D();
+        EndDrawing();
+    }
+    next:
+        int z=0;
+}
+
+void nivel3(int diflvl)
+{
+    int maxplat=4;
+    float _G=0.1;
+    float _GD=0.15;
+    srand(time(NULL));
+    int j, i, k;
+    int y0Cam;
+
+    // contadores
+    int frameC = 0;
+    float time = 0;
+    int c = 0;
+    int igncolision = 0;
+    int hitc = 0;
+    int platc = 0;
+    // int caminarc=0;
+
+    // banderas
+    int bsuelo = 0;
+    int bdown = 0;
+    // int caminar=0;
+    int lookR = 1;
+    int lookL = 0;
+    int lookUp = 0;
+    int lookDown = 0;
+    int dash = 0;
+
+    int fin = 0;
+
+    // auxiliar
+    int random;
+    Trec aux;
+    aux.height = 20;
+    aux.width = 20;
+    float grados;
+
+    // Inicializacion ***************************************************************************************
+    // Inicializacion Plataformas
+    Tplat plat[maxplat];
+    for (i = 0; i < maxplat; i++)
+    {
+        plat[i].pos.height = 30;
+        plat[i].pos.width = 322;
+        plat[i].status = 1;
+        plat[i].flag = 0;
+    }
+    plat[0].pos.x = RANCHO - plat[1].pos.width - 300;
+    plat[0].pos.y = 450;
+    plat[1].pos.x = 100;
+    plat[1].pos.y = 250;
+    plat[2].pos.x = 800;
+    plat[2].pos.y = -50;
+    plat[3].pos.x = 250;
+    plat[3].pos.y = -400;
+
+    //** piezas **********************************************************************************************************************************
+    Tpart pieza[3];
+
+    for (j = 0; j < 3; j++)
+    {
+        pieza[j].status = 1;
+        pieza[j].pos.height = 181;
+        pieza[j].pos.width = 63;
+        pieza[j].pos.x = plat[j + 1].pos.x + plat[j + 1].pos.width / 2 - pieza[j].pos.width / 2;
+        pieza[j].pos.y = -1500;
+        pieza[j].listo = 0;
+    }
+
+    int piezac = 0;
+    int hitb = 0;
+    // Inicializa la posicion
+    Tplayer player;
+    player.pos.height = ALTOP;
+    player.pos.width = 25;
+    player.pos.x = CAMX - player.pos.width; // Posicion incial
+    player.pos.y = SUELO;                   //""
+    player.y0 = player.pos.y;
+    player.v0 = 0;
+    player.timeDash = 70;
+    player.AtkC = 0;
+
+    // vida
+    player.vida.num = MAXVIDA;
+    player.vida.pos.width = 25;
+    player.vida.pos.height = 25;
+    player.vida.pos.x = 30;
+    player.vida.pos.y = 30;
+    player.vida.time = 0;
+
+    // Inicializacion enemigos
+    Ttow torre[MAXTORRE];
+    for (j = 0; j < MAXTORRE; j++)
+    {
+        torre[j].status = 0;
+        torre[0].direccion = 0;
+        torre[1].direccion = 1;
+        torre[j].pos.x = 2000;
+        torre[j].pos.y = 800;
+        torre[j].pos.height = 40;
+        torre[j].pos.width = 60;
+        torre[j].atkC = 0;
+        for (i = 0; i < MAXHITTORRE; i++)
+        {
+            torre[j].hit[i].status = 0;
+            torre[j].hit[i].pos.x = 0;
+            torre[j].hit[i].pos.y = 1500;
+            torre[j].hit[i].pos.height = 20;
+            torre[j].hit[i].pos.width = 20;
+        }
+    }
+
+    Tovni ovni[MAXOVNI];
+    for (i = 0; i < MAXOVNI; i++)
+    {
+        ovni[i].pos.height = 35;
+        ovni[i].pos.width = 60;
+        ovni[i].pos.x = 0;
+        ovni[i].pos.y = 1300;
+        ovni[i].status = 0;
+    }
+    ovni[0].direccion = 1;
+    ovni[1].direccion = 0;
+
+    Tlaser laser;
+    laser.pos.height = 114;
+    laser.pos.width = 168;
+    laser.pos.x = player.pos.x;
+    laser.pos.y = 1500;
+    laser.status = 0;
+    laser.atkC = 0;
+    laser.mov = 1;
+    laser.hit.height = 10;
+    laser.hit.width = 3000;
+
+    Thit hit[MAXHIT];
+    for (i = 0; i < MAXHIT; i++)
+    {
+        hit[i].status = 0;
+        hit[i].pos.width = RANCHO;
+        hit[i].pos.height = 25;
+        hit[i].pos.x = 1280;
+        hit[i].pos.y = 1500;
+    }
+
+    Tcora dropVida[MAXDROPVIDA];
+
+    for (i = 0; i < MAXDROPVIDA; i++)
+    {
+        dropVida[i].pos.width = 30;
+        dropVida[i].pos.height = 30;
+        dropVida[i].status = 0;
+        dropVida[i].time = 0;
+    }
+
+    TatkSpeed dropASpeed[MAXDROPASPEED];
+    for (i = 0; i < MAXDROPASPEED; i++)
+    {
+        dropASpeed[i].pos.width = 80;
+        dropASpeed[i].pos.height = 60;
+        dropASpeed[i].statusDraw = 0;
+        dropASpeed[i].statusFun = 0;
+        dropASpeed[i].time = 0;
+        dropASpeed[i].duracion = DURACIONBUFF;
+    }
+
+    // Inicializacion camara
+    Camera2D camara = {0};
+    camara.target.x = 0;
+    camara.target.y = 0;
+    camara.offset.x = 0;
+    camara.offset.y = 0;
+    camara.rotation = 0;
+    camara.zoom = 1;
+    Vector2 org;
+    Vector2 org1;
+    Trec temp;
+
+    // inicializacion para dibujado
+
+    int framesAutom = 0;
+
+    int framesSpeed = 8;
+    int currentFrame = 0;
+
+    int currentPersonaje = 0;
+    int framesPersonaje = 0;
+
+    int currentSalto = 0;
+    int framesSalto = 0;
+    /******************************************************** CARGAR TEXTURAS **************************************************************/
+    Texture2D morado = LoadTexture("texturas\\ovni.png");
+    Texture2D bala = LoadTexture("texturas\\balalvl3.png");
+    Texture2D suelo = LoadTexture("texturas\\suelo3.png");
+    Texture2D fondo = LoadTexture("texturas\\luna.png");
+    Texture2D plat3 = LoadTexture("texturas\\plat3.png");
+    Texture2D corazon = LoadTexture("texturas\\corazon.png");
+    Texture2D laserG = LoadTexture("texturas\\laserGreen.png");
+    Texture2D laserM = LoadTexture("texturas\\laserMorado.png");
+    Texture2D Aspeed = LoadTexture("texturas\\AtkSpeed.png");
+
+    Texture2D nave[3];
+    nave[0] = LoadTexture("texturas\\pieza1_3.png");
+    nave[1] = LoadTexture("texturas\\pieza2_3.png");
+    nave[2] = LoadTexture("texturas\\pieza3_3.png");
+
+    Texture2D towl[9];
+    towl[0] = LoadTexture("texturas\\torrel270.png");
+    towl[1] = LoadTexture("texturas\\torrel292.png");
+    towl[2] = LoadTexture("texturas\\torrel315.png");
+    towl[3] = LoadTexture("texturas\\torrel337.png");
+    towl[4] = LoadTexture("texturas\\torrel0.png");
+    towl[5] = LoadTexture("texturas\\torrel22.png");
+    towl[6] = LoadTexture("texturas\\torrel45.png");
+    towl[7] = LoadTexture("texturas\\torrel67.png");
+    towl[8] = LoadTexture("texturas\\torrel90.png");
+    Texture2D towr[9];
+    towr[0] = LoadTexture("texturas\\torrer270.png");
+    towr[1] = LoadTexture("texturas\\torrer247.png");
+    towr[2] = LoadTexture("texturas\\torrer225.png");
+    towr[3] = LoadTexture("texturas\\torrer192.png");
+    towr[4] = LoadTexture("texturas\\torrer180.png");
+    towr[5] = LoadTexture("texturas\\torrer158.png");
+    towr[6] = LoadTexture("texturas\\torrer135.png");
+    towr[7] = LoadTexture("texturas\\torrer112.png");
+    towr[8] = LoadTexture("texturas\\torrer90.png");
+
+    // jugador
+    Texture2D jet[2];
+    jet[0] = LoadTexture("texturas\\jetL.png");
+    jet[1] = LoadTexture("texturas\\jetR.png");
+
+    Texture2D hitR[3];
+    hitR[0] = LoadTexture("texturas\\HitR0.png");
+    hitR[1] = LoadTexture("texturas\\HitR1.png");
+    hitR[2] = LoadTexture("texturas\\HitR2.png");
+    Texture2D hitL[3];
+    hitL[0] = LoadTexture("texturas\\HitL0.png");
+    hitL[1] = LoadTexture("texturas\\HitL1.png");
+    hitL[2] = LoadTexture("texturas\\HitL2.png");
+    Texture2D laserRed[2];
+    laserRed[1] = LoadTexture("texturas\\laserR.png");
+    laserRed[0] = LoadTexture("texturas\\laserL.png");
+
+    Texture2D caminar = LoadTexture("texturas/Cyborg_run.png");
+    Rectangle framesCaminar = {0.0f, 0.0f, (float)caminar.width / 6, (float)caminar.height};
+    Texture2D caminarizq = LoadTexture("texturas/Cyborg_run_left.png");
+    Rectangle framesCaminarizq = {0.0f, 0.0f, (float)caminarizq.width / 6, (float)caminarizq.height};
+    Texture2D reposo = LoadTexture("texturas/Cyborg_idle.png");
+    Rectangle framesReposo = {0.0f, 0.0f, (float)reposo.width / 4, (float)reposo.height};
+    Texture2D reposoizq = LoadTexture("texturas/Cyborg_idle_left.png");
+    Rectangle framesReposoizq = {0.0f, 0.0f, (float)reposoizq.width / 4, (float)reposoizq.height};
+    Texture2D danio = LoadTexture("texturas/Cyborg_hurt.png");
+    Rectangle framesDanio = {0.0f, 0.0f, (float)danio.width, (float)danio.height};
+    Texture2D salto = LoadTexture("texturas/Cyborg_jump.png");
+    Rectangle frameSalto = {0.0f, 0.0f, (float)salto.width / 4, (float)salto.height};
+    Texture2D saltoder = LoadTexture("texturas/Cyborg_jumpr.png");
+    Rectangle frameSaltoder = {0.0f, 0.0f, (float)saltoder.width / 4, (float)saltoder.height};
+
+    //**************************************************** CARGAR AUDIOS *******************************************************************
+
+    InitAudioDevice();
+
+    Sound dolor = LoadSound("sonidos/danio.wav");
+    Sound RecPieza = LoadSound("sonidos/pieza.wav");
+    Sound las = LoadSound("sonidos/laser.wav");
+    Sound brinco = LoadSound("sonidos/salto.mp3");
+    Sound sdash = LoadSound("sonidos/paso1.wav");
+    Sound jetpack = LoadSound("sonidos/jetpack.mp3");
+    Sound orbita = LoadSound("sonidos/oribita_nv3.mp3");
+    Sound ovni_laser = LoadSound("sonidos/laser_ovni.mp3");
+    Sound canion = LoadSound("sonidos/canion.mp3");
+    Music musica_nv3 = LoadMusicStream("sonidos/nivel3_musica.mp3");
+
+    SetSoundVolume(sdash, +10.0f);
+    SetSoundVolume(jetpack, -0.5f);
+    SetSoundVolume(orbita, -0.3f);
+    SetMusicVolume(musica_nv3, -1.2);
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        BeginMode2D(camara);
+        time += 0.5;
+        igncolision += 1;
+        frameC++;
+        player.timeDash++;
+        player.AtkC++;
+        player.vida.time++;
+
+        torre[0].atkC++;
+        torre[1].atkC++;
+
+        //** terminar el nivel ***********************************************************************************
+        if (pieza[0].status)
+        {
+            if (pieza[0].pos.y == SUELO - pieza[0].pos.height)
+            {
+                if (pieza[1].status)
+                {
+                    if (pieza[1].pos.y == SUELO - pieza[1].pos.height)
+                    {
+                        if (pieza[2].status)
+                        {
+                            if (pieza[2].pos.y == SUELO - pieza[2].pos.height)
+                            {
+                                if (!fin)
+                                {
+                                    time = 0;
+                                }
+                                fin = 1;
+                                LimpiaEnemigosLvl3(torre, ovni);
+                                if (time > 100)
+                                {
+                                    goto next;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!fin)
+        {
+            //** reajusta posicion x ****************************************************************************************************
+            if (player.pos.x < 0)
+            {
+                player.pos.x = 0;
+            }
+            else
+            {
+                if (player.pos.x > RANCHO - player.pos.width)
+                {
+                    player.pos.x = RANCHO - player.pos.width;
+                }
+            }
+
+            //** reajusta posicion y ***************************************************************************************
+            if (player.pos.y < -900)
+            {
+                player.pos.y = -900;
+            }
+
+            //** pieza **************************************************************************************************************************
+            for (j = 0; j < 3; j++)
+            {
+                // drop
+                if (pieza[j].listo)
+                {
+                    if (!pieza[j].status)
+                    {
+                        if (CheckPlayerColision(player.pos, pieza[j].pos))
+                        {
+                            pieza[j].status = 1;
+                        }
+                    }
+                }
+
+                // recolleccion
+                if (!pieza[j].listo)
+                {
+                    if (pieza[j].status)
+                    {
+                        if (CheckPlayerColision(player.pos, pieza[j].pos))
+                        {
+                            PlaySound(RecPieza);
+                            pieza[j].status = 0;
+                            pieza[j].listo = 1;
+                            pieza[j].pos.y = SUELO - pieza[j].pos.height;
+                            piezac++;
+                            switch (j)
+                            {
+                            case 0:
+                                pieza[j].pos.x = 150;
+                                break;
+                            case 1:
+                                pieza[j].pos.x = 213;
+                                break;
+                            case 2:
+                                pieza[j].pos.x = 276;
+                                break;
+                            }
+                            j = 3;
+                        }
+                    }
+                }
+            }
+
+            // movimiento piezas
+            if (frameC > 300)
+            {
+                if (!pieza[0].listo)
+                {
+                    if (pieza[0].status)
+                    {
+                        if (pieza[0].pos.y < plat[1].pos.y - pieza[0].pos.height)
+                        {
+                            pieza[0].pos.y += 4;
+                        }
+                        else
+                        {
+                            if (piezac < 1)
+                            {
+                                pieza[0].pos.y = plat[1].pos.y - pieza[0].pos.height;
+                            }
+                        }
+                    }
+                }
+                if (frameC > 600)
+                {
+                    if (!pieza[1].listo)
+                    {
+                        if (pieza[1].status)
+                        {
+                            if (pieza[1].pos.y < plat[2].pos.y - pieza[1].pos.height)
+                            {
+                                pieza[1].pos.y += 4;
+                            }
+                            else
+                            {
+                                if (piezac < 2)
+                                {
+                                    pieza[1].pos.y = plat[2].pos.y - pieza[1].pos.height;
+                                }
+                            }
+                        }
+                    }
+
+                    if (frameC > 900)
+                    {
+                        if (!pieza[2].listo)
+                        {
+                            if (pieza[2].status)
+                            {
+                                if (pieza[2].pos.y < plat[3].pos.y - pieza[2].pos.height)
+                                {
+                                    pieza[2].pos.y += 4;
+                                }
+                                else
+                                {
+                                    if (piezac < 3)
+                                    {
+                                        pieza[2].pos.y = plat[3].pos.y - pieza[2].pos.height;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // enemigos
+
+            //** torreta **************************************************************************************************************************
+            for (i = 0; i < MAXTORRE; i++)
+            {
+                if (torre[i].status)
+                {
+                    // ataque
+                    for (j = 0; j < MAXHITTORRE; j++)
+                    {
+                        if (torre[i].atkC > TORREASPEED)
+                        {
+
+                            // disparo
+                            if (torre[i].hit[j].status == 0)
+                            {
+                                if (torre[i].direccion)
+                                {
+                                    torre[i].hit[j].pos.x = torre[i].pos.x;
+                                    torre[i].hit[j].pos.y = torre[i].pos.y;
+                                    grados = CalculaAngulo(torre[i].hit[j].pos, player.pos);
+                                    CalculaComponentesVelocidad(TORREVPROYECTIL, grados, torre[i].hit[j].v);
+                                    torre[i].atkC = 0;
+                                    torre[i].hit[j].status = 1;
+                                    j = MAXHITTORRE;
+                                }
+                                else
+                                {
+                                    torre[i].hit[j].pos.x = torre[i].pos.x + torre[i].pos.width;
+                                    torre[i].hit[j].pos.y = torre[i].pos.y;
+                                    grados = CalculaAngulo(torre[i].hit[j].pos, player.pos);
+                                    CalculaComponentesVelocidad(TORREVPROYECTIL, grados, torre[i].hit[j].v);
+                                    torre[i].atkC = 0;
+                                    torre[i].hit[j].status = 1;
+                                    j = MAXHITTORRE;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //** ataaque ** movimiento
+                            if (torre[i].hit[j].status)
+                            {
+                                PosicionObieto(torre[i].hit[j].v.vx, torre[i].hit[j].v.vy, torre[i].hit[j].pos);
+
+                                // si se paso del borde izquierdo
+                                if (torre[i].hit[j].pos.x < 0 - torre[i].hit[j].pos.width)
+                                {
+                                    torre[i].hit[j].status = 0;
+                                }
+                                else
+                                {
+                                    // si se paso del borde derecho
+                                    if (torre[i].hit[j].pos.x > RANCHO)
+                                    {
+                                        torre[i].hit[j].status = 0;
+                                    }
+                                }
+
+                                // colision con jugador
+                                if (player.vida.time > INVULERABILIDAD)
+                                {
+                                    if (CheckPlayerColision(player.pos, torre[i].hit[j].pos))
+                                    {
+                                        PlaySound(dolor);
+                                        if (player.vida.num < 1)
+                                        {
+                                            piezac = 0;
+                                            frameC = 0;
+                                            muerteLvl3(player, torre, ovni, pieza, plat);
+                                        }
+                                        else
+                                        {
+                                            player.vida.num--;
+                                            player.vida.time = 0;
+                                        }
+                                        j = MAXHITTORRE;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Colision con golpe (enemigo)
+                    for (j = 0; j < MAXHIT; j++)
+                    {
+                        if (hit[j].status)
+                        {
+                            if (hit[j].time > 10)
+                            {
+                                if (CheckMobColision(torre[i].pos, hit[j]))
+                                {
+                                    torre[i].status = 0;
+                                    random = rand() % 10 + 1;
+                                    if (random <= 4)
+                                    {
+                                        random = rand() % 2;
+                                        if (random)
+                                        {
+                                            for (k = 0; k < MAXDROPVIDA; k++)
+                                            {
+                                                if (!dropVida[k].status)
+                                                {
+                                                    dropVida[k].status = 1;
+                                                    dropVida[k].time = 0;
+                                                    dropVida[k].pos.x = torre[i].pos.x;
+                                                    dropVida[k].pos.y = torre[i].pos.y;
+                                                    k = MAXDROPVIDA;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (k = 0; k < MAXDROPASPEED; k++)
+                                            {
+                                                if (!dropASpeed[k].statusDraw)
+                                                {
+                                                    if (!dropASpeed[k].statusFun)
+                                                    {
+                                                        dropASpeed[k].statusDraw = 1;
+                                                        dropASpeed[k].statusFun = 0;
+                                                        dropASpeed[k].time = 0;
+                                                        dropASpeed[k].pos.x = torre[i].pos.x;
+                                                        dropASpeed[k].pos.y = torre[i].pos.y;
+                                                        k = MAXDROPASPEED;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Colision con jugador (enemigo)
+                    if (player.vida.time > INVULERABILIDAD)
+                    {
+                        if (CheckPlayerColision(player.pos, torre[i].pos))
+                        {
+                            PlaySound(dolor);
+                            if (player.vida.num < 1)
+                            {
+                                piezac = 0;
+                                frameC = 0;
+                                muerteLvl3(player, torre, ovni, pieza, plat);
+                            }
+                            else
+                            {
+                                player.vida.num--;
+                                player.vida.time = 0;
+                            }
+                            i = MAXTORRE;
+                        }
+                    }
+                }
+                else
+                {
+                    // generacion
+                    random = (rand() % 300) + 1;
+                    if (random == 1)
+                    {
+                        if (torre[i].direccion)
+                        {
+                            torre[i].status = 1;
+                            torre[i].pos.x = RANCHO - torre[i].pos.width - 10;
+                            torre[i].pos.y = 50;
+                            for (j = 0; j < MAXHITTORRE; j++)
+                            {
+                                torre[i].hit[j].status = 0;
+                            }
+                        }
+                        else
+                        {
+                            torre[i].status = 1;
+                            torre[i].pos.x = 10;
+                            torre[i].pos.y = 50;
+                            for (j = 0; j < MAXHITTORRE; j++)
+                            {
+                                torre[i].hit[j].status = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //** ovni ************************************************************************************************************
+            for (i = 0; i < MAXOVNI; i++)
+            {
+                // comportameinto
+                if (ovni[i].status)
+                {
+                    ovni[i].time++;
+                    // movimiento enemigo **si sale de la pantalla se elimina**
+                    if (ovni[i].direccion)
+                    { // movimiento
+                        ovni[i].pos.x -= OVNISPEED;
+                        ovni[i].pos.y += OVNIAMP * cos(2 * M_PI / OVNILONG * ovni[i].time);
+
+                        if (ovni[i].pos.x <= 0 - ovni[i].pos.width)
+                        {
+                            ovni[i].status = 0;
+                        }
+                    }
+                    else
+                    {
+                        // movimiento
+                        ovni[i].pos.x += OVNISPEED;
+                        ovni[i].pos.y += OVNIAMP * cos(2 * M_PI / OVNILONG * ovni[i].time);
+                        // eliminacion
+                        if (ovni[i].pos.x > RANCHO + ovni[i].pos.width)
+                        {
+                            ovni[i].status = 0;
+                        }
+                    }
+
+                    // Colision con golpe
+                    for (j = 0; j < MAXHIT; j++)
+                    {
+                        if (hit[j].status)
+                        {
+                            if (hit[i].time > 10)
+                            {
+                                if (CheckMobColision(ovni[i].pos, hit[j]))
+                                {
+                                    ovni[i].status = 0;
+                                    random = rand() % 10 + 1;
+                                    if (random <= 4)
+                                    {
+                                        random = rand() % 2;
+                                        if (random)
+                                        {
+                                            for (k = 0; k < MAXDROPVIDA; k++)
+                                            {
+                                                if (!dropVida[k].status)
+                                                {
+                                                    dropVida[k].status = 1;
+                                                    dropVida[k].time = 0;
+                                                    dropVida[k].pos.x = ovni[i].pos.x;
+                                                    dropVida[k].pos.y = ovni[i].pos.y;
+                                                    k = MAXDROPVIDA;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (k = 0; k < MAXDROPASPEED; k++)
+                                            {
+                                                if (!dropASpeed[k].statusDraw)
+                                                {
+                                                    if (!dropASpeed[k].statusFun)
+                                                    {
+                                                        dropASpeed[k].statusDraw = 1;
+                                                        dropASpeed[k].statusFun = 0;
+                                                        dropASpeed[k].time = 0;
+                                                        dropASpeed[k].pos.x = ovni[i].pos.x;
+                                                        dropASpeed[k].pos.y = ovni[i].pos.y;
+                                                        k = MAXDROPASPEED;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Colision con iugador
+                    if (ovni[i].status)
+                    {
+
+                        if (player.vida.time > INVULERABILIDAD)
+                        {
+                            if (CheckPlayerColision(player.pos, ovni[i].pos))
+                            {
+                                PlaySound(dolor);
+                                if (player.vida.num < 1)
+                                {
+                                    piezac = 0;
+                                    frameC = 0;
+                                    muerteLvl3(player, torre, ovni, pieza, plat);
+                                }
+                                else
+                                {
+                                    player.vida.num--;
+                                    player.vida.time = 0;
+                                }
+                                i = MAXOVNI;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // generacion
+                    random = (rand() % 100) + 1;
+                    if (random == 1)
+                    {
+                        if (ovni[i].direccion)
+                        {
+                            PlaySound(orbita);
+                            ovni[i].status = 1;
+                            ovni[i].pos.x = RANCHO;
+                            ovni[i].pos.y = player.pos.y;
+                            ovni[i].time = 0;
+                        }
+                        else
+                        {
+                            PlaySound(orbita);
+                            ovni[i].status = 1;
+                            ovni[i].pos.x = 0 - ovni[i].pos.width;
+                            ovni[i].pos.y = player.pos.y;
+                            ovni[i].time = 0;
+                        }
+                    }
+                }
+            }
+
+            //** laser ****************************************************************************************************************************
+            if (laser.status)
+            {
+                laser.atkC++;
+                // movimiento enemigo **si sale de la pantalla se elimina**
+                if (laser.mov)
+                {
+                    laser.pos.x = RANCHO - player.pos.x - player.pos.width;
+
+                    laser.pos.y = pow(((laser.pos.x - CAMX - laser.pos.width / 2) * 0.02), 2) + SUELO - 600;
+                    if (player.pos.y < 400)
+                    {
+                        laser.pos.y -= fabs(SUELO - player.pos.y);
+                        laser.pos.y += 250;
+                    }
+
+                    if (laser.pos.x < 0)
+                    {
+                        laser.pos.x = 0;
+                    }
+                    else
+                    {
+                        if (laser.pos.x + laser.pos.width > RANCHO)
+                        {
+                            laser.pos.x = RANCHO - laser.pos.width;
+                        }
+                    }
+                }
+
+                //** ataque *******************************************************************************************************************
+                if (laser.atkC > 240)
+                {
+                    if (laser.atkC < 360)
+                    {
+                        if (laser.atkC == 241)
+                        {
+                            laser.hit.x = laser.pos.x + laser.pos.width / 2;
+                            laser.hit.y = laser.pos.y + laser.pos.height / 2;
+                            laser.grados = CalculaAngulo(laser.pos, player.pos);
+                            laser.mov = 0;
+                            laser.time = 0;
+                        }
+                    }
+                    else
+                    {
+                        laser.time++;
+                        if (laser.time < 15)
+                        {
+                            for (i = 0; i < 1500; i += 10)
+                            {
+
+                                if (player.pos.x < laser.pos.x)
+                                {
+                                    grados = 275 + laser.grados;
+                                    aux.x = laser.pos.x + tan(Radianes(grados)) * i;
+                                    aux.y = laser.pos.y + i;
+                                }
+                                else
+                                {
+                                    grados = 270 - laser.grados;
+                                    aux.x = laser.pos.x - tan(Radianes(grados)) * i;
+                                    aux.y = laser.pos.y + i;
+                                }
+                                if (player.vida.time > INVULERABILIDAD)
+                                {
+                                    if (CheckPlayerColision(player.pos, aux))
+                                    {
+                                        if (player.vida.num < 1)
+                                        {
+                                            piezac = 0;
+                                            frameC = 0;
+                                            muerteLvl3(player, torre, ovni, pieza, plat);
+                                        }
+                                        else
+                                        {
+                                            player.vida.num--;
+                                            player.vida.time = 0;
+                                        }
+                                        i = SUELO;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            laser.mov = 1;
+                            laser.time = 0;
+                            laser.atkC = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // generacion
+                random = (rand() % 100) + 1;
+                if (random == 1)
+                {
+                    laser.status = 1;
+                    laser.pos.x = -laser.pos.width;
+                    laser.pos.y = camara.target.y - 537;
+                    laser.time = 0;
+                    laser.atkC = 0;
+                }
+            }
+
+            //** DROPS ************************************************************************************************************************
+            for (i = 0; i < MAXDROPVIDA; i++)
+            {
+                if (dropVida[i].status)
+                {
+                    // tiempo
+                    dropVida[i].time++;
+                    // eliminacion
+                    if (dropVida[i].time > DESPAWNTIME)
+                    {
+                        dropVida[i].status = 0;
+                        dropVida[i].time = 0;
+                    }
+
+                    // curacion
+                    if (CheckPlayerColision(player.pos, dropVida[i].pos))
+                    {
+                        player.vida.num++;
+                        dropVida[i].status = 0;
+                        dropVida[i].time = 0;
+                    }
+                    else
+                    {
+                        // movimiento
+                        if (dropVida[i].pos.y < SUELO - dropVida[i].pos.height)
+                        {
+                            dropVida[i].pos.y += 2;
+                        }
+                        else
+                        {
+                            dropVida[i].pos.y = SUELO - dropVida[i].pos.height;
+                        }
+                    }
+                }
+            }
+
+            for (i = 0; i < MAXDROPASPEED; i++)
+            {
+                if (dropASpeed[i].statusDraw)
+                {
+                    // tiempo
+                    dropASpeed[i].time++;
+                    // eliminacion
+                    if (!dropASpeed[i].statusFun)
+                    {
+                        if (dropASpeed[i].time > DESPAWNTIME)
+                        {
+                            dropASpeed[i].statusDraw = 0;
+                            dropASpeed[i].statusFun = 0;
+                            dropASpeed[i].time = 0;
+                        }
+                        if (CheckPlayerColision(player.pos, dropASpeed[i].pos))
+                        {
+                            player.buff = 1;
+                            dropASpeed[i].statusDraw = 0;
+                            dropASpeed[i].statusFun = 1;
+                            dropASpeed[i].time = 0;
+                            dropASpeed[i].duracion = 0;
+                        }
+                        else
+                        {
+                            // movimiento
+                            if (dropASpeed[i].pos.y < SUELO - dropASpeed[i].pos.height * 3)
+                            {
+                                dropASpeed[i].pos.y += 1;
+                            }
+                            else
+                            {
+                                dropASpeed[i].pos.y = SUELO - dropASpeed[i].pos.height * 3;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (player.buff)
+                    {
+                        if (dropASpeed[i].statusFun)
+                        {
+                            if (dropASpeed[i].duracion < DURACIONBUFF)
+                            {
+                                dropASpeed[i].duracion++;
+                            }
+                            else
+                            {
+                                player.buff = 0;
+                                dropASpeed[i].statusFun = 0;
+                                dropASpeed[i].statusDraw = 0;
+                                dropASpeed[i].time = 0;
+                                dropASpeed[i].duracion = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //** caluclar posicion y ********************************************************************************************************************************
+            if (player.fall)
+            {
+                player.jetc++;
+                if (bdown)
+                {
+                    if (velocidad(player.v0, time,_G) > 0)
+                    {
+                        if (++c == 1)
+                        {
+                            player.v0 = velocidad(player.v0, time,_G); // velocidad inicial igual a velocidad actual
+                            player.y0 = player.pos.y;
+                            time = 1;
+                        }
+                    }
+                    else
+                    {
+                        Reposo(time, player.v0, player.y0, player.pos.y);
+                    }
+
+                    // jetpack *******************
+                    if (!player.jet) // si no esta usando el jetpack calcula caida
+                    {
+                        player.pos.y = Posicion(player.y0, player.v0, time, bdown,_G,_GD); // y=y0+v0*t+G*t^2  caida acelerada
+                    }
+                    else
+                    {
+                        player.jet = JetPack(time, player.v0, player.y0, player.pos.y, bdown); // inicializa un minisalto cuando se suelte abajo
+                                                                                               // hace mas comodo el uso del jetpack
+                        player.pos.y -= VY;                                                    // sube con velocidad constante
+                        bdown = 0;
+                    }
+                }
+                else
+                {
+
+                    // jetpack***********
+                    if (!player.jet) // si no esta usando el jetpack calcula caida
+                    {
+                        player.pos.y = Posicion(player.y0, player.v0, time, bdown,_G,_GD); // y=y0+v0*t+G*t^2   //calcula caida
+                    }
+                    else
+                    {
+                        player.jet = JetPack(time, player.v0, player.y0, player.pos.y, bdown); // inicializa un minisalto cuando se suelte abajo
+                                                                                               // hace mas comodo el uso del jetpack
+                        player.pos.y -= VY;
+                    }
+                }
+            }
+
+            //** colisiones ********************************************************************************************************************************
+            // v=v0*2*G*t derivada de la posicion=velocidad
+            // suelo
+            if (player.pos.y + player.pos.height > SUELO)
+            {
+                player.pos.y = SUELO - player.pos.height;
+                Reposo(time, player.v0, player.y0, player.pos.y);
+                player.fall = 0;
+                bsuelo = 1;
+                player.jump = 1;
+                player.jumpjump = 0;
+                player.jet = 0;
+            }
+
+            // plataformas
+            if (igncolision > 35)
+            {
+                // plataforma cuando cae
+                if (velocidad(player.v0, time,_G) > 0)
+                {
+                    for (j = 0; j < maxplat; j++)
+                    {
+                        if (plat[j].status)
+                        {
+                            if (ColisionPlat(player, plat[j]))
+                            {
+                                player.pos.y = plat[j].pos.y - player.pos.height;
+                                Reposo(time, player.v0, player.y0, player.pos.y);
+                                player.fall = 0;
+                                plat[j].flag = 1;
+                                player.jump = 1;
+                                player.jumpjump = 0;
+                                bdown = 0;
+                                player.jet = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // si salio de la paltaforma
+            for (j = 0; j < maxplat; j++)
+            {
+                if (plat[j].status)
+                {
+                    if (plat[j].flag)
+                    {
+                        if (!ColisionPlat(player, plat[j]))
+                        {
+                            Reposo(time, player.v0, player.y0, player.pos.y);
+                            player.fall = 1;
+                            plat[j].flag = 0;
+                            player.jump = 0;
+                            player.jumpjump = 0;
+                            bdown = 0;
+                            player.jet = 0;
+                        }
+                    }
+                }
+            }
+
+            //** golpe ********************************************************************************************************************************
+            for (i = 0; i < MAXHIT; i++)
+            {
+                //** movimiento del disparo ***********************************************************************************
+                if (hit[i].status)
+                {
+                    //** Eliminacion del proyectil *******************************************************************************
+                    hit[i].time++;
+                    if (hit[i].time < 25)
+                    {
+                        hitb = 1;
+                        if (hit[i].time > 10)
+                        {
+                            hit[i].pos.y = player.pos.y - 18;
+                            if (hit[i].direccion)
+                            {
+                                hit[i].pos.x = player.pos.x + player.pos.width * 3 + 3;
+                            }
+                            else
+                            {
+                                hit[i].pos.x = player.pos.x - player.pos.width * 3 - hit[i].pos.width + 17;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        hitb = 0;
+                        hit[i].status = 0;
+                        hit[i].time = 0;
+                        hit[i].pos.x = 1500;
+                        hit[i].pos.y = -300;
+                    }
+                }
+            }
+
+            //** dash ********************************************************************************************************************************
+            if (dash)
+            {
+                if (player.timeDash < 20)
+                {
+                    if (lookR)
+                    {
+                        player.pos.x += 6;
+                    }
+                    else
+                    {
+                        if (lookL)
+                        {
+                            player.pos.x -= 6;
+                        }
+                    }
+                }
+                else
+                {
+                    player.jump == 0;
+                    player.fall = 1;
+                    dash = Reposo(time, player.v0, player.y0, player.pos.y);
+                }
+            }
+
+            //** camara ********************************************************************************************************************************
+            if (player.pos.y > 400)
+            {
+                camara.target.y = 0;
+                camara.offset.y = 0;
+            }
+            else
+            {
+                camara.target.y = player.pos.y;
+                camara.offset.y = 400;
+            }
+
+            //** intput ********************************************************************************************************************************
+            // hit
+            if (IsKeyPressed(KEY_X))
+            {
+                for (i = 0; i < MAXHIT; i++)
+                {
+                    Direccioniugador(lookL, lookR, lookUp, lookDown, player);
+                    if (!player.buff) //** Meiora ******************************************************************************************************
+                    {
+                        if (player.AtkC > VATAQUE)
+                        {
+                            if (!hit[i].status)
+                            {
+                                hit[i].pos.y = player.pos.y + player.pos.height / 4;
+                                Direccioniugador(lookL, lookR, lookL, lookDown, player);
+                                if (lookR)
+                                {
+                                    hit[i].direccion = 1;
+                                    hit[i].pos.x = player.pos.x + player.pos.width / 2;
+                                }
+                                else
+                                {
+                                    if (lookL)
+                                    {
+                                        hit[i].direccion = 0;
+                                        hit[i].pos.x = player.pos.x + player.pos.width / 2 - RANCHO;
+                                    }
+                                }
+                                hit[i].status = 1;
+                                hit[i].time = 0;
+                                player.AtkC = 0;
+                                i = MAXHIT;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (player.AtkC > VATAQUEBUFF)
+                        {
+                            if (!hit[i].status)
+                            {
+                                hit[i].pos.y = player.pos.y + player.pos.height / 4;
+                                hit[i].pos.x = player.pos.x + player.pos.width / 2;
+                                Direccioniugador(lookL, lookR, lookL, lookDown, player);
+                                if (lookR)
+                                {
+                                    hit[i].direccion = 1;
+                                }
+                                else
+                                {
+                                    if (lookL)
+                                    {
+                                        hit[i].direccion = 0;
+                                    }
+                                }
+                                hit[i].status = 1;
+                                hit[i].time = 0;
+                                player.AtkC = 0;
+                                i = MAXHIT;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // dash KEY C
+            if (player.pos.x < 1250)
+            {
+                if (player.pos.x > 0)
+                {
+                    if (player.timeDash > 80)
+                    {
+                        if (!dash)
+                        {
+                            if (IsKeyPressed(KEY_C))
+                            {
+                                PlaySound(sdash);
+                                dash = 1;
+                                player.timeDash = 0;
+                                Reposo(time, player.v0, player.y0, player.pos.y);
+                                player.fall = 0;
+                                player.jump = 0;
+                                player.jumpjump = 0;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    player.pos.x=0;
+                }
+            }
+            else
+            {
+                player.pos.y=1250;
+            }
+
+            if (!dash) // right left
+            {
+                if (IsKeyDown(KEY_RIGHT))
+                {
+                    if (player.pos.x < 1280)
+                    {
+                        player.x0 = player.pos.x;
+                        player.pos.x += 3;
+                        lookR = 1;
+                        lookL = 0;
+                    }
+                }
+                else
+                {
+                    if (IsKeyDown(KEY_LEFT))
+                    {
+                        if (player.pos.x > 0)
+                        {
+                            player.x0 = player.pos.x;
+                            player.pos.x -= 3;
+                            lookR = 0;
+                            lookL = 1;
+                        }
+                        else
+                        {
+                            player.pos.x=0;
+                        }
+                    }
+                }
+            }
+
+            if (!dash) // up down
+            {
+                if (IsKeyDown(KEY_UP))
+                {
+                    if (player.jump)
+                    {
+                        PlaySound(brinco);
+                        Reposo(time, player.v0, player.y0, player.pos.y);
+                        Salto(time, player.v0, player.y0, player.pos.y);
+                        player.fall = 1;
+                        if (player.jumpjump) //! doblesalto
+                        {
+                            PlaySound(brinco);
+                            player.jump = 1;
+                            player.jumpjump = 0;
+                        }
+                        else
+                        {
+                            player.jump = 0;
+                        }
+                        for (j = 0; j < maxplat; j++)
+                        {
+                            if (plat[j].status)
+                            {
+                                plat[j].flag = 0;
+                            }
+                        }
+                        player.jetc = 0;
+                        bsuelo = 0;
+                        bdown = 0;
+                    }
+                    else
+                    {
+                        if (IsKeyPressed(KEY_UP))
+                        {
+                            PlaySound(jetpack);
+                        }
+                        if (player.jetc > 60)
+                        {
+                            player.jet = 1; // esta usando jetpack
+                            c = 0;          // habilita bajar rapido
+                        }
+                    }
+                }
+                else
+                {
+                    if (IsKeyPressed(KEY_DOWN))
+                    {
+                        for (j = 0; j < maxplat; j++)
+                        {
+                            if (plat[j].flag)
+                            {
+                                // if(IsKeyPressedRepeat(KEY_DOWN))
+                                {
+                                    player.fall = 1;
+                                    igncolision = 0;
+                                    bdown = 0;
+                                }
+                            }
+                            else
+                            {
+
+                                bdown = 1;
+                                player.fall = 1;
+                                c = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        ClearBackground(BLANK);
+        PlayMusicStream(musica_nv3);
+        UpdateMusicStream(musica_nv3);
+        DrawTexture(fondo, 0, -1300, WHITE);
+        org.x = laser.pos.x + laser.pos.width / 2;
+        org.y = laser.pos.y + laser.pos.height / 2;
+        org1.x = 0;
+        org1.y = 0;
+
+        // suelo
+        DrawTexture(suelo, 0, SUELO - 4, WHITE);
+        // printf("\n centro jux = %f centro laser = %f\n",player.pos.x+player.pos.width/2,laser.pos.x+laser.pos.width/2);
+        // laser
+
+        if (laser.time > 1)
+        {
+            if (laser.time < 15)
+            {
+                PlaySound(ovni_laser);
+                DrawTextureEx(laserRed[1], org, 360 - laser.grados, 1, WHITE);
+            }
+        }
+
+        if (laser.atkC > 240)
+        {
+            if (laser.atkC < 360)
+            {
+                DrawTexture(laserG, laser.pos.x, laser.pos.y, WHITE);
+            }
+            else
+            {
+                DrawTexture(laserM, laser.pos.x, laser.pos.y, WHITE);
+            }
+        }
+        else
+        {
+            DrawTexture(laserM, laser.pos.x, laser.pos.y, WHITE);
+        }
+
+        // vida
+        for (i = 1; i <= player.vida.num; i++)
+        {
+            if (player.pos.y > 400)
+            {
+                player.vida.pos.y = 25;
+            }
+            else
+            {
+                player.vida.pos.y = player.pos.y - 375;
+            }
+            DrawTexture(corazon, player.vida.pos.x, player.vida.pos.y, WHITE);
+            player.vida.pos.x += 25 + player.vida.pos.width;
+        }
+        player.vida.pos.x = 25;
+
+        // plataformas
+        for (j = 0; j < maxplat; j++)
+        {
+            DrawTexture(plat3, plat[j].pos.x, plat[j].pos.y, WHITE);
+        }
+        // enemigos
+        for (j = 0; j < MAXTORRE; j++)
+        {
+            if (torre[j].status)
+            {
+                for (i = 0; i < MAXHITTORRE; i++)
+                {
+                    if (torre[j].hit[i].status)
+                    {
+                        DrawTexture(bala, torre[j].hit[i].pos.x - 4, torre[j].hit[i].pos.y - 4, WHITE);
+                        PlaySound(canion);
+                    }
+                }
+
+                if (torre[j].direccion)
+                {
+                    grados = CalculaAngulo(torre[j].pos, player.pos);
+                    if (grados <= 112)
+                    {
+                        DrawTexture(towr[8], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                    }
+                    else
+                    {
+                        if (grados <= 135)
+                        {
+                            DrawTexture(towr[7], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                        }
+                        else
+                        {
+                            if (grados <= 158)
+                            {
+                                DrawTexture(towr[6], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                            }
+                            else
+                            {
+                                if (grados <= 180)
+                                {
+                                    DrawTexture(towr[5], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                }
+                                else
+                                {
+                                    if (grados <= 192)
+                                    {
+                                        DrawTexture(towr[4], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                    }
+                                    else
+                                    {
+                                        if (grados <= 225)
+                                        {
+                                            DrawTexture(towr[3], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                        }
+                                        else
+                                        {
+                                            if (grados <= 247)
+                                            {
+                                                DrawTexture(towr[2], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                            }
+                                            else
+                                            {
+                                                if (grados <= 270)
+                                                {
+                                                    DrawTexture(towr[1], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                                }
+                                                else
+                                                {
+                                                    if (grados > 270)
+                                                    {
+                                                        DrawTexture(towr[0], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    grados = CalculaAngulo(torre[j].pos, player.pos) + 90;
+
+                    if (grados > 360)
+                    {
+                        grados -= 360;
+                    }
+
+                    if (grados > 90)
+                    {
+                        if (grados <= 270)
+                        {
+                            if (grados <= 112)
+                            {
+                                DrawTexture(towl[5], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                            }
+                            else
+                            {
+                                if (grados <= 135)
+                                {
+                                    DrawTexture(towl[6], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                }
+                                else
+                                {
+                                    if (grados <= 158)
+                                    {
+                                        DrawTexture(towl[7], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                    }
+                                    else
+                                    {
+                                        DrawTexture(towl[8], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (grados <= 22)
+                        {
+                            DrawTexture(towl[1], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                        }
+                        else
+                        {
+                            if (grados <= 45)
+                            {
+                                DrawTexture(towl[2], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                            }
+                            else
+                            {
+                                if (grados <= 67)
+                                {
+                                    DrawTexture(towl[3], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                }
+                                else
+                                {
+                                    if (grados <= 90)
+                                    {
+                                        DrawTexture(towl[4], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (grados >= 337)
+                    {
+                        DrawTexture(towl[0], torre[j].pos.x - 5, torre[j].pos.y - 5, WHITE);
+                    }
+                }
+            }
+        }
+        for (i = 0; i < MAXOVNI; i++)
+        {
+            if (ovni[i].status)
+            {
+                DrawTexture(morado, ovni[i].pos.x - 12.5, ovni[i].pos.y - 7.5, WHITE);
+            }
+        }
+        // piezas
+        for (j = 0; j < 3; j++)
+        {
+            if (pieza[j].status)
+            {
+                DrawTexture(nave[j], pieza[j].pos.x, pieza[j].pos.y, WHITE);
+            }
+        }
+        // golpe
+        for (i = 0; i < MAXHIT; i++)
+        {
+            if (hit[i].status)
+            {
+
+                if (lookR)
+                {
+                    if (hit[i].time < 5)
+                    {
+                        DrawTexture(hitR[0], player.pos.x - 15, player.pos.y - 35, WHITE);
+                    }
+                    else
+                    {
+                        if (hit[i].time < 10)
+                        {
+                            DrawTexture(hitR[1], player.pos.x - 25, player.pos.y - 35, WHITE);
+                        }
+                        else
+                        {
+                            PlaySound(las);
+                            DrawTexture(laserRed[1], hit[i].pos.x, hit[i].pos.y - 10, WHITE);
+                            DrawTexture(hitR[2], player.pos.x - 35, player.pos.y - 35, WHITE);
+                        }
+                    }
+                }
+                else
+                {
+                    if (lookL)
+                    {
+                        if (hit[i].time < 5)
+                        {
+                            DrawTexture(hitL[0], player.pos.x - 45, player.pos.y - 35, WHITE);
+                        }
+                        else
+                        {
+                            if (hit[i].time < 10)
+                            {
+                                DrawTexture(hitL[1], player.pos.x - 55, player.pos.y - 35, WHITE);
+                            }
+                            else
+                            {
+                                PlaySound(las);
+                                DrawTexture(laserRed[0], hit[i].pos.x + 190, hit[i].pos.y - 10, YELLOW);
+                                DrawTexture(hitL[2], player.pos.x - 60, player.pos.y - 35, WHITE);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // DROPS
+        for (i = 0; i < MAXDROPVIDA; i++)
+        {
+            if (dropVida[i].status)
+            {
+                DrawTexture(corazon, dropVida[i].pos.x, dropVida[i].pos.y, WHITE);
+            }
+        }
+        for (i = 0; i < MAXDROPASPEED; i++)
+        {
+            if (dropASpeed[i].statusDraw)
+            {
+                if (!dropASpeed[i].statusFun)
+                {
+                    DrawTexture(Aspeed, dropASpeed[i].pos.x, dropASpeed[i].pos.y, WHITE);
+                }
+            }
+        }
+
+        // jugador
+        // jetpack
+        Direccioniugador(lookL, lookR, lookUp, lookDown, player);
+        if (lookR)
+        {
+            DrawTexture(jet[1], player.pos.x - 45, player.pos.y - 10, WHITE);
+        }
+        else
+        {
+            if (lookL)
+            {
+                DrawTexture(jet[0], player.pos.x + player.pos.width - 10, player.pos.y - 10, WHITE);
+            }
+            else
+            {
+                DrawTexture(jet[1], player.pos.x - 45, player.pos.y - 10, WHITE);
+            }
+        }
+        if (!hitb)
+        {
+            if (player.fall)
+            {
+                framesSalto++;
+                if (framesSalto >= (60 / framesSpeed))
+                {
+                    framesSalto = 0;
+                    currentSalto++;
+
+                    if (currentSalto > 3)
+                        currentSalto = 0;
+                    frameSalto.x = (float)currentSalto * (float)salto.width / 4;
+                    frameSaltoder.x = (float)currentSalto * (float)saltoder.width / 4;
+                }
+                if (lookL)
+                {
+                    DrawTextureRec(salto, frameSalto, Vector2{player.pos.x - 80, player.pos.y - 50}, WHITE);
+                }
+                else
+                {
+                    if (lookR)
+                    {
+                        DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
+                    }
+                    else
+                    {
+                        DrawTextureRec(saltoder, frameSalto, Vector2{player.pos.x - 40, player.pos.y - 50}, WHITE);
+                    }
+                }
+            }
+            else
+            {
+                if (IsKeyDown(KEY_RIGHT))
+                {
+                    framesPersonaje++;
+                    framesSalto = 0;
+                    if (framesPersonaje >= (60 / framesSpeed))
+                    {
+                        framesPersonaje = 0;
+                        currentPersonaje++;
+
+                        if (currentPersonaje > 5)
+                            currentPersonaje = 0;
+                        framesCaminar.x = (float)currentPersonaje * (float)caminar.width / 6;
+                    }
+                    DrawTextureRec(caminar, framesCaminar, Vector2{player.pos.x - 40, player.pos.y - 60}, WHITE);
+                }
+                else if (IsKeyDown(KEY_LEFT))
+                {
+                    framesPersonaje++;
+                    if (framesPersonaje >= (60 / framesSpeed))
+                    {
+                        framesPersonaje = 0;
+                        currentPersonaje++;
+
+                        if (currentPersonaje > 5)
+                            currentPersonaje = 0;
+                        framesCaminarizq.x = (float)currentPersonaje * (float)caminarizq.width / 6;
+                    }
+                    DrawTextureRec(caminarizq, framesCaminarizq, Vector2{player.pos.x - 80, player.pos.y - 60}, WHITE);
+                }
+                else
+                {
+                    framesPersonaje = 0;
+                    if (lookL)
+                    {
+                        DrawTextureRec(reposoizq, framesReposoizq, Vector2{player.pos.x - 85, player.pos.y - 60}, WHITE);
+                    }
+                    else
+                    {
+                        if (lookR)
+                        {
+                            DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 30, player.pos.y - 60}, WHITE);
+                        }
+                        else
+                        {
+                            DrawTextureRec(reposo, framesReposo, Vector2{player.pos.x - 30, player.pos.y - 60}, WHITE);
+                        }
+                    }
+                }
+            }
+        }
+        EndMode2D();
+        EndDrawing();
+    }
+    
+    next:
+        UnloadTexture(morado);
+        UnloadTexture(bala);
+        UnloadTexture(suelo);
+        UnloadTexture(fondo);
+        UnloadTexture(plat3);
+        UnloadTexture(corazon);
+        UnloadTexture(laserG);
+        UnloadTexture(laserM);
+        UnloadTexture(Aspeed);
+        UnloadTexture(nave[0]);
+        UnloadTexture(nave[1]);
+        UnloadTexture(nave[2]);
+        UnloadTexture(towl[0]);
+        UnloadTexture(towl[1]);
+        UnloadTexture(towl[2]);
+        UnloadTexture(towl[3]);
+        UnloadTexture(towl[4]);
+        UnloadTexture(towl[5]);
+        UnloadTexture(towl[6]);
+        UnloadTexture(towl[7]);
+        UnloadTexture(towl[8]);
+        UnloadTexture(towr[0]);
+        UnloadTexture(towr[1]);
+        UnloadTexture(towr[2]);
+        UnloadTexture(towr[3]);
+        UnloadTexture(towr[4]);
+        UnloadTexture(towr[5]);
+        UnloadTexture(towr[6]);
+        UnloadTexture(towr[7]);
+        UnloadTexture(towr[8]);
+        UnloadTexture(jet[0]);
+        UnloadTexture(jet[1]);
+        UnloadTexture(hitR[0]);
+        UnloadTexture(hitR[1]);
+        UnloadTexture(hitR[2]);
+        UnloadTexture(hitL[0]);
+        UnloadTexture(hitL[1]);
+        UnloadTexture(hitL[2]);
+        UnloadTexture(laserRed[0]);
+        UnloadTexture(laserRed[1]);
+        UnloadTexture(caminar);
+        UnloadTexture(caminarizq);
+        UnloadTexture(reposo);
+        UnloadTexture(reposoizq);
+        UnloadTexture(danio);
+        UnloadTexture(salto);
+        UnloadTexture(saltoder);
+
+        UnloadSound(dolor);
+        UnloadSound(RecPieza);
+        UnloadSound(las);
+        UnloadSound(brinco);
+        UnloadSound(sdash);
+        UnloadSound(jetpack);
+        UnloadSound(orbita);
+        UnloadSound(ovni_laser);
+        UnloadSound(canion);
+        UnloadMusicStream(musica_nv3);
+        CloseAudioDevice();
+}
+
+/********************************************************  Cuerpo Funciones Generales *****************************************************************/
+//1, 3
 void Direccioniugador(int &L, int &R, int &Up, int &Down, Tplayer player)
+{
+    if (IsKeyDown(KEY_RIGHT))
+    {
+        if (IsKeyDown(KEY_UP))
+        {
+            R = 1;
+            Up = 1;
+            Down = 0;
+            L = 0;
+        }
+        else
+        {
+            if (IsKeyDown(KEY_DOWN))
+            {
+                R = 1;
+                Up = 0;
+                Down = 1;
+                L = 0;
+            }
+            else
+            {
+                R = 1;
+                Up = 0;
+                Down = 0;
+                L = 0;
+            }
+        }
+    }
+    else
+    {
+        if (IsKeyDown(KEY_LEFT))
+        {
+            if (IsKeyDown(KEY_UP))
+            {
+                R = 0;
+                Up = 1;
+                Down = 0;
+                L = 1;
+            }
+            else
+            {
+                if (IsKeyDown(KEY_DOWN))
+                {
+                    R = 0;
+                    Up = 0;
+                    Down = 1;
+                    L = 1;
+                }
+                else
+                {
+                    R = 0;
+                    Up = 0;
+                    Down = 0;
+                    L = 1;
+                }
+            }
+        }
+        else
+        {
+            if (IsKeyDown(KEY_UP))
+            {
+                R = 0;
+                Up = 1;
+                Down = 0;
+                L = 0;
+                if (player.x0 <= player.pos.x)
+                {
+                    R = 1;
+                    Up = 0;
+                    Down = 0;
+                    L = 0;
+                }
+                else
+                {
+                    R = 0;
+                    Up = 0;
+                    Down = 0;
+                    L = 1;
+                }
+            }
+            else
+            {
+                if (IsKeyDown(KEY_DOWN))
+                {
+                    R = 0;
+                    Up = 0;
+                    Down = 1;
+                    L = 0;
+                    if (player.x0 <= player.pos.x)
+                    {
+                        R = 1;
+                        Up = 0;
+                        Down = 0;
+                        L = 0;
+                    }
+                    else
+                    {
+                        R = 0;
+                        Up = 0;
+                        Down = 0;
+                        L = 1;
+                    }
+                }
+                else
+                {
+                    if (player.x0 <= player.pos.x)
+                    {
+                        R = 1;
+                        Up = 0;
+                        Down = 0;
+                        L = 0;
+                    }
+                    else
+                    {
+                        R = 0;
+                        Up = 0;
+                        Down = 0;
+                        L = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+//1,3
+void InicializaProyectil(int L, int R, int Up, int Down, Tplayer player, Thit &hit)
+{
+    hit.pos.y = player.pos.y + player.pos.height / 4;
+    hit.pos.x = player.pos.x + player.pos.width / 2;
+    if (R)
+    {
+        if (Up)
+        {
+            hit.direccion = 1;
+        }
+        else
+        {
+            if (Down)
+            {
+                hit.direccion = 7;
+            }
+            else
+            {
+                hit.direccion = 0;
+            }
+        }
+    }
+    else
+    {
+        if (L)
+        {
+            if (Up)
+            {
+                hit.direccion = 3;
+            }
+            else
+            {
+                if (Down)
+                {
+                    hit.direccion = 5;
+                }
+                else
+                {
+                    hit.direccion = 4;
+                }
+            }
+        }
+        else
+        {
+            if (Up)
+            {
+                hit.direccion = 2;
+            }
+            else
+            {
+                if (Down)
+                {
+                    hit.direccion = 6;
+                }
+            }
+        }
+    }
+}
+
+//1,3
+void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v)
+{
+    if (grados >= 360)
+    {
+        grados -= 360;
+    }
+
+    v.vy = velocidad * sin(Radianes(grados));
+    v.vx = sqrt((pow(velocidad, 2) - pow(v.vy, 2)));
+    if (grados <= 90)
+    {
+        v.vy = -v.vy;
+    }
+    else
+    {
+        if (grados <= 180)
+        {
+            v.vx = -v.vx;
+            v.vy = -v.vy;
+        }
+        else
+        {
+            if (grados <= 270)
+            {
+                v.vx = -v.vx;
+                v.vy = -v.vy;
+            }
+            else
+            {
+                v.vy = -v.vy;
+            }
+        }
+    }
+}
+
+//1,3
+float Radianes(float grados)
+{
+    return (grados * M_PI / 180);
+}
+
+//1,3
+void PosicionObieto(float vx, float vy, Trec &pos)
+{
+    pos.x += vx;
+    pos.y += vy;
+}
+
+//1,2,3
+int CheckPlayerColision(Trec player, Trec mob)
+{
+    if (player.x < (mob.x + mob.width))
+    {
+        if ((player.x + player.width) > mob.x)
+        {
+            if (player.y < (mob.y + mob.height))
+            {
+                if ((player.y + player.height) > mob.y)
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+//revisar para cada nivel
+int CheckMobColision(Trec mob, Thit hit)
+{
+    if (mob.x < (hit.pos.x + hit.pos.width))
+    {
+        if ((mob.x + mob.width) > hit.pos.x)
+        {
+            if (mob.y < (hit.pos.y + hit.pos.height))
+            {
+                if ((mob.y + mob.height) > hit.pos.y)
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+//1,3
+float CalculaAngulo(Trec enemigo, Trec player)
+{
+    float difx = fabs(player.x + player.width / 2 - (enemigo.x + enemigo.width / 2));
+    float dify = fabs(player.y + player.height / 2 - (enemigo.y + enemigo.height / 2));
+    float a = atan2(difx, dify);
+    a = a * 180 / M_PI;
+    if (player.x > enemigo.x)
+    {
+        if (player.y > enemigo.y)
+        {
+            return (270 + a);
+        }
+        else
+        {
+            return (90 - a);
+        }
+    }
+    else
+    {
+        if (player.y > enemigo.y)
+        {
+            return (270 - a);
+        }
+        else
+        {
+            return (90 + a);
+        }
+    }
+    return 0;
+}
+
+//2,3
+int ColisionPlat(Tplayer player, Tplat plat)
+{
+    if (player.pos.x <= plat.pos.x + plat.pos.width) // Si esta tocando el lado derecho de la plataforma n
+    {
+        if (plat.pos.x <= player.pos.x + ANCHOP) // si esta tocando el lado izquierdo de la platforma n
+        {
+            if (player.pos.y + player.pos.height <= (plat.pos.y + 30))
+            {
+                if (player.pos.y + player.pos.height >= plat.pos.y)
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+//2,3
+int Reposo(float &time, float &v0, int &y0, int y)
+{
+    time = 0;
+    v0 = 0;
+    y0 = y;
+    return 0;
+}
+
+//2,3
+int Salto(float &time, float &v0, int &y0, int y)
+{
+    time = 0;
+    y0 = y;
+    v0 = VS;
+    return 0;
+}
+
+//2,3
+//revisar para cada nivel
+int Posicion(int y0, float v0, float time, int g,float _G,float _GD)
+{
+    return (y0 + v0 * time + (g ? _GD : _G) * time * time);
+}
+
+//2,3
+//revisar para cada nivel
+float velocidad(float v0, float time,float _G)
+{
+    return (v0 + 2 * _G * time);
+}
+
+/********************************************************  Cuerpo Funciones 1 *****************************************************************/
+void LimpiaEnemigosLvl1(Tshark shark[], Ttortu tort[], Tangui ang[])
+{
+    int i;
+    for (i = 0; i < MAXSHARK; i++)
+    {
+        shark[i].status = 0;
+    }
+    for (i = 0; i < MAXTORTUGA; i++)
+    {
+        tort[i].status = 0;
+    }
+    for (i = 0; i < MAXANGUILA; i++)
+    {
+        ang[i].status = 0;
+        ang[i].hit.status = 0;
+    }
+}
+
+void AngElectro(Tangui &ang)
+{
+    ang.hit.pos.y = ang.pos.y - ang.pos.height;
+    ang.hit.pos.x = ang.pos.x - 21;
+    ang.hit.status = 1;
+    ang.hit.time = 0;
+}
+
+void muerteLvl1(Tplayer &player, Tshark shark[], Ttortu tort[], Tangui ang[], Tpart pieza[], Trec plat[])
+{
+    int j;
+    player.pos.x = 400;   // Posicion incial
+    player.pos.y = SUELO; //""
+    player.timeDash = 70;
+    player.vida.num = MAXVIDA;
+    LimpiaEnemigosLvl1(shark, tort, ang);
+    for (j = 0; j < 3; j++)
+    {
+        pieza[j].status = 1;
+        pieza[j].listo = 0;
+        pieza[j].pos.x = plat[j].x + plat[j].width / 2 - pieza[j].pos.width / 2;
+        pieza[j].pos.y = -300;
+    }
+}
+
+void Direccioniugador1(int &L, int &R, int &Up, int &Down, Tplayer player)
 {
     if (IsKeyDown(KEY_RIGHT))
     {
@@ -2411,752 +5901,138 @@ void Direccioniugador(int &L, int &R, int &Up, int &Down, Tplayer player)
         }
     }
 }
-
-void InicializaProyectil(int L, int R, int Up, int Down, Tplayer player, Thit &hit)
+/********************************************************  Cuerpo Funciones 2 *****************************************************************/
+void DropEgg(Tave mob, Tegg &egg)
 {
-    hit.pos.y = player.pos.y + player.pos.height / 4;
-    hit.pos.x = player.pos.x + player.pos.width / 2;
-    if (R)
+    if (!egg.status)
     {
-        if (Up)
-        {
-            hit.direccion = 1;
-        }
-        else
-        {
-            if (Down)
-            {
-                hit.direccion = 7;
-            }
-            else
-            {
-                hit.direccion = 0;
-            }
-        }
+        egg.time = 0;
+        egg.y0 = mob.pos.y;
+        egg.pos.y = mob.pos.y;
+        egg.pos.x = mob.pos.x + 14;
+        egg.status = 1;
+    }
+}
+
+void LimpiaEnemigosLvl2(Tave ave[], Tcar car[])
+{
+    int j;
+    for (j = 0; j < MAXAVE; j++)
+    {
+        ave[j].status = 0;
+    }
+    for (j = 0; j < MAXCAR; j++)
+    {
+        car[j].status = 0;
+    }
+}
+
+void CalculaPosEnemigo(Tave &mob)
+{
+    if (mob.right)
+    {
+        mob.pos.x -= 6;
     }
     else
     {
-        if (L)
+        if (mob.left)
         {
-            if (Up)
-            {
-                hit.direccion = 3;
-            }
-            else
-            {
-                if (Down)
-                {
-                    hit.direccion = 5;
-                }
-                else
-                {
-                    hit.direccion = 4;
-                }
-            }
+            mob.pos.x += 6;
+        }
+    }
+}
+
+void muerteLvl2(Tplayer &player,Tave ave[],Tcar car[],Tpart pieza[],Tplat plat[],int platc)
+{
+    int j;
+    player.pos.x=400;  //Posicion incial
+    player.pos.y=SUELO;    //""
+    player.y0=player.pos.y;
+    player.v0=0;
+    player.timeDash=70;
+    player.vida.num=MAXVIDA;
+    int aux=platc/3;
+    LimpiaEnemigosLvl2(ave,car);
+    for (j = 0; j < 3; j++)
+    {
+        pieza[j].status = 1;
+        pieza[j].listo=0;
+        pieza[j].pos.height = 163;
+        pieza[j].pos.width = 114;
+
+        if (j == 0)
+        {
+            pieza[j].pos.y = plat[platc - 1].pos.y - pieza[j].pos.height;
+            pieza[j].pos.x = plat[platc - 1].pos.x + plat[platc].pos.width / 2;
         }
         else
         {
-            if (Up)
-            {
-                hit.direccion = 2;
-            }
-            else
-            {
-                if (Down)
-                {
-                    hit.direccion = 6;
-                }
-            }
+            pieza[j].pos.y = plat[(platc - aux * j)].pos.y - pieza[j].pos.height;
+            pieza[j].pos.x = plat[(platc - aux * j)].pos.x + plat[(platc - aux * j)].pos.width / 2;
         }
     }
 }
 
-void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v)
-{
-    if (grados >= 360)
-    {
-        grados -= 360;
-    }
-
-    v.vy = velocidad * sin(Radianes(grados));
-    v.vx = sqrt((pow(velocidad, 2) - pow(v.vy, 2)));
-    if (grados <= 90)
-    {
-        v.vy = -v.vy;
-    }
-    else
-    {
-        if (grados <= 180)
-        {
-            v.vx = -v.vx;
-            v.vy = -v.vy;
-        }
-        else
-        {
-            if (grados <= 270)
-            {
-                v.vx = -v.vx;
-                v.vy = -v.vy;
-            }
-            else
-            {
-                v.vy = -v.vy;
-            }
-        }
-    }
-}
-
-float Radianes(float grados)
-{
-    return (grados * M_PI / 180);
-}
-
-void PosicionObieto(float vx, float vy, Trec &pos)
-{
-    pos.x += vx;
-    pos.y += vy;
-}
-
-int CheckPlayerColision(Trec player, Trec mob)
-{
-    if (player.x < (mob.x + mob.width))
-    {
-        if ((player.x + player.width) > mob.x)
-        {
-            if (player.y < (mob.y + mob.height))
-            {
-                if ((player.y + player.height) > mob.y)
-                {
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-int CheckMobColision(Trec mob, Thit hit)
-{
-    if (mob.x < (hit.pos.x + hit.pos.width))
-    {
-        if ((mob.x + mob.width) > hit.pos.x)
-        {
-            if (mob.y < (hit.pos.y + hit.pos.height))
-            {
-                if ((mob.y + mob.height) > hit.pos.y)
-                {
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-void LimpiaEnemigosLvl1(Tshark shark[], Ttortu tort[], Tangui ang[])
-{
-    int i;
-    for (i = 0; i < MAXSHARK; i++)
-    {
-        shark[i].status = 0;
-    }
-    for (i = 0; i < MAXTORTUGA; i++)
-    {
-        tort[i].status = 0;
-    }
-    for (i = 0; i < MAXANGUILA; i++)
-    {
-        ang[i].status = 0;
-        ang[i].hit.status = 0;
-    }
-}
-
-float CalculaAnguloAnguila(Trec ang, Trec player)
-{
-    float difx = fabs(player.x + player.width / 2 - ang.x);
-    float dify = fabs(player.y + player.height / 2 - ang.y);
-    float a = atan2(difx, dify);
-    a = a * 180 / M_PI;
-    if (player.x > ang.x)
-    {
-        if (player.y > ang.y)
-        {
-            return (270 + a);
-        }
-        else
-        {
-            return (90 - a);
-        }
-    }
-    else
-    {
-        if (player.y > ang.y)
-        {
-            return (270 - a);
-        }
-        else
-        {
-            return (90 + a);
-        }
-    }
-    return 0;
-}
-
-void AngElectro(Tangui &ang)
-{
-    ang.hit.pos.y = ang.pos.y - ang.pos.height;
-    ang.hit.pos.x = ang.pos.x - 21;
-    ang.hit.status = 1;
-    ang.hit.time = 0;
-}
-
-void muerteLvl1(Tplayer &player, Tshark shark[], Ttortu tort[], Tangui ang[], Tpart pieza[], Trec plat[])
+/********************************************************  Cuerpo Funciones 3 *****************************************************************/
+void muerteLvl3(Tplayer &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[])
 {
     int j;
     player.pos.x = 400;   // Posicion incial
     player.pos.y = SUELO; //""
+    player.y0 = player.pos.y;
+    player.v0 = 0;
     player.timeDash = 70;
     player.vida.num = MAXVIDA;
-    LimpiaEnemigosLvl1(shark, tort, ang);
+    player.vida.time = 0;
+    LimpiaEnemigosLvl3(torre, ovni);
     for (j = 0; j < 3; j++)
     {
         pieza[j].status = 1;
         pieza[j].listo = 0;
-        pieza[j].pos.x = plat[j].x + plat[j].width / 2 - pieza[j].pos.width / 2;
-        pieza[j].pos.y = -300;
+        pieza[j].pos.x = plat[j + 1].pos.x + plat[j + 1].pos.width / 2 - pieza[j].pos.width / 2;
+        pieza[j].pos.y = -1500;
     }
 }
 
-void cinemaPuzleNivel1(int diflvl)
+void LimpiaEnemigosLvl3(Ttow torre[], Tovni ovni[])
 {
-    SetTargetFPS(60);  
-    InitWindow(RANCHO,RALTO,"iuego");
-    Texture2D fondo = LoadTexture("texturas\\motor1.png");
-    srand(time(NULL));
-
-    Vector2 v=GetMousePosition();
-
-    Color casillas;
-    casillas.r=219;
-    casillas.g=145;
-    casillas.b=49;
-    casillas.a=255;
-
-    Color operacion;
-    operacion.b=122;
-    operacion.g=183;
-    operacion.r=231;
-    operacion.a=255;
-
-    
-    
-    
-    BEIGE;
-    Trec cas;
-    cas.height=110;
-    cas.width=150;
-    cas.x=185;
-    cas.y=100;
-
-    Trec bordecas;
-    bordecas.height=120;
-    bordecas.width=160;
-    bordecas.x=cas.x-5;
-    bordecas.y=cas.y-5;
-    
-    Trec op;
-    op.height=60;
-    op.width=60;
-    op.x=0;
-    op.y=0;
-
-    Trec bordeop;
-    bordeop.height=70;
-    bordeop.width=70;
-
-    Color cian;
-    cian.b=113;
-    cian.g=168;
-    cian.r=0;
-    cian.a=255;
-    cian=BLACK;
-    Color colorop;
-    colorop.b=6;
-    colorop.g=32;
-    colorop.r=56;
-    colorop.a=255;
-
-    int i,j;
-    int random;
-    float respuestasx[3];
-    float respuestasy[2];
-    int fin;
-    int maxDraw=1;
-    char txt[10];
-    Ttab tabla[RENGLONES1][COLUMNAS1];
-    int sel[2]={0,0};
-    //+ - * /
-    char operadores[5][2]={"+","-","*","/","="};
-    FILE *fa;
-    char t[2];
-    int ocultoC=0;
-    int predictC=0;
-    //for(int k=1;k<=15;k++)
-    
-        /*
-        //asignacion ==
-        for(i=0;i<RENGLONES1;i++)
+    int j, i;
+    for (j = 0; j < MAXTORRE; j++)
+    {
+        torre[j].status = 0;
+        for (i = 0; i < MAXHITTORRE; i++)
         {
-            strcpy(tabla[i][COLUMNAS1-1].opRight,operadores[4]);
-        }
-        for(i=0;i<COLUMNAS1;i++)
-        {
-            strcpy(tabla[RENGLONES1-1][i].opDown,operadores[4]);
-        }
-
-        //asignacion de operadores y numeros
-        for(i=0;i<RENGLONES1;i++)
-        {
-            for(j=0;j<COLUMNAS1;j++)
+            torre[j].hit[i].status = 0;
+            torre[j].hit[i].v.vx = 0;
+            torre[j].hit[i].v.vy = 0;
+            if (torre[j].direccion)
             {
-                random=rand()%10;
-                if(random%2==0)
-                {
-                    tabla[i][j].status=1;
-                    tabla[i][j].num=(rand()%40)+1;
-                    if(j<COLUMNAS1-1)
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                            strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                        }
-                        else
-                        {
-                            if(j<COLUMNAS1-1)
-                            {
-                                strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                            }   
-                        }
-                    }
-                    else
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                        }
-                    }
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                    tabla[i][j].num=(rand()%40)+1;
-                    if(j<COLUMNAS1-1)
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                            strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                        }
-                        else
-                        {
-                            if(j<COLUMNAS1-1)
-                            {
-                                strcpy(tabla[i][j].opRight,operadores[rand()%4]);
-                            }   
-                        }
-                    }
-                    else
-                    {
-                        if(i<RENGLONES1-1)
-                        {
-                            strcpy(tabla[i][j].opDown,operadores[rand()%4]);
-                        }
-                    }
-                }
+
+                torre[j].hit[i].pos.x = -500;
+            }
+            else
+            {
+                torre[j].hit[i].pos.x = 1500;
             }
         }
-        */
-        /**/
-
-    if(1)
+    }
+    for (i = 0; i < MAXOVNI; i++)
     {
-        random=(rand()%5)+1;
-        
-        switch (random)
-        {
-            case 1:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_1.txt","r");
-                break;
-            case 2:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_2.txt","r");
-                break;
-            case 3:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_3.txt","r");
-                break;
-            case 4:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_4.txt","r");
-                break;
-            case 5:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif1_5.txt","r");
-                break;
-        }
+        ovni[i].status = 0;
+    }
+}
+
+int JetPack(float &time, float &v0, int &y0, int y, int bdown)
+{
+    if (!bdown)
+    {
+        time = 0;
+        v0 = VSJ;
+        y0 = y;
     }
     else
     {
-        random=(rand()%5)+1;
-        
-        switch (random)
-        {
-            case 1:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_1.txt","r");
-                break;
-            case 2:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_2.txt","r");
-                break;
-            case 3:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_3.txt","r");
-                break;
-            case 4:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_4.txt","r");
-                break;
-            case 5:
-                fa=fopen("C:\\Users\\ramon\\Downloads\\juego\\puzzles\\dif1\\dif2_5.txt","r");
-                break;
-        }
+        Reposo(time, v0, y0, y);
     }
-    
-    if(fa)
-    {    
-        for(i=0;i<RENGLONES1;i++)
-        {
-            for(j=0;j<COLUMNAS1;j++)
-            {
-                random=(rand()%10)+1;
-                if(random<=6)
-                {
-                    tabla[i][j].status=1;
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                }
-                tabla[i][j].elec=0;
-                fscanf(fa,"%d %c %c",&tabla[i][j].num,&tabla[i][j].opRight[0],&tabla[i][j].opDown[0]);
-                tabla[i][j].opRight[1]='\0';
-                tabla[i][j].opDown[1]='\0';
-                if(!tabla[i][j].status)
-                {
-                    ocultoC++;
-                    tabla[i][j].numPredict=0;
-                }
-            }
-        }
-            fscanf(fa," %f %f %f %f %f ",&respuestasy[0],&respuestasy[1],&respuestasx[0],&respuestasx[1],&respuestasx[2]);
-            fclose(fa);
-    }
-    tabla[0][0].elec=1;
-    
-    while (!WindowShouldClose())
-    {
-        v=GetMousePosition();
-
-        //printf("\noculto = %d predictC = %d \n",ocultoC,predictC);
-        //termianr minijuego
-        if(IsKeyPressed(KEY_ENTER))
-        {
-            for(i=0;i<RENGLONES1;i++)
-            {
-                for(j=0;j<COLUMNAS1;j++)
-                {
-                    if(!tabla[i][j].status)
-                    {
-                        if(tabla[i][j].num==tabla[i][j].numPredict)
-                        {
-                            predictC++;
-                        }
-                    }
-                }
-            }
-
-            if(predictC==ocultoC)
-            {
-                printf("Ganaste");
-            }
-            predictC=0;
-        }
-        //printf("\nx = %f  y = %f\n",v.x,v.y);
-        for(i=0;i<RENGLONES1;i++)
-        {
-            for(j=0;j<COLUMNAS1;j++)
-            {  
-                if(i==sel[0])
-                {
-                    
-                    if(j==sel[1])
-                    {
-                        tabla[i][j].elec=1;
-                    }
-                    else
-                    {
-                        tabla[i][j].elec=0;
-                    }
-                }
-                else
-                {
-                    tabla[i][j].elec=0;
-                }
-            }
-        }
-
-        //seleccion right left
-        if(IsKeyPressed(KEY_RIGHT))
-        {
-            if(sel[1]<2)
-            {
-                sel[1]++;
-            }
-        }
-        else
-        {
-            if(IsKeyPressed(KEY_LEFT))
-            {
-                if(sel[1]>0)
-                {
-                    sel[1]--;
-                }
-            }
-        }
-
-        if(IsKeyPressed(KEY_UP))
-        {
-            if(sel[0]>0)
-            {
-                sel[0]--;
-            }
-        }
-        else
-        {
-            if(IsKeyPressed(KEY_DOWN))
-            {
-                if(sel[0]<1)
-                {
-                    sel[0]++;
-                }
-            }
-        }
-
-        
-        if(IsKeyPressed(KEY_W))
-        {
-            if(!tabla[sel[0]][sel[1]].status)
-            {
-                if(tabla[sel[0]][sel[1]].elec)
-                {
-                    tabla[sel[0]][sel[1]].numPredict++;
-                }
-            }
-        }
-        else
-        {
-            if(IsKeyPressed(KEY_S))
-            {
-                if(!tabla[sel[0]][sel[1]].status)
-                {
-                    if(tabla[sel[0]][sel[1]].elec)
-                    {
-                        tabla[sel[0]][sel[1]].numPredict--;
-                    }
-                }
-            }
-        }
-        BeginDrawing();
-            DrawTexture(fondo,0,0,WHITE);
-            
-            for(i=0;i<=RENGLONES1;i++)
-            {
-                for(j=0;j<=COLUMNAS1;j++)
-                {
-                    bordecas.x=cas.x-5;
-                    bordecas.y=cas.y-5;
-
-                    if(i==RENGLONES1 && j==COLUMNAS1)
-                    {
-                        continue;
-                    }
-                    if(i==sel[0])
-                    {
-                        if(j==sel[1])
-                        {
-                            DrawRectangleRec(bordecas,BLACK);
-                        }
-                        else
-                        {
-                            DrawRectangleRec(bordecas,colorop);
-                        }
-                    }
-                    else
-                    {
-                        DrawRectangleRec(bordecas,colorop);
-                    }
-                    DrawRectangleRec(cas,casillas);
-                    if(i==0)
-                    {
-                        if(j==3)
-                        {
-                            sprintf(txt,"%.2f",respuestasy[0]);
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==1)
-                    {
-                        if(j==3)
-                        {
-                            sprintf(txt,"%.2f",respuestasy[1]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==2)
-                    {
-                        if(j==0)
-                        {
-                            sprintf(txt,"%.2f",respuestasx[0]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==2)
-                    {
-                        if(j==1)
-                        {
-                            sprintf(txt,"%.2f",respuestasx[1]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    if(i==2)
-                    {
-                        if(j==2)
-                        {
-                            sprintf(txt,"%.2f",respuestasx[2]);
-                            
-                            if(strlen(txt)>1)
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                            else
-                            {
-                                DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                            }
-                        }
-                    }
-                    
-                    if(i<RENGLONES1)
-                    {  
-                        if(j<COLUMNAS1)
-                        {
-                            op.x=bordecas.x+bordecas.width+15;
-                            op.y=bordecas.y+20;
-                            bordeop.x=op.x-5;
-                            bordeop.y=op.y-5;
-                            DrawRectangleRec(bordeop,colorop);
-                            DrawRectangleRec(op,operacion);
-                            DrawText(tabla[i][j].opRight,op.x+((op.width-MeasureText(tabla[i][j].opRight,40))/2),op.y+10,40,BLACK);
-                            
-                            op.x=bordecas.x+bordecas.width/2-op.width/2;
-                            op.y=bordecas.y+bordecas.height+15;
-                            bordeop.x=op.x-5;
-                            bordeop.y=op.y-5;
-                            DrawRectangleRec(bordeop,colorop);
-                            DrawRectangleRec(op,operacion);
-                            DrawText(tabla[i][j].opDown,op.x+((op.width-MeasureText(tabla[i][j].opDown,40))/2),op.y+10,40,BLACK);
-
-                            if(tabla[i][j].status)
-                            {
-                                itoa(tabla[i][j].num,txt,10);
-                                if(tabla[i][j].elec)
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,80))/2),cas.y+((cas.height-80)/2),80,WHITE);
-                                }
-                                else
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,WHITE);
-                                }
-                            }
-                            else
-                            {
-                                itoa(tabla[i][j].numPredict,txt,10);
-                                if(tabla[i][j].elec)
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,80))/2),cas.y+((cas.height-80)/2),80,cian);
-                                }
-                                else
-                                {
-                                    DrawText(txt,cas.x+((cas.width-MeasureText(txt,40))/2),cas.y+((cas.height-40)/2),40,cian);
-                                }
-                            }
-                        }
-                    }
-
-                    
-                    if(maxDraw)
-                    {
-                        if(i==RENGLONES1)
-                        {
-                            maxDraw=0;
-                            j--;
-                            
-                        }
-                    }
-                    cas.x+=100+cas.width;
-                }
-                
-                cas.y+=100+cas.height;
-                cas.x=185;
-            }
-            cas.y=100;
-        EndDrawing();
-    }
-    CloseWindow();
+    return 0;
 }
-
-/*
-DrawTexture(ataquesderechos[1], player.pos.x, player.pos.y - 10, WHITE);
-DrawTexture(ataquesderechos[0], player.pos.x, player.pos.y - 10, WHITE);
-DrawTexture(ataquesderechos[3], player.pos.x - 5, player.pos.y - 30, WHITE);
-DrawTexture(ataquesderechos[2], player.pos.x, player.pos.y - 10, WHITE);
-DrawTexture(ataquesizquierdos[1], player.pos.x - 25, player.pos.y - 10, WHITE);
-DrawTexture(ataquesizquierdos[3], player.pos.x, player.pos.y - 30, WHITE);
-
-DrawTexture(ataquesizquierdos[2], player.pos.x - 32, player.pos.y - 10, WHITE);
-*/

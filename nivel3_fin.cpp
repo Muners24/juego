@@ -163,20 +163,20 @@ int Posicion(int y0, float v0, float time, int g);
 int CheckMobColision(Trec mob, Trec hit);
 int CheckPlayerColision(Trec player, Trec mob);
 // int CheckPiezaColision(Trec player,Trec mob); // duplicado para probar sin daño
-void LimpiaEnemigosLvl3(Ttow torre[], Tovni ovni[]);
-int JetPack(float &time, float &v0, int &y0, int y, int bdown);
 void InicializaProyectil(int L, int R, int Up, int Down, Tplayer player, Thit &hit);
 void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v);
 float Radianes(float grados);
 void PosicionObieto(float vx, float vy, Trec &pos);
 void Direccioniugador(int &L, int &R, int &Up, int &Down, Tplayer player);
 float CalculaAngulo(Trec ang, Trec player);
+
+void LimpiaEnemigosLvl3(Ttow torre[], Tovni ovni[]);
+int JetPack(float &time, float &v0, int &y0, int y, int bdown);
 void muerteLvl3(Tplayer &player, Ttow torre[], Tovni ovni[], Tpart pieza[], Tplat plat[]);
 void cinemaPuzleNivel3(void);
 
 int main()
 {
-
     SetTargetFPS(60);
     InitWindow(RANCHO, RALTO, "juego");
     srand(time(NULL));
