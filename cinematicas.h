@@ -232,28 +232,32 @@ void cinemaPuzleNivel1(int diflvl)
         {
             for(j=0;j<COLUMNAS1;j++)
             {
-                random=(rand()%10)+1;
-                if(random<=6)
-                {
-                    tabla[i][j].status=1;
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                }
+                tabla[i][j].numPredict=-1;
+                tabla[i][j].status=1;
                 tabla[i][j].elec=0;
                 fscanf(fa,"%d %c %c",&tabla[i][j].num,&tabla[i][j].opRight[0],&tabla[i][j].opDown[0]);
                 tabla[i][j].opRight[1]='\0';
                 tabla[i][j].opDown[1]='\0';
-                if(!tabla[i][j].status)
-                {
-                    ocultoC++;
-                    tabla[i][j].numPredict=0;
-                }
             }
         }
             fscanf(fa," %f %f %f %f %f ",&respuestasy[0],&respuestasy[1],&respuestasx[0],&respuestasx[1],&respuestasx[2]);
             fclose(fa);
+    }
+
+    int random2;
+    int random3;
+    ocultoC=(rand()%3)+1;
+    random3=ocultoC;
+    while(random3>0)
+    {
+        random=rand()%2;
+        random2=rand()%3;
+        if(tabla[random][random2].status==1)
+        {
+            tabla[random][random2].status=0;
+            tabla[random][random2].numPredict=0;
+            random3--;
+        }
     }
     tabla[0][0].elec=1;
     
@@ -673,28 +677,32 @@ void cinemaPuzleNivel2(int diflvl)
         {
             for(j=0;j<COLUMNAS1;j++)
             {
-                random=(rand()%10)+1;
-                if(random<=6)
-                {
-                    tabla[i][j].status=1;
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                }
+                tabla[i][j].numPredict=-1;
+                tabla[i][j].status=1;
                 tabla[i][j].elec=0;
                 fscanf(fa,"%d %c %c",&tabla[i][j].num,&tabla[i][j].opRight[0],&tabla[i][j].opDown[0]);
                 tabla[i][j].opRight[1]='\0';
                 tabla[i][j].opDown[1]='\0';
-                if(!tabla[i][j].status)
-                {
-                    ocultoC++;
-                    tabla[i][j].numPredict=0;
-                }
             }
         }
             fscanf(fa," %f %f %f %f %f ",&respuestasy[0],&respuestasy[1],&respuestasx[0],&respuestasx[1],&respuestasx[2]);
             fclose(fa);
+    }
+
+    int random2;
+    int random3;
+    ocultoC=(rand()%3)+1;
+    random3=ocultoC;
+    while(random3>0)
+    {
+        random=rand()%2;
+        random2=rand()%3;
+        if(tabla[random][random2].status==1)
+        {
+            tabla[random][random2].status=0;
+            tabla[random][random2].numPredict=0;
+            random3--;
+        }
     }
     tabla[0][0].elec=1;
     
@@ -1112,28 +1120,32 @@ void cinemaPuzleNivel3(int diflvl)
         {
             for(j=0;j<COLUMNAS1;j++)
             {
-                random=(rand()%10)+1;
-                if(random<=6)
-                {
-                    tabla[i][j].status=1;
-                }
-                else
-                {
-                    tabla[i][j].status=0;
-                }
+                tabla[i][j].numPredict=-1;
+                tabla[i][j].status=1;
                 tabla[i][j].elec=0;
                 fscanf(fa,"%d %c %c",&tabla[i][j].num,&tabla[i][j].opRight[0],&tabla[i][j].opDown[0]);
                 tabla[i][j].opRight[1]='\0';
                 tabla[i][j].opDown[1]='\0';
-                if(!tabla[i][j].status)
-                {
-                    ocultoC++;
-                    tabla[i][j].numPredict=0;
-                }
             }
         }
             fscanf(fa," %f %f %f %f %f ",&respuestasy[0],&respuestasy[1],&respuestasx[0],&respuestasx[1],&respuestasx[2]);
             fclose(fa);
+    }
+
+    int random2;
+    int random3;
+    ocultoC=(rand()%3)+1;
+    random3=ocultoC;
+    while(random3>0)
+    {
+        random=rand()%2;
+        random2=rand()%3;
+        if(tabla[random][random2].status==1)
+        {
+            tabla[random][random2].status=0;
+            tabla[random][random2].numPredict=0;
+            random3--;
+        }
     }
     tabla[0][0].elec=1;
     

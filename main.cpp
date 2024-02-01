@@ -25,7 +25,7 @@
 #define ALTOP 85
 #define ANCHOP 50
 #define SUELO 650
-#define MAXVIDA 150
+#define MAXVIDA 4
 #define INVULERABILIDAD 120
 
 #define VS -11
@@ -1660,6 +1660,7 @@ void nivel1(int diflvl)
                                             if (ang[i].pos.y >= player.pos.y - 200)
                                             {
                                                 // random=rand()%MAXANGUILAHIT;
+                                                PlaySound(anguilasound);
                                                 AngElectro(ang[i]);
                                             }
                                         }
@@ -1684,13 +1685,12 @@ void nivel1(int diflvl)
                                     {
                                         if (CheckPlayerColision(player.pos, ang[i].hit.pos))
                                         {
-                                            PlaySound(anguilasound);
+                                            PlaySound(dolor);
                                             if (player.vida.num < 1)
                                             {
                                                 piezac = 0;
                                                 time = 0;
                                                 muerteLvl1(player, shark, tort, ang, pieza, plat);
-                                                PlaySound(anguilasound);
                                             }
                                             else
                                             {
@@ -5627,12 +5627,6 @@ void CalculaComponentesVelocidad(float velocidad, float grados, Tvel &v)
 }
 
 //1,3
-float Radianes(float grados)
-{
-    return (grados * M_PI / 180);
-}
-
-//1,3
 void PosicionObieto(float vx, float vy, Trec &pos)
 {
     pos.x += vx;
@@ -5758,6 +5752,12 @@ int Posicion(int y0, float v0, float time, int g,float _G,float _GD)
 float velocidad(float v0, float time,float _G)
 {
     return (v0 + 2 * _G * time);
+}
+
+//1,3
+float Radianes(float grados)
+{
+    return (grados * M_PI / 180);
 }
 
 /********************************************************  Cuerpo Funciones 1 *****************************************************************/
